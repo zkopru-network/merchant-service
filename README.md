@@ -1,8 +1,8 @@
 # Zkopru Merchant Service
 
-A privacy-friendly online store for on-chain assets like NFTs on top of Zkopru network. 
+A privacy-friendly online store for on-chain assets like NFTs, powered by the Zkopru network. 
 
-Merchants can easily setup online store and list their items for sale. Customers will then be able to purchase items without revealing their wallet address. Note that assets for sale has to be moved to Zkopru network by th merchant.
+Merchants can easily setup online store and list their assets for sale. Customers will then be able to purchase assets without revealing their wallet details. 
 
 <br />
 
@@ -10,31 +10,40 @@ Merchants can easily setup online store and list their items for sale. Customers
 
 The core purchase flow is powered by the private [atomic swap](https://docs.zkopru.network/how-it-works/atomic-swap) feature in Zkopru. 
 
-- Merchants setup the store and list the items for sale. Currently only ERC721 tokens are supported.
-- NFTs listed for sale and their price is stored in the merchant's server, and not on the chain.
-- When a customer visit the UI app, a Zkopru node is run in the browser and syncs with the network.
-- App will connect to the server and loads the items available for sale. Server will also send information required to create the purchase transaction (UTXO hash).
-- Customer will be able to purchase an item by creating a UTXO that match the one provided by the merchant.
-- The transaction will also include the `swap` value which is the expected UTXO hash of the purchased item.
-- UI app send the signed transaction (with the help of Zkopru extension), and the ZKSnark proof to the merchant server.
-- Server creates a corresponding UTXO and the proof, and submit both transactions to a coordinator. 
-- Coordinator includes both transactions in a block.
-- The salt required for creating the UTXO can be generated in the app and passed to the merchant server along with the transaction.
-- When the server and customers browser nodes sync fully, the swap would be complete.
-
 
 ### Example:
 
-Assume Merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purchase it.
+Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purchase it.
 
 - Assume Alice has 2 ETH in her wallet.
-- She will spend her 2ETH note, and create two UTXOs
+- She will create a Zkopru L2 transaction that spend her 2ETH note, and create two output notes:
   - one for the merchant for 1.5ETH 
   - and another UTXO of 0.5ETH for herself. 
-- She will also include a desired `swap` note in the transaction which would be the hash of UTXO of NFT with Alice as the owner.
-- Merchant will create a transaction with spending the note for NFT and creating an output UTXO for the NFT with Alice as the recipient. The transaction will also include the swap note for UTXO corresponding to 1.5ETH to the merchant.
+- Merchant will create a transaction with spending the note for NFT and creating an output UTXO for the NFT with Alice as the owner.
+- Both the transactions will include a desired `swap` note which is the UTXO hash of the asset each party would be receiving. This is required for a successful atomic swap in the network.
+
+### Detailed flow
+
+- Merchants setup a server that store assets for sale and the inventory in a database. The server would also be running a Zkopru node.
+- `Merchant Admin` app can be used to manage the inventory and see the orders.
+- Customers use the frontend `app` to view the products (tokens) available for purchase, including their price and metadata.
+- Customer create a transaction to transfer the `ETH` required to purchase the item, and send the transaction to the merchant server.
+- Merchant server create a transaction to transfer the asset to the customer, and send both the transactions to a coordinator.
+- Both customer and merchant will have the `swap` field in the transaction which is the expected UTXO hash of asset bought/sold.
+- `salt` required to generate the UTXO hash for the `swap` key in the transaction can be generated in the UI app and passed to the server along with the transaction.
+- Coordinator includes both transactions received from the merchant in one block.
+
+### Notes / Assumptions
+
+- Assets for sale has to be moved to Zkopru network by th merchant.
+- Customer facing app interact with Zkopru network using the browser extension.
+- The service is only support one store at the moment.
+- Only ERC721 and ERC20 tokens are supported.
 
 <br />
 
 ## Domain
-- 
+- **Merchant**: Vendor who sells the product.
+- **Product**: Item/asset that is available for sale. All products are tokens in either ERC20 or ERC721 format.
+- **Inventory**: Quantity of a product/asset available for sale. Stored along with the product.
+- **Order**: Transaction corresponding to the purchase of an item.
