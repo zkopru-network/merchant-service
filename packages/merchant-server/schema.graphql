@@ -1,0 +1,9 @@
+type Product {
+  name: String
+  contract: String
+  tokenId: String
+}
+
+type Query {
+  findProducts: [Product]
+}

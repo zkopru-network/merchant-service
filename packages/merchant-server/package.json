@@ -1,0 +1,30 @@
+{
+  "name": "merchant-server",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "ts-node .",
+    "dev": "npx nodemon ./index.ts",
+    "build": "npx tsc",
+    "test": "jest --detectOpenHandles",
+    "generate": "graphql-codegen --config codegen.yml"
+  },
+  "dependencies": {
+    "@graphql-tools/graphql-file-loader": "^7.5.5",
+    "@graphql-tools/load": "^7.7.7",
+    "@graphql-tools/schema": "^9.0.4",
+    "fastify": "^4.9.1",
+    "graphql": "^16.6.0",
+    "graphql-middleware": "^6.1.33",
+    "mercurius": "^11.0.1",
+    "pino": "^8.6.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@graphql-codegen/cli": "^2.13.7",
+    "@graphql-codegen/typescript": "^2.7.4",
+    "@graphql-codegen/typescript-resolvers": "^2.7.4"
+  }
+}
