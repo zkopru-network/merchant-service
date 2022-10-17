@@ -42,8 +42,13 @@ Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purc
 
 <br />
 
-## Domain
+## Domain Terms
 - **Merchant**: Vendor who sells the product.
 - **Product**: Item/asset that is available for sale. All products are tokens in either ERC20 or ERC721 format.
 - **Inventory**: Quantity of a product/asset available for sale. Stored along with the product.
 - **Order**: Transaction corresponding to the purchase of an item.
+
+<br />
+
+## Docs
+- [Architecture](./docs/ARCHITECTURE.md)
