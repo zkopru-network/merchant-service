@@ -1,0 +1,8 @@
+{
+  "short_name": "Zkopru Merchant Service - Admin",
+  "name": "Zkopru Merchant Service - Admin",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
