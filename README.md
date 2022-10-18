@@ -24,7 +24,7 @@ Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purc
 
 ### Detailed flow
 
-- Merchants setup a server that store assets for sale and the inventory in a database. The server would also be running a Zkopru node.
+- Merchants setup a server that store assets for sale and the inventory in a database. Server will connect to a Zkopru node and would be configured with merchant's wallet.
 - `Merchant Admin` app can be used to manage the inventory and see the orders.
 - Customers use the frontend `app` to view the products (tokens) available for purchase, including their price and metadata.
 - Customer create a transaction to transfer the `ETH` required to purchase the item, and send the transaction to the merchant server.
