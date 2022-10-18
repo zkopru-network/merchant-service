@@ -5,9 +5,7 @@ import { applyMiddleware } from 'graphql-middleware';
 
 export const resolvers = {
   Query: {
-    findProducts: (_: any, args: any, context: any) => {
-      return [{ name: "Bored Ape", tokenId: "123" }]
-    },
+    findProducts: (_: any, args: any, context: any) => [{ name: 'Bored Ape', tokenId: '123' }],
   },
 };
 

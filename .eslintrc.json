@@ -4,9 +4,12 @@
         "es2021": true,
         "node": true
     },
+    "parser": "@typescript-eslint/parser",
     "extends": [
         "plugin:react/recommended",
-        "airbnb-base"
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "airbnb"
     ],
     "parserOptions": {
         "ecmaVersion": "latest",
@@ -16,15 +19,30 @@
         "react",
         "@typescript-eslint"
     ],
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            }
+        }
+    },
     "rules": {
         "import/prefer-default-export": [0],
         "import/extensions": [
             "error",
             "ignorePackages",
             {
-              "js": "never",
-              "ts": "never"
+                "js": "never",
+                "ts": "never",
+                "jsx": "never",
+                "tsx": "never"
             }
          ]
-    }
+    },
+    "ignorePatterns": ["**/graphql.ts"]
 }

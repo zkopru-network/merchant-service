@@ -1,11 +1,18 @@
+/* eslint-disable import/first */
+
 import dotenv from 'dotenv';
+
 dotenv.config();
 
-// eslint-disable-next-line import/first
 import app from './app';
+import logger from './core/logger';
 
 const port = Number(process.env.PORT) || 8000;
 
-app.listen({ port }, (_, args) => {
-  console.log(`server start on port ${port}`);
-})
+app.listen({ port }, (err) => {
+  if (err) {
+    logger.error(err);
+  } else {
+    logger.info(`merchant-server start on port ${port}`);
+  }
+});
