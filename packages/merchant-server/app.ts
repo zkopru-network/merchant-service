@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import mercurius from 'mercurius';
 import { schema, resolvers } from './core/graphql';
+import './services/zkopru-service';
 
 const app = fastify();
 
