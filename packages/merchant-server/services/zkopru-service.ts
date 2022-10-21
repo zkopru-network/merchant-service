@@ -2,9 +2,9 @@
 
 // Note: Use `yarn link` to resolve below modules
 import Zkopru, { UtxoStatus } from '@zkopru/client';
-import { ZkAccount } from '@zkopru/client/dist/node';
-import type ZkopruNode from '@zkopru/client/dist/zkopru-node';
-import type ZkopruWallet from '@zkopru/client/dist/zkopru-wallet';
+import { ZkAccount, ZkopruNode, ZkopruWallet } from '@zkopru/client/dist/node';
+import { WalletService } from '../core/interfaces';
+import product from '../domain/product';
 
 type L2ServiceConstructor = {
   websocketUrl: string;
@@ -12,7 +12,7 @@ type L2ServiceConstructor = {
   accountPrivateKey: string;
 }
 
-export default class ZkopruService {
+export default class ZkopruService implements WalletService {
   websocketUrl: string;
 
   contractAddress: string;
@@ -33,6 +33,7 @@ export default class ZkopruService {
       websocket: params.websocketUrl,
       address: params.contractAddress,
       accounts: [this.zkAccount],
+      databaseName: 'zkopru.db',
     });
   }
 
@@ -43,8 +44,8 @@ export default class ZkopruService {
 
     // Node only tracks Utxo for the specified accounts. The `Zkopru.Node` don't expose a way for specifying the default client.
     // Using below hack at the moment to add accounts to the tracker.
-    await this.node.node.blockProcessor.tracker.addAccounts(this.zkAccount);
-    this.node.node.blockCache.web3.eth.accounts.wallet.add(this.zkAccount.toAddAccount());
+    // await this.node.node.blockProcessor.tracker.addAccounts(this.zkAccount);
+    // this.node.node.blockCache.web3.eth.accounts.wallet.add(this.zkAccount.toAddAccount());
 
     await this.node.start();
   }
@@ -69,19 +70,23 @@ export default class ZkopruService {
       notes,
     };
   }
+
+  async ensureProductAvailability({ product, quantity }) => {
+    
+  }
 }
 
 // Test
-(async () => {
-  const service = new ZkopruService({
-    accountPrivateKey: 'd5eecfacbe5fff810074c5c1e371c65eb4c7f9b0269b3cb250ed0520255e551d',
-    websocketUrl: 'ws://127.0.0.1:5000',
-    contractAddress: '0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF',
-  });
+// (async () => {
+//   const service = new ZkopruService({
+//     accountPrivateKey: 'd5eecfacbe5fff810074c5c1e371c65eb4c7f9b0269b3cb250ed0520255e551d',
+//     websocketUrl: 'ws://127.0.0.1:5000',
+//     contractAddress: '0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF',
+//   });
 
-  service.start();
+//   service.start();
 
-  setInterval(async () => {
-    console.log(await service.getBalances());
-  }, 10000);
-})();
+//   setInterval(async () => {
+//     console.log(await service.getBalances());
+//   }, 10000);
+// })();

@@ -37,7 +37,7 @@ Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purc
 
 - Assets for sale has to be moved to Zkopru network by th merchant.
 - Customer facing app interact with Zkopru network using the browser extension.
-- The service is only support one store at the moment.
+- The service only supports one store at the moment (i.e no multi-tenancy).
 - Only ERC721 and ERC20 tokens are supported.
 
 <br />

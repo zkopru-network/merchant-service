@@ -1,9 +1,37 @@
+enum TokenStandard {
+  Erc721
+  Erc20
+}
+
 type Product {
-  name: String
-  contract: String
-  tokenId: String
+  id: String!
+  name: String!
+  description: String!
+  image: String!
+  tokenStandard: TokenStandard!
+  contract: String!
+  tokenId: String!
+  availableSupply: Int!
+  totalSupply: Int!
+  priceInWei: String!
+}
+
+input ProductInput {
+  name: String!
+  description: String!
+  image: String!
+  tokenStandard: TokenStandard!
+  contract: String!
+  tokenId: String!
+  availableSupply: Int!
+  totalSupply: Int!
+  priceInWei: String!
 }
 
 type Query {
   findProducts: [Product]
+}
+
+type Mutation {
+  createProduct(product: ProductInput) : Product
 }

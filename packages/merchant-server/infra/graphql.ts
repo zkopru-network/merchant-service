@@ -2,12 +2,9 @@ import { loadSchemaSync } from '@graphql-tools/load';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
-
-export const resolvers = {
-  Query: {
-    findProducts: (_: any, args: any, context: any) => [{ name: 'Bored Ape', tokenId: '123' }],
-  },
-};
+import db from './db';
+import resolvers from './resolvers';
+import logger from '../core/logger';
 
 const typeDefs = loadSchemaSync('./schema.graphql', {
   loaders: [new GraphQLFileLoader()],
@@ -21,3 +18,12 @@ const schemaRaw = makeExecutableSchema({
 export const schema = applyMiddleware(
   schemaRaw,
 );
+
+export const buildContext = () => {
+  return {
+      db: db,
+      logger: logger
+  }
+}
+
+export type GraphQLContext = ReturnType<typeof buildContext>;
