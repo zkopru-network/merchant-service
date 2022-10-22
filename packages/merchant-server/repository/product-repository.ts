@@ -22,7 +22,7 @@ export class ProductRepository implements IProductRepository {
       tokenId: product.tokenId,
       available_supply: product.availableSupply,
       total_supply: product.totalSupply,
-      price_in_wei: product.priceInWei,
+      price_in_wei: product.priceInGwei,
     });
   }
 }

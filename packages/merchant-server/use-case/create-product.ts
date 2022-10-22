@@ -1,4 +1,4 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import BN from 'bn.js';
 import { IProductRepository, TokenStandard, ILogger } from '../core/interfaces';
 import Product from '../domain/product';
 
@@ -23,7 +23,7 @@ export default async function createProductUseCase(productInput: CreateProductIn
   // Create domain object
   const product = new Product({
     ...productInput,
-    priceInWei: BigNumber.from(productInput.priceInWei),
+    priceInWei: new BN(productInput.priceInWei),
   });
 
   // TODO: Validate presence of token in L2 chain

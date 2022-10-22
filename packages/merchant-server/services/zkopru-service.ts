@@ -1,10 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies, import/no-unresolved  */
 
 // Note: Use `yarn link` to resolve below modules
-import Zkopru, { UtxoStatus } from '@zkopru/client';
+import Zkopru from '@zkopru/client';
 import { ZkAccount, ZkopruNode, ZkopruWallet } from '@zkopru/client/dist/node';
-import { WalletService } from '../core/interfaces';
-import product from '../domain/product';
+import BN from 'bn.js';
+import { TokenStandard, WalletService } from '../core/interfaces';
+import Product from '../domain/product';
 
 type L2ServiceConstructor = {
   websocketUrl: string;
@@ -25,6 +26,8 @@ export default class ZkopruService implements WalletService {
 
   wallet: ZkopruWallet;
 
+  tokens: Record<string, Record<string, BN>>;
+
   constructor(params: L2ServiceConstructor) {
     this.accountPrivateKey = params.accountPrivateKey;
     this.zkAccount = new ZkAccount(params.accountPrivateKey);
@@ -35,58 +38,56 @@ export default class ZkopruService implements WalletService {
       accounts: [this.zkAccount],
       databaseName: 'zkopru.db',
     });
+
+    this.tokens = {};
   }
 
   async start() {
     await this.node.initNode();
 
+    // Node only tracks Utxo for the specified accounts. The `Zkopru.Node()` don't expose a way for specifying the accounts at the moment.
+    // Using below hack at the moment to add accounts to the tracker.
+    await this.node.node.blockProcessor.tracker.addAccounts(this.zkAccount);
+    this.node.node.blockCache.web3.eth.accounts.wallet.add(this.zkAccount.toAddAccount());
+
     this.wallet = new Zkopru.Wallet(this.node, this.accountPrivateKey);
 
-    // Node only tracks Utxo for the specified accounts. The `Zkopru.Node` don't expose a way for specifying the default client.
-    // Using below hack at the moment to add accounts to the tracker.
-    // await this.node.node.blockProcessor.tracker.addAccounts(this.zkAccount);
-    // this.node.node.blockCache.web3.eth.accounts.wallet.add(this.zkAccount.toAddAccount());
-
     await this.node.start();
+
+    await this.updateBalance();
   }
 
-  async getBalances() {
-    const [
-      spendable,
-      locked,
-      erc20Info,
-      notes,
-    ] = await Promise.all([
-      this.wallet.wallet.getSpendableAmount(),
-      this.wallet.wallet.getLockedAmount(),
-      this.node.node.loadERC20Info(),
-      this.wallet.wallet.getUtxos(null, [UtxoStatus.UNSPENT, UtxoStatus.SPENDING]),
-    ]);
+  async updateBalance() {
+    const spendable = await this.wallet.wallet.getSpendableAmount();
 
-    return {
-      spendable,
-      locked,
-      erc20Info,
-      notes,
+    this.tokens = {
+      erc721: spendable.erc721,
+      erc20: spendable.erc20,
     };
+
+    setTimeout(async () => {
+      await this.updateBalance();
+    }, 10000);
   }
 
-  async ensureProductAvailability({ product, quantity }) => {
-    
+  async ensureProductAvailability({ product, quantity }: { product: Product, quantity: number }) {
+    console.log('ensureProductAvailability', product, quantity);
+
+    // if (product.tokenStandard === TokenStandard.Erc20) {
+    //   if (!this.tokens[product.contract]) {
+    //     throw new Error("No token regis")
+    //   }
+    // }
   }
 }
 
 // Test
 // (async () => {
 //   const service = new ZkopruService({
-//     accountPrivateKey: 'd5eecfacbe5fff810074c5c1e371c65eb4c7f9b0269b3cb250ed0520255e551d',
+//     accountPrivateKey: '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
 //     websocketUrl: 'ws://127.0.0.1:5000',
 //     contractAddress: '0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF',
 //   });
 
-//   service.start();
-
-//   setInterval(async () => {
-//     console.log(await service.getBalances());
-//   }, 10000);
+//   await service.start();
 // })();

@@ -1,4 +1,4 @@
-import type { BigNumber } from '@ethersproject/bignumber';
+import BN from 'bn.js';
 import { TokenStandard } from '../core/interfaces';
 
 interface IProduct {
@@ -10,7 +10,7 @@ interface IProduct {
   tokenId: string;
   availableSupply: number;
   totalSupply: number;
-  priceInWei: BigNumber;
+  priceInWei: BN;
 }
 
 export default class Product {
@@ -30,7 +30,7 @@ export default class Product {
 
   totalSupply: number;
 
-  priceInWei: BigNumber;
+  priceInGwei: BN;
 
   constructor(args: IProduct) {
     this.name = args.name;
@@ -38,7 +38,7 @@ export default class Product {
     this.image = args.image;
     this.tokenStandard = args.tokenStandard;
     this.contract = args.contract;
-    this.priceInWei = args.priceInWei;
+    this.priceInGwei = args.priceInWei;
 
     if (args.tokenStandard === TokenStandard.Erc721) {
       if (!args.tokenId) {
