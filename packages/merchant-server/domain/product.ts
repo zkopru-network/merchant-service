@@ -1,28 +1,31 @@
-import BN from 'bn.js';
+import { v4 as uuid, v4 } from 'uuid';
 import { TokenStandard } from '../core/interfaces';
 
 interface IProduct {
+  id?: string;
   name: string;
-  description: string;
-  image: string;
+  description?: string;
+  imageUrl?: string;
   tokenStandard: TokenStandard;
-  contract: string;
-  tokenId: string;
+  contractAddress: string;
+  tokenId?: string;
   availableSupply: number;
   totalSupply: number;
-  priceInWei: BN;
+  priceInGwei: number;
 }
 
 export default class Product {
+  id: string;
+
   name: string;
 
   description: string;
 
-  image: string;
+  imageUrl: string;
 
   tokenStandard: TokenStandard;
 
-  contract: string;
+  contractAddress: string;
 
   tokenId: string;
 
@@ -30,15 +33,16 @@ export default class Product {
 
   totalSupply: number;
 
-  priceInGwei: BN;
+  priceInGwei: number;
 
   constructor(args: IProduct) {
+    this.id = args.id || v4();
     this.name = args.name;
     this.description = args.description;
-    this.image = args.image;
+    this.imageUrl = args.imageUrl;
     this.tokenStandard = args.tokenStandard;
-    this.contract = args.contract;
-    this.priceInGwei = args.priceInWei;
+    this.contractAddress = args.contractAddress;
+    this.priceInGwei = args.priceInGwei;
 
     if (args.tokenStandard === TokenStandard.Erc721) {
       if (!args.tokenId) {

@@ -16,13 +16,13 @@ export class ProductRepository implements IProductRepository {
     await this.db('products').insert({
       name: product.name,
       description: product.description,
-      image: product.image,
+      image_url: product.imageUrl,
       token_standard: product.tokenStandard,
-      contract: product.contract,
+      contract_address: product.contractAddress,
       tokenId: product.tokenId,
       available_supply: product.availableSupply,
       total_supply: product.totalSupply,
-      price_in_wei: product.priceInGwei,
+      price_in_gwei: product.priceInGwei,
     });
   }
 }

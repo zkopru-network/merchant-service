@@ -1,17 +1,16 @@
-import BN from 'bn.js';
 import { IProductRepository, TokenStandard, ILogger } from '../core/interfaces';
 import Product from '../domain/product';
 
 export type CreateProductInput = {
   name: string;
-  description: string;
-  image: string;
+  description?: string;
+  image?: string;
   tokenStandard: TokenStandard;
-  contract: string;
-  tokenId: string;
+  contractAddress: string;
+  tokenId?: string;
   availableSupply: number;
   totalSupply: number;
-  priceInWei: string;
+  priceInGwei: number;
 };
 
 export type UsecaseContext = {
@@ -23,7 +22,6 @@ export default async function createProductUseCase(productInput: CreateProductIn
   // Create domain object
   const product = new Product({
     ...productInput,
-    priceInWei: new BN(productInput.priceInWei),
   });
 
   // TODO: Validate presence of token in L2 chain

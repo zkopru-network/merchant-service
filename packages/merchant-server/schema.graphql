@@ -6,26 +6,26 @@ enum TokenStandard {
 type Product {
   id: String!
   name: String!
-  description: String!
-  image: String!
+  description: String
+  imageUrl: String
   tokenStandard: TokenStandard!
-  contract: String!
-  tokenId: String!
+  contractAddress: String!
+  tokenId: String
   availableSupply: Int!
   totalSupply: Int!
-  priceInWei: String!
+  priceInGwei: Int!
 }
 
 input ProductInput {
   name: String!
-  description: String!
-  image: String!
+  description: String
+  imageUrl: String
   tokenStandard: TokenStandard!
-  contract: String!
-  tokenId: String!
+  contractAddress: String!
+  tokenId: String
   availableSupply: Int!
   totalSupply: Int!
-  priceInWei: String!
+  priceInGwei: Int!
 }
 
 type Query {

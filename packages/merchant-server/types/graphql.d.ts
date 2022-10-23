@@ -1,5 +1,4 @@
 import { GraphQLResolveInfo } from 'graphql';
-
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -19,19 +18,33 @@ export type Mutation = {
   createProduct?: Maybe<Product>;
 };
 
+
 export type MutationCreateProductArgs = {
-  product?: InputMaybe<Product>;
+  product?: InputMaybe<ProductInput>;
 };
 
 export type Product = {
   __typename?: 'Product';
   availableSupply: Scalars['Int'];
-  contract: Scalars['String'];
-  description: Scalars['String'];
-  image: Scalars['String'];
+  contractAddress: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  imageUrl?: Maybe<Scalars['String']>;
   name: Scalars['String'];
-  priceInWei: Scalars['String'];
-  tokenId: Scalars['String'];
+  priceInGwei: Scalars['Int'];
+  tokenId?: Maybe<Scalars['String']>;
+  tokenStandard: TokenStandard;
+  totalSupply: Scalars['Int'];
+};
+
+export type ProductInput = {
+  availableSupply: Scalars['Int'];
+  contractAddress: Scalars['String'];
+  description?: InputMaybe<Scalars['String']>;
+  imageUrl?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+  priceInGwei: Scalars['Int'];
+  tokenId?: InputMaybe<Scalars['String']>;
   tokenStandard: TokenStandard;
   totalSupply: Scalars['Int'];
 };
@@ -46,7 +59,10 @@ export enum TokenStandard {
   Erc721 = 'Erc721'
 }
 
+
+
 export type ResolverTypeWrapper<T> = Promise<T> | T;
+
 
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
@@ -116,6 +132,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   Product: ResolverTypeWrapper<Product>;
+  ProductInput: ProductInput;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   TokenStandard: TokenStandard;
@@ -127,6 +144,7 @@ export type ResolversParentTypes = {
   Int: Scalars['Int'];
   Mutation: {};
   Product: Product;
+  ProductInput: ProductInput;
   Query: {};
   String: Scalars['String'];
 };
@@ -137,12 +155,13 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 
 export type ProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
   availableSupply?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  contract?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  image?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  priceInWei?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  tokenId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  priceInGwei?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  tokenId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tokenStandard?: Resolver<ResolversTypes['TokenStandard'], ParentType, ContextType>;
   totalSupply?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -157,3 +176,4 @@ export type Resolvers<ContextType = any> = {
   Product?: ProductResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 };
+

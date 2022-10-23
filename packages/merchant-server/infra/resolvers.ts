@@ -14,8 +14,7 @@ const resolvers : Resolvers<GraphQLContext> = {
       });
 
       // Convert domain to DTO
-      const createdProductOutputType = { ...createdProduct, priceInWei: createdProduct.priceInGwei.toString() };
-      return createdProductOutputType;
+      return createdProduct;
     },
   },
 };
