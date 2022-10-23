@@ -1,26 +1,27 @@
+import { v4 as uuid } from 'uuid';
 import { IProductRepository, TokenStandard, ILogger } from '../core/interfaces';
 import Product from '../domain/product';
 
-export type CreateProductInput = {
+type CreateProductInput = {
   name: string;
   description?: string;
   image?: string;
   tokenStandard: TokenStandard;
   contractAddress: string;
   tokenId?: string;
-  availableSupply: number;
-  totalSupply: number;
+  availableQuantity: number;
   priceInGwei: number;
 };
 
-export type UsecaseContext = {
+type Context = {
   logger: ILogger;
   productRepository: IProductRepository;
 };
 
-export default async function createProductUseCase(productInput: CreateProductInput, context: UsecaseContext) : Promise<Product> {
+export default async function createProductUseCase(productInput: CreateProductInput, context: Context) : Promise<Product> {
   // Create domain object
   const product = new Product({
+    id: uuid(),
     ...productInput,
   });
 

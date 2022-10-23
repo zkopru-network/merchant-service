@@ -20,8 +20,7 @@ export class ProductRepository implements IProductRepository {
       token_standard: product.tokenStandard,
       contract_address: product.contractAddress,
       tokenId: product.tokenId,
-      available_supply: product.availableSupply,
-      total_supply: product.totalSupply,
+      available_quantity: product.availableQuantity,
       price_in_gwei: product.priceInGwei,
     });
   }

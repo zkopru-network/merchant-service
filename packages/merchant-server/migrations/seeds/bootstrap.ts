@@ -10,8 +10,7 @@ export async function seed(knex: Knex) {
       table.string('token_standard', 10).notNullable();
       table.string('contract_address', 42).notNullable();
       table.string('tokenId', 255).nullable();
-      table.integer('available_supply').notNullable();
-      table.integer('total_supply').notNullable();
+      table.integer('available_quantity').notNullable();
       table.integer('price_in_gwei').notNullable();
     });
 }

@@ -11,8 +11,7 @@ type Product {
   tokenStandard: TokenStandard!
   contractAddress: String!
   tokenId: String
-  availableSupply: Int!
-  totalSupply: Int!
+  availableQuantity: Int!
   priceInGwei: Int!
 }
 
@@ -23,8 +22,7 @@ input ProductInput {
   tokenStandard: TokenStandard!
   contractAddress: String!
   tokenId: String
-  availableSupply: Int!
-  totalSupply: Int!
+  availableQuantity: Int!
   priceInGwei: Int!
 }
 

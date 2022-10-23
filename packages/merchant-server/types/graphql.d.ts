@@ -25,7 +25,7 @@ export type MutationCreateProductArgs = {
 
 export type Product = {
   __typename?: 'Product';
-  availableSupply: Scalars['Int'];
+  availableQuantity: Scalars['Int'];
   contractAddress: Scalars['String'];
   description?: Maybe<Scalars['String']>;
   id: Scalars['String'];
@@ -34,11 +34,10 @@ export type Product = {
   priceInGwei: Scalars['Int'];
   tokenId?: Maybe<Scalars['String']>;
   tokenStandard: TokenStandard;
-  totalSupply: Scalars['Int'];
 };
 
 export type ProductInput = {
-  availableSupply: Scalars['Int'];
+  availableQuantity: Scalars['Int'];
   contractAddress: Scalars['String'];
   description?: InputMaybe<Scalars['String']>;
   imageUrl?: InputMaybe<Scalars['String']>;
@@ -46,7 +45,6 @@ export type ProductInput = {
   priceInGwei: Scalars['Int'];
   tokenId?: InputMaybe<Scalars['String']>;
   tokenStandard: TokenStandard;
-  totalSupply: Scalars['Int'];
 };
 
 export type Query = {
@@ -154,7 +152,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type ProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
-  availableSupply?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  availableQuantity?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -163,7 +161,6 @@ export type ProductResolvers<ContextType = any, ParentType extends ResolversPare
   priceInGwei?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   tokenId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tokenStandard?: Resolver<ResolversTypes['TokenStandard'], ParentType, ContextType>;
-  totalSupply?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

@@ -1,16 +1,14 @@
-import { v4 as uuid, v4 } from 'uuid';
 import { TokenStandard } from '../core/interfaces';
 
 interface IProduct {
-  id?: string;
+  id: string;
   name: string;
   description?: string;
   imageUrl?: string;
   tokenStandard: TokenStandard;
   contractAddress: string;
   tokenId?: string;
-  availableSupply: number;
-  totalSupply: number;
+  availableQuantity: number;
   priceInGwei: number;
 }
 
@@ -29,14 +27,12 @@ export default class Product {
 
   tokenId: string;
 
-  availableSupply: number;
-
-  totalSupply: number;
-
   priceInGwei: number;
 
+  availableQuantity: number;
+
   constructor(args: IProduct) {
-    this.id = args.id || v4();
+    this.id = args.id;
     this.name = args.name;
     this.description = args.description;
     this.imageUrl = args.imageUrl;
@@ -46,16 +42,15 @@ export default class Product {
 
     if (args.tokenStandard === TokenStandard.Erc721) {
       if (!args.tokenId) {
-        throw new Error('tokenId is required for Erc721 type token');
+        throw new Error('tokenId is required for Erc721 type token.');
       }
 
-      if (args.totalSupply > 1) {
-        throw new Error('Erc721 type token cannot have more than one supply');
+      if (args.availableQuantity > 1) {
+        throw new Error('Erc721 type token cannot have more than one quantity available.');
       }
     }
 
     this.tokenId = args.tokenId;
-    this.availableSupply = args.availableSupply;
-    this.totalSupply = args.totalSupply;
+    this.availableQuantity = args.availableQuantity;
   }
 }
