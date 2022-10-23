@@ -3,6 +3,10 @@
 # Sqlite
 *.db
 
+.postgres
+
+.env
+
 # compiled output
 dist
 tmp
