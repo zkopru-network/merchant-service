@@ -10,6 +10,7 @@ export enum TokenStandard {
 }
 
 export interface IProductRepository {
+  findProducts: () => Promise<Product[]>;
   createProduct: (product: Product) => Promise<void>;
 }
 
