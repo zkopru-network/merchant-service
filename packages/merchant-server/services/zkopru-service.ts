@@ -88,7 +88,7 @@ export default class ZkopruService implements IWalletService {
       const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
 
       if (!available || requiredQuantity.gt(toWei(available, 'ether'))) {
-        throw new Error(`No enough balance in wallet for ERC20 token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`);
+        throw new Error(`No enough balance in wallet for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`);
       }
     } else if (product.tokenStandard === TokenStandard.Erc721) {
       const availableTokens = this.tokens[product.tokenStandard][product.contractAddress] as BN[] || [];

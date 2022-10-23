@@ -10,6 +10,7 @@ export enum TokenStandard {
 }
 
 export interface IProductRepository {
+  productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
   findProducts: () => Promise<Product[]>;
   createProduct: (product: Product) => Promise<void>;
 }

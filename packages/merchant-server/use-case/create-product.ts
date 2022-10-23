@@ -28,8 +28,14 @@ export default async function createProductUseCase(productInput: CreateProductIn
     ...productInput,
   });
 
+  const productExists = await context.productRepository.productExist(product.contractAddress, product.tokenId);
+
+  if (productExists) {
+    throw new Error('Another product exists with the same contract/tokenId');
+  }
+
   // Ensure the token is available in the wallet
-  context.walletService.ensureProductAvailability({ product, quantity: product.availableQuantity });
+  await context.walletService.ensureProductAvailability({ product, quantity: product.availableQuantity });
 
   // Add to repo
   await context.productRepository.createProduct(product);

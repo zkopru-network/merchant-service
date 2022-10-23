@@ -56,4 +56,15 @@ export class ProductRepository implements IProductRepository {
       this.mapProductToDbRow(product),
     );
   }
+
+  async productExist(contractAddress: string, tokenId?: string) : Promise<boolean> {
+    const rows = await this.db('products').count('id').where({
+      contract_address: contractAddress,
+      ...tokenId && { token_id: tokenId },
+    });
+
+    const exists = rows[0]?.count && Number(rows[0]?.count) > 0;
+
+    return exists;
+  }
 }

@@ -1,12 +1,10 @@
-import { loadSchemaSync } from '@graphql-tools/load';
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { applyMiddleware } from 'graphql-middleware';
-import db from './db';
-import resolvers from './resolvers';
-import logger from '../core/logger';
+import { loadSchemaSync } from "@graphql-tools/load";
+import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { applyMiddleware } from "graphql-middleware";
+import resolvers from "./resolvers";
 
-const typeDefs = loadSchemaSync('./schema.graphql', {
+const typeDefs = loadSchemaSync("./schema.graphql", {
   loaders: [new GraphQLFileLoader()],
 });
 
@@ -15,15 +13,20 @@ const schemaRaw = makeExecutableSchema({
   resolvers,
 });
 
-export const schema = applyMiddleware(
-  schemaRaw,
-);
+// const errorHandlerMiddleware = async (
+//   resolve: any,
+//   root: any,
+//   args: any,
+//   context: any,
+//   info: any
+// ) => {
+//   try {
+//     console.log("HERE")
+//     const result = await resolve(root, args, context, info);
+//     return result;
+//   } catch (error) {
+//     return "Unexpected error";
+//   }
+// };
 
-export const buildContext = () => {
-  return {
-      db: db,
-      logger: logger
-  }
-}
-
-export type GraphQLContext = ReturnType<typeof buildContext>;
+export const schema = applyMiddleware(schemaRaw);
