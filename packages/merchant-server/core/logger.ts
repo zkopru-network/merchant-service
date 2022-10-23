@@ -1,8 +1,9 @@
-import createLogger from 'pino';
+import pino from 'pino';
+import { ILogger } from './interfaces';
 
-const logger = createLogger({
-  name: 'merchant-server',
-  level: process.env.LOG_LEVEL || 'info',
-});
-
-export default logger;
+export function createLogger() : ILogger {
+  return pino({
+    name: 'merchant-server',
+    level: process.env.LOG_LEVEL || 'info',
+  });
+}

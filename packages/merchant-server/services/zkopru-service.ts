@@ -4,7 +4,8 @@
 import Zkopru from '@zkopru/client';
 import { ZkAccount, ZkopruNode, ZkopruWallet } from '@zkopru/client/dist/node';
 import BN from 'bn.js';
-import { TokenStandard, WalletService } from '../core/interfaces';
+import { fromWei, toWei } from 'web3-utils';
+import { ILogger, TokenStandard, IWalletService } from '../core/interfaces';
 import Product from '../domain/product';
 
 type L2ServiceConstructor = {
@@ -13,7 +14,9 @@ type L2ServiceConstructor = {
   accountPrivateKey: string;
 }
 
-export default class ZkopruService implements WalletService {
+export default class ZkopruService implements IWalletService {
+  logger: ILogger;
+
   websocketUrl: string;
 
   contractAddress: string;
@@ -26,9 +29,9 @@ export default class ZkopruService implements WalletService {
 
   wallet: ZkopruWallet;
 
-  tokens: Record<string, Record<string, BN>>;
+  tokens: Record<TokenStandard, Record<string, BN | [BN]>>;
 
-  constructor(params: L2ServiceConstructor) {
+  constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
     this.accountPrivateKey = params.accountPrivateKey;
     this.zkAccount = new ZkAccount(params.accountPrivateKey);
 
@@ -39,10 +42,17 @@ export default class ZkopruService implements WalletService {
       databaseName: 'zkopru.db',
     });
 
-    this.tokens = {};
+    this.tokens = {
+      [TokenStandard.Erc20]: {},
+      [TokenStandard.Erc721]: {},
+    };
+
+    this.logger = context.logger;
   }
 
   async start() {
+    this.logger.info('Starting Zkopru Node');
+
     await this.node.initNode();
 
     // Node only tracks Utxo for the specified accounts. The `Zkopru.Node()` don't expose a way for specifying the accounts at the moment.
@@ -58,11 +68,13 @@ export default class ZkopruService implements WalletService {
   }
 
   async updateBalance() {
+    this.logger.debug('Updating Zkopru balances');
+
     const spendable = await this.wallet.wallet.getSpendableAmount();
 
     this.tokens = {
-      erc721: spendable.erc721,
-      erc20: spendable.erc20,
+      [TokenStandard.Erc721]: spendable.erc721,
+      [TokenStandard.Erc20]: spendable.erc20,
     };
 
     setTimeout(async () => {
@@ -71,23 +83,19 @@ export default class ZkopruService implements WalletService {
   }
 
   async ensureProductAvailability({ product, quantity }: { product: Product, quantity: number }) {
-    console.log('ensureProductAvailability', product, quantity);
+    if (product.tokenStandard === TokenStandard.Erc20) {
+      const available = this.tokens[product.tokenStandard][product.contractAddress] as BN;
+      const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
 
-    // if (product.tokenStandard === TokenStandard.Erc20) {
-    //   if (!this.tokens[product.contract]) {
-    //     throw new Error("No token regis")
-    //   }
-    // }
+      if (!available || requiredQuantity.gt(toWei(available, 'ether'))) {
+        throw new Error(`No enough balance in wallet for ERC20 token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`);
+      }
+    } else if (product.tokenStandard === TokenStandard.Erc721) {
+      const availableTokens = this.tokens[product.tokenStandard][product.contractAddress] as BN[] || [];
+      const isAvailable = (availableTokens as BN[] || []).some((el) => el.eq(new BN(product.tokenId)));
+      if (!isAvailable) {
+        throw new Error(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
+      }
+    }
   }
 }
-
-// Test
-// (async () => {
-//   const service = new ZkopruService({
-//     accountPrivateKey: '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
-//     websocketUrl: 'ws://127.0.0.1:5000',
-//     contractAddress: '0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF',
-//   });
-
-//   await service.start();
-// })();

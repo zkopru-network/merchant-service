@@ -5,8 +5,8 @@ import type { Logger } from 'pino';
 import Product from '../domain/product';
 
 export enum TokenStandard {
-  Erc20,
-  Erc721
+  Erc20 = 'Erc20',
+  Erc721 = 'Erc721'
 }
 
 export interface IProductRepository {
@@ -16,7 +16,7 @@ export interface IProductRepository {
 
 export type ILogger = Logger;
 
-export interface WalletService {
+export interface IWalletService {
   start: () => void;
   ensureProductAvailability: (args: { product: Product; quantity?: number }) => Promise<void>
 }

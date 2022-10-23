@@ -1,8 +1,36 @@
-import knex from 'knex';
+import knex, { Knex } from 'knex';
 
-const db = knex({
-  client: 'pg',
-  connection: process.env.DB_CONNECTION_STRING,
-});
+declare module 'knex' {
+  interface Tables {
+    products: {
+      'id': string
+      'name': string
+      'description'?: string
+      'image_url'?: string
+      'token_standard': string
+      'contract_address': string
+      'tokenId'?: string
+      'available_quantity': number
+      'price_in_gwei': number
+    }
+  }
+}
 
-export default db;
+let db : Knex;
+
+export function connectDB() {
+  if (db) {
+    return db;
+  }
+
+  db = knex({
+    client: 'pg',
+    connection: process.env.DB_CONNECTION_STRING,
+  });
+
+  return db;
+}
+
+export function disconnectDB() {
+  db.destroy();
+}

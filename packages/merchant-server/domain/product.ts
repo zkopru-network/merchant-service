@@ -51,7 +51,7 @@ export default class Product {
     }
 
     if (args.tokenStandard === TokenStandard.Erc20) {
-      if (!args.tokenId) {
+      if (args.tokenId) {
         throw new Error('tokenId should not be found for Erc20 type token.');
       }
     }

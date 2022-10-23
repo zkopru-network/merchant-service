@@ -4,8 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import app from './app';
-import logger from './core/logger';
+import app, { logger } from './app';
 
 const port = Number(process.env.PORT) || 8000;
 

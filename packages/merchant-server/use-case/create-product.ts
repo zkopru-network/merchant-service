@@ -1,5 +1,7 @@
 import { v4 as uuid } from 'uuid';
-import { IProductRepository, TokenStandard, ILogger } from '../core/interfaces';
+import {
+  IProductRepository, TokenStandard, ILogger, IWalletService,
+} from '../core/interfaces';
 import Product from '../domain/product';
 
 type CreateProductInput = {
@@ -16,6 +18,7 @@ type CreateProductInput = {
 type Context = {
   logger: ILogger;
   productRepository: IProductRepository;
+  walletService: IWalletService;
 };
 
 export default async function createProductUseCase(productInput: CreateProductInput, context: Context) : Promise<Product> {
@@ -25,7 +28,8 @@ export default async function createProductUseCase(productInput: CreateProductIn
     ...productInput,
   });
 
-  // TODO: Validate presence of token in L2 chain
+  // Ensure the token is available in the wallet
+  context.walletService.ensureProductAvailability({ product, quantity: product.availableQuantity });
 
   // Add to repo
   await context.productRepository.createProduct(product);

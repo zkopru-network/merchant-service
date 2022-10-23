@@ -1,5 +1,5 @@
-import type { Knex } from 'knex';
-import { IProductRepository, ILogger } from '../core/interfaces';
+import type { Knex, Tables } from 'knex';
+import { IProductRepository, ILogger, TokenStandard } from '../core/interfaces';
 import Product from '../domain/product';
 
 export class ProductRepository implements IProductRepository {
@@ -12,14 +12,21 @@ export class ProductRepository implements IProductRepository {
     this.logger = context.logger;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private mapDBRowToProduct(dbRow: any) {
+  private mapDBRowToProduct(dbRow: Tables['products']) {
+    let tokenStandard : TokenStandard;
+    if (dbRow.token_standard === TokenStandard.Erc20.toString()) {
+      tokenStandard = TokenStandard.Erc20;
+    }
+    if (dbRow.token_standard === TokenStandard.Erc721.toString()) {
+      tokenStandard = TokenStandard.Erc721;
+    }
+
     return new Product({
       id: dbRow.id,
       name: dbRow.name,
       description: dbRow.description,
       imageUrl: dbRow.image_url,
-      tokenStandard: dbRow.token_standard,
+      tokenStandard,
       contractAddress: dbRow.contract_address,
       availableQuantity: dbRow.available_quantity,
       priceInGwei: dbRow.price_in_gwei,
@@ -32,7 +39,7 @@ export class ProductRepository implements IProductRepository {
       name: product.name,
       description: product.description,
       image_url: product.imageUrl,
-      token_standard: product.tokenStandard,
+      token_standard: product.tokenStandard.toString(),
       contract_address: product.contractAddress,
       available_quantity: product.availableQuantity,
       price_in_gwei: product.priceInGwei,
