@@ -1,8 +1,8 @@
 import type { MercuriusContext } from 'mercurius';
-import createProductUseCase from '../use-case/create-product';
-import findProductsUseCase from '../use-case/find-products';
+import createProductUseCase from '../use-cases/create-product';
+import findProductsUseCase from '../use-cases/find-products';
 import { Resolvers } from '../types/graphql.d';
-import { ProductRepository } from '../repository/product-repository';
+import { ProductRepository } from './repositories/product-repository';
 
 const resolvers : Resolvers<MercuriusContext> = {
   Mutation: {

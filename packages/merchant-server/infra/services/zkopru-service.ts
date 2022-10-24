@@ -5,8 +5,8 @@ import Zkopru from '@zkopru/client';
 import { ZkAccount, ZkopruNode, ZkopruWallet } from '@zkopru/client/dist/node';
 import BN from 'bn.js';
 import { fromWei, toWei } from 'web3-utils';
-import { ILogger, TokenStandard, IWalletService } from '../core/interfaces';
-import Product from '../domain/product';
+import { ILogger, TokenStandard, IWalletService } from '../../common/interfaces';
+import Product from '../../domain/product';
 
 type L2ServiceConstructor = {
   websocketUrl: string;
@@ -83,6 +83,7 @@ export default class ZkopruService implements IWalletService {
   }
 
   async ensureProductAvailability({ product, quantity }: { product: Product, quantity: number }) {
+    console.log(this.tokens)
     if (product.tokenStandard === TokenStandard.Erc20) {
       const available = this.tokens[product.tokenStandard][product.contractAddress] as BN;
       const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));

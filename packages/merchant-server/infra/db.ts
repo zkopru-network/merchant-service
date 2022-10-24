@@ -9,7 +9,7 @@ declare module 'knex' {
       'image_url'?: string
       'token_standard': string
       'contract_address': string
-      'tokenId'?: string
+      'token_id'?: string
       'available_quantity': number
       'price_in_gwei': number
     }

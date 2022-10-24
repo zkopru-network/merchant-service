@@ -1,10 +1,10 @@
-import { loadSchemaSync } from "@graphql-tools/load";
-import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { applyMiddleware } from "graphql-middleware";
-import resolvers from "./resolvers";
+import { loadSchemaSync } from '@graphql-tools/load';
+import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { applyMiddleware } from 'graphql-middleware';
+import resolvers from './resolvers';
 
-const typeDefs = loadSchemaSync("./schema.graphql", {
+const typeDefs = loadSchemaSync('./schema.graphql', {
   loaders: [new GraphQLFileLoader()],
 });
 
@@ -21,7 +21,6 @@ const schemaRaw = makeExecutableSchema({
 //   info: any
 // ) => {
 //   try {
-//     console.log("HERE")
 //     const result = await resolve(root, args, context, info);
 //     return result;
 //   } catch (error) {

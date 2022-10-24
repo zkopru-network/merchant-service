@@ -1,6 +1,6 @@
 import type { Knex, Tables } from 'knex';
-import { IProductRepository, ILogger, TokenStandard } from '../core/interfaces';
-import Product from '../domain/product';
+import { IProductRepository, ILogger, TokenStandard } from '../../common/interfaces';
+import Product from '../../domain/product';
 
 export class ProductRepository implements IProductRepository {
   db: Knex;
@@ -26,6 +26,7 @@ export class ProductRepository implements IProductRepository {
       name: dbRow.name,
       description: dbRow.description,
       imageUrl: dbRow.image_url,
+      tokenId: dbRow.token_id,
       tokenStandard,
       contractAddress: dbRow.contract_address,
       availableQuantity: dbRow.available_quantity,
@@ -39,6 +40,7 @@ export class ProductRepository implements IProductRepository {
       name: product.name,
       description: product.description,
       image_url: product.imageUrl,
+      token_id: product.tokenId,
       token_standard: product.tokenStandard.toString(),
       contract_address: product.contractAddress,
       available_quantity: product.availableQuantity,

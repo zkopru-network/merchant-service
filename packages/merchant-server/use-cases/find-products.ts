@@ -1,4 +1,4 @@
-import { IProductRepository, ILogger } from '../core/interfaces';
+import { IProductRepository, ILogger } from '../common/interfaces';
 import Product from '../domain/product';
 
 type Context = {

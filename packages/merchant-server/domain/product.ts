@@ -1,4 +1,4 @@
-import { TokenStandard } from '../core/interfaces';
+import { TokenStandard } from '../common/interfaces';
 
 interface IProduct {
   id: string;

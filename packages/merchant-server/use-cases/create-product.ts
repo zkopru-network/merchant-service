@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import {
   IProductRepository, TokenStandard, ILogger, IWalletService,
-} from '../core/interfaces';
+} from '../common/interfaces';
 import Product from '../domain/product';
 
 type CreateProductInput = {
@@ -28,13 +28,13 @@ export default async function createProductUseCase(productInput: CreateProductIn
     ...productInput,
   });
 
+  // Check for existing product with same token
   const productExists = await context.productRepository.productExist(product.contractAddress, product.tokenId);
-
   if (productExists) {
     throw new Error('Another product exists with the same contract/tokenId');
   }
 
-  // Ensure the token is available in the wallet
+  // Ensure the token/quantity is available in the wallet
   await context.walletService.ensureProductAvailability({ product, quantity: product.availableQuantity });
 
   // Add to repo

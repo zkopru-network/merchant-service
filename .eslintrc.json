@@ -50,5 +50,5 @@
     "no-restricted-syntax": [0],
     "class-methods-use-this": [0]
   },
-  "ignorePatterns": ["**/graphql.ts"]
+  "ignorePatterns": ["**/graphql.d.ts"]
 }

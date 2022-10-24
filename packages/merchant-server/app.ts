@@ -1,17 +1,20 @@
 import fastify from 'fastify';
 import mercurius, { IResolvers } from 'mercurius';
 import { schema } from './infra/graphql';
-import { createLogger } from './core/logger';
+import { createLogger } from './common/logger';
 import resolvers from './infra/resolvers';
-import ZkopruService from './services/zkopru-service';
+import ZkopruService from './infra/services/zkopru-service';
 import { connectDB } from './infra/db';
 
-export const logger = createLogger();
+const logger = createLogger();
 
+// Create server
 const app = fastify({ logger });
 
+// Initialize DB connection
 const db = connectDB();
 
+// Initialize Zkopru service
 const zkopruService = new ZkopruService({
   websocketUrl: process.env.WEBSOCKET_URL,
   contractAddress: process.env.ZKOPRU_CONTRACT_ADDRESS,
@@ -20,17 +23,18 @@ const zkopruService = new ZkopruService({
   logger,
 });
 
+// Start ZKopru client when server starts
 app.addHook('onReady', () => {
   zkopruService.start();
 });
 
+// Register GraphQL endpoint
 export const buildContext = () => ({
   db,
   logger,
   zkopruService,
 });
 
-// Register GraphQL endpoint
 app.register(mercurius, {
   schema,
   context: buildContext,
