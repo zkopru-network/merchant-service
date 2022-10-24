@@ -7,7 +7,7 @@ import Product from '../domain/product';
 type CreateProductInput = {
   name: string;
   description?: string;
-  image?: string;
+  imageUrl?: string;
   tokenStandard: TokenStandard;
   contractAddress: string;
   tokenId?: string;

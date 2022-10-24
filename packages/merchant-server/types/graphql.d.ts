@@ -13,14 +13,29 @@ export type Scalars = {
   Float: number;
 };
 
+export type EditProductInput = {
+  availableQuantity: Scalars['Int'];
+  description?: InputMaybe<Scalars['String']>;
+  imageUrl?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+  priceInGwei: Scalars['Int'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createProduct?: Maybe<Product>;
+  editProduct?: Maybe<Product>;
 };
 
 
 export type MutationCreateProductArgs = {
   product?: InputMaybe<ProductInput>;
+};
+
+
+export type MutationEditProductArgs = {
+  id?: InputMaybe<Scalars['String']>;
+  productData?: InputMaybe<EditProductInput>;
 };
 
 export type Product = {
@@ -127,6 +142,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  EditProductInput: EditProductInput;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   Product: ResolverTypeWrapper<Product>;
@@ -139,6 +155,7 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
+  EditProductInput: EditProductInput;
   Int: Scalars['Int'];
   Mutation: {};
   Product: Product;
@@ -149,6 +166,7 @@ export type ResolversParentTypes = {
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<MutationCreateProductArgs>>;
+  editProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<MutationEditProductArgs>>;
 };
 
 export type ProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {

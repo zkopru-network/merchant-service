@@ -48,6 +48,16 @@ export class ProductRepository implements IProductRepository {
     };
   }
 
+  async getById(id: string) : Promise<Product> {
+    const rows = await this.db('products').select('*').where({ id });
+
+    if (rows.length !== 1) {
+      throw new Error(`Cannot find product with id ${id}`);
+    }
+
+    return this.mapDBRowToProduct(rows[0]);
+  }
+
   async findProducts() : Promise<Product[]> {
     const rows = await this.db('products').select('*');
     return rows.map(this.mapDBRowToProduct);
@@ -57,6 +67,12 @@ export class ProductRepository implements IProductRepository {
     await this.db('products').insert(
       this.mapProductToDbRow(product),
     );
+  }
+
+  async updateProduct(product: Product) {
+    await this.db('products').update(
+      this.mapProductToDbRow(product),
+    ).where({ id: product.id });
   }
 
   async productExist(contractAddress: string, tokenId?: string) : Promise<boolean> {

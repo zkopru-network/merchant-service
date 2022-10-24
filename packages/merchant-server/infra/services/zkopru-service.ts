@@ -83,12 +83,11 @@ export default class ZkopruService implements IWalletService {
   }
 
   async ensureProductAvailability({ product, quantity }: { product: Product, quantity: number }) {
-    console.log(this.tokens)
     if (product.tokenStandard === TokenStandard.Erc20) {
       const available = this.tokens[product.tokenStandard][product.contractAddress] as BN;
       const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
 
-      if (!available || requiredQuantity.gt(toWei(available, 'ether'))) {
+      if (!available || requiredQuantity.gt(available)) {
         throw new Error(`No enough balance in wallet for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`);
       }
     } else if (product.tokenStandard === TokenStandard.Erc721) {
@@ -97,6 +96,8 @@ export default class ZkopruService implements IWalletService {
       if (!isAvailable) {
         throw new Error(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
       }
+    } else {
+      throw new Error('Unknown Token Standard');
     }
   }
 }

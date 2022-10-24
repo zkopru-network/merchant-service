@@ -26,10 +26,19 @@ input ProductInput {
   priceInGwei: Int!
 }
 
+input EditProductInput {
+  name: String!
+  description: String
+  imageUrl: String
+  availableQuantity: Int!
+  priceInGwei: Int!
+}
+
 type Query {
   findProducts: [Product]
 }
 
 type Mutation {
   createProduct(product: ProductInput) : Product
+  editProduct(id: String, productData: EditProductInput) : Product
 }

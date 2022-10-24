@@ -19,7 +19,9 @@ export interface IWalletService {
 }
 
 export interface IProductRepository {
-  productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
+  getById: (id: string) => Promise<Product>;
   findProducts: () => Promise<Product[]>;
+  productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
   createProduct: (product: Product) => Promise<void>;
+  updateProduct: (product: Product) => Promise<void>;
 }
