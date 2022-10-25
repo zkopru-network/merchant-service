@@ -3,6 +3,7 @@
 
 import type { Logger } from 'pino';
 import Product from '../domain/product';
+import Order from '../domain/order';
 
 // TODO: Can be changed to a custom type to avoid dependency on pino
 export type ILogger = Logger;
@@ -15,7 +16,7 @@ export enum TokenStandard {
 // Interface for the service interacting with the Blockchain
 export interface IWalletService {
   start: () => void;
-  ensureProductAvailability: (args: { product: Product; quantity?: number }) => Promise<void>
+  ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
 }
 
 export interface IProductRepository {

@@ -1,6 +1,6 @@
 import { TokenStandard } from '../common/interfaces';
 
-interface IProduct {
+type IProduct = {
   id: string;
   name: string;
   description?: string;

@@ -35,7 +35,7 @@ export default async function createProductUseCase(productInput: CreateProductIn
   }
 
   // Ensure the token/quantity is available in the wallet
-  await context.walletService.ensureProductAvailability({ product, quantity: product.availableQuantity });
+  await context.walletService.ensureProductAvailability(product, product.availableQuantity);
 
   // Add to repo
   await context.productRepository.createProduct(product);

@@ -33,7 +33,7 @@ export default async function editProductUseCase(productInput: EditProductInput,
   product.priceInGwei = productData.priceInGwei;
 
   // Ensure the new quantity is available in the wallet
-  await context.walletService.ensureProductAvailability({ product, quantity: product.availableQuantity });
+  await context.walletService.ensureProductAvailability(product, product.availableQuantity);
 
   // Add to repo
   await context.productRepository.updateProduct(product);
