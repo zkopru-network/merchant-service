@@ -9,7 +9,7 @@ type IProduct = {
   contractAddress: string;
   tokenId?: string;
   availableQuantity: number;
-  priceInGwei: number;
+  price: number;
 }
 
 export default class Product {
@@ -27,7 +27,7 @@ export default class Product {
 
   tokenId: string;
 
-  priceInGwei: number;
+  price: number;
 
   availableQuantity: number;
 
@@ -38,7 +38,7 @@ export default class Product {
     this.imageUrl = args.imageUrl;
     this.tokenStandard = args.tokenStandard;
     this.contractAddress = args.contractAddress;
-    this.priceInGwei = args.priceInGwei;
+    this.price = args.price;
 
     if (args.tokenStandard === TokenStandard.Erc721) {
       if (!args.tokenId) {

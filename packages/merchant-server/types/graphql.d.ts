@@ -13,18 +13,32 @@ export type Scalars = {
   Float: number;
 };
 
+export type CreateOrderInput = {
+  atomicSwapSalt: Scalars['Int'];
+  buyerAddress: Scalars['String'];
+  buyerTransaction: Scalars['String'];
+  productId: Scalars['String'];
+  quantity: Scalars['Float'];
+};
+
 export type EditProductInput = {
   availableQuantity: Scalars['Int'];
   description?: InputMaybe<Scalars['String']>;
   imageUrl?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
-  priceInGwei: Scalars['Int'];
+  price: Scalars['Float'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createOrder?: Maybe<Order>;
   createProduct?: Maybe<Product>;
   editProduct?: Maybe<Product>;
+};
+
+
+export type MutationCreateOrderArgs = {
+  order?: InputMaybe<CreateOrderInput>;
 };
 
 
@@ -38,6 +52,17 @@ export type MutationEditProductArgs = {
   productData?: InputMaybe<EditProductInput>;
 };
 
+export type Order = {
+  __typename?: 'Order';
+  amount?: Maybe<Scalars['Float']>;
+  buyerAddress?: Maybe<Scalars['String']>;
+  buyerTransaction?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['String']>;
+  product?: Maybe<Product>;
+  quantity?: Maybe<Scalars['Float']>;
+  sellerTransaction?: Maybe<Scalars['String']>;
+};
+
 export type Product = {
   __typename?: 'Product';
   availableQuantity: Scalars['Int'];
@@ -46,7 +71,7 @@ export type Product = {
   id: Scalars['String'];
   imageUrl?: Maybe<Scalars['String']>;
   name: Scalars['String'];
-  priceInGwei: Scalars['Int'];
+  price: Scalars['Float'];
   tokenId?: Maybe<Scalars['String']>;
   tokenStandard: TokenStandard;
 };
@@ -57,7 +82,7 @@ export type ProductInput = {
   description?: InputMaybe<Scalars['String']>;
   imageUrl?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
-  priceInGwei: Scalars['Int'];
+  price: Scalars['Float'];
   tokenId?: InputMaybe<Scalars['String']>;
   tokenStandard: TokenStandard;
 };
@@ -142,9 +167,12 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  CreateOrderInput: CreateOrderInput;
   EditProductInput: EditProductInput;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
+  Order: ResolverTypeWrapper<Order>;
   Product: ResolverTypeWrapper<Product>;
   ProductInput: ProductInput;
   Query: ResolverTypeWrapper<{}>;
@@ -155,9 +183,12 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
+  CreateOrderInput: CreateOrderInput;
   EditProductInput: EditProductInput;
+  Float: Scalars['Float'];
   Int: Scalars['Int'];
   Mutation: {};
+  Order: Order;
   Product: Product;
   ProductInput: ProductInput;
   Query: {};
@@ -165,8 +196,20 @@ export type ResolversParentTypes = {
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  createOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, Partial<MutationCreateOrderArgs>>;
   createProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<MutationCreateProductArgs>>;
   editProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<MutationEditProductArgs>>;
+};
+
+export type OrderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Order'] = ResolversParentTypes['Order']> = {
+  amount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  buyerAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  buyerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType>;
+  quantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  sellerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
@@ -176,7 +219,7 @@ export type ProductResolvers<ContextType = any, ParentType extends ResolversPare
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  priceInGwei?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   tokenId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tokenStandard?: Resolver<ResolversTypes['TokenStandard'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -188,6 +231,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
+  Order?: OrderResolvers<ContextType>;
   Product?: ProductResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 };

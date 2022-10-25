@@ -10,7 +10,7 @@ type EditProductInput = {
     description?: string;
     imageUrl?: string;
     availableQuantity: number;
-    priceInGwei: number;
+    price: number;
   }
 };
 
@@ -30,7 +30,7 @@ export default async function editProductUseCase(productInput: EditProductInput,
   product.description = productData.description;
   product.imageUrl = productData.imageUrl;
   product.availableQuantity = productData.availableQuantity;
-  product.priceInGwei = productData.priceInGwei;
+  product.price = productData.price;
 
   // Ensure the new quantity is available in the wallet
   await context.walletService.ensureProductAvailability(product, product.availableQuantity);

@@ -17,6 +17,7 @@ export enum TokenStandard {
 export interface IWalletService {
   start: () => void;
   ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
+  executeOrder: (order: Order, params: object) => Promise<string>;
 }
 
 export interface IProductRepository {
@@ -25,4 +26,11 @@ export interface IProductRepository {
   productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
   createProduct: (product: Product) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
+}
+
+export interface IOrderRepository {
+  getById: (id: string) => Promise<Order>;
+  findOrders: () => Promise<Order[]>;
+  createOrder: (order: Order) => Promise<void>;
+  updateOrder: (order: Order) => Promise<void>;
 }

@@ -4,6 +4,8 @@ import findProductsUseCase from '../use-cases/find-products';
 import { Resolvers } from '../types/graphql.d';
 import { ProductRepository } from './repositories/product-repository';
 import editProductUseCase from '../use-cases/edit-product';
+import { OrderRepository } from './repositories/order-repository';
+import createOrderUseCase from '../use-cases/create-order';
 
 const resolvers : Resolvers<MercuriusContext> = {
   Mutation: {
@@ -28,6 +30,19 @@ const resolvers : Resolvers<MercuriusContext> = {
       });
 
       return createdProduct;
+    },
+    async createOrder(_, args, context) {
+      const productRepo = new ProductRepository(context.db, { logger: context.logger });
+      const orderRepo = new OrderRepository(context.db, { logger: context.logger });
+
+      const createdOrder = await createOrderUseCase(args.order, {
+        walletService: context.zkopruService,
+        productRepository: productRepo,
+        orderRepository: orderRepo,
+        logger: context.logger,
+      });
+
+      return createdOrder;
     },
   },
   Query: {

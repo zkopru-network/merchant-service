@@ -12,7 +12,7 @@ export class ProductRepository implements IProductRepository {
     this.logger = context.logger;
   }
 
-  private mapDBRowToProduct(dbRow: Tables['products']) {
+  static mapDBRowToProduct(dbRow: Tables['products']) {
     let tokenStandard : TokenStandard;
     if (dbRow.token_standard === TokenStandard.Erc20.toString()) {
       tokenStandard = TokenStandard.Erc20;
@@ -30,11 +30,11 @@ export class ProductRepository implements IProductRepository {
       tokenStandard,
       contractAddress: dbRow.contract_address,
       availableQuantity: dbRow.available_quantity,
-      priceInGwei: dbRow.price_in_gwei,
+      price: dbRow.price,
     });
   }
 
-  private mapProductToDbRow(product: Product) {
+  private static mapProductToDbRow(product: Product) {
     return {
       id: product.id,
       name: product.name,
@@ -44,7 +44,7 @@ export class ProductRepository implements IProductRepository {
       token_standard: product.tokenStandard.toString(),
       contract_address: product.contractAddress,
       available_quantity: product.availableQuantity,
-      price_in_gwei: product.priceInGwei,
+      price: product.price,
     };
   }
 
@@ -55,23 +55,23 @@ export class ProductRepository implements IProductRepository {
       throw new Error(`Cannot find product with id ${id}`);
     }
 
-    return this.mapDBRowToProduct(rows[0]);
+    return ProductRepository.mapDBRowToProduct(rows[0]);
   }
 
   async findProducts() : Promise<Product[]> {
     const rows = await this.db('products').select('*');
-    return rows.map(this.mapDBRowToProduct);
+    return rows.map(ProductRepository.mapDBRowToProduct);
   }
 
   async createProduct(product: Product) {
     await this.db('products').insert(
-      this.mapProductToDbRow(product),
+      ProductRepository.mapProductToDbRow(product),
     );
   }
 
   async updateProduct(product: Product) {
     await this.db('products').update(
-      this.mapProductToDbRow(product),
+      ProductRepository.mapProductToDbRow(product),
     ).where({ id: product.id });
   }
 

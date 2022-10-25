@@ -1,9 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies, import/no-unresolved  */
 
 // Note: Use `yarn link` to resolve below modules
+import axios from 'axios';
 import Zkopru from '@zkopru/client';
 import {
-  ZkAccount, ZkopruNode, ZkopruWallet, ZkTx,
+  ZkAccount, ZkopruNode, ZkopruWallet,
 } from '@zkopru/client/dist/node';
 import BN from 'bn.js';
 import { fromWei, toWei } from 'web3-utils';
@@ -104,5 +105,40 @@ export default class ZkopruService implements IWalletService {
     } else {
       throw new Error('Unknown Token Standard');
     }
+  }
+
+  async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
+    // Generate swap transaction (sell tx)
+    const sellTx = await this.wallet.generateSwapTransaction(
+      order.buyerAddress,
+      order.product.contractAddress,
+      toWei(new BN(order.quantity)).toString(),
+      ZERO_ADDRESS,
+      toWei(new BN(1)).toString(),
+      (+order.fee * (10 ** 9)).toString(), // TODO: Verify fee / weiPerByte calculation
+      params.atomicSwapSalt,
+    );
+
+    // Create shielded transaction and encode it
+    const zkTx = await this.wallet.wallet.shieldTx({ tx: sellTx });
+    const sellerTransaction = zkTx.encode().toString('hex');
+
+    // Send both transactions to the coordinator
+    const coordinatorUrl = await this.wallet.wallet.coordinatorManager.activeCoordinatorUrl();
+    const response = await axios(`${coordinatorUrl}/txs`, {
+      method: 'post',
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: JSON.stringify([order.buyerTransaction, sellerTransaction]),
+    });
+
+    // Revert UTXO status if tx fails
+    if (response.status !== 200) {
+      await this.wallet.wallet.unlockUtxos(sellTx.inflow);
+      throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
+    }
+
+    return sellerTransaction;
   }
 }

@@ -12,7 +12,7 @@ type CreateProductInput = {
   contractAddress: string;
   tokenId?: string;
   availableQuantity: number;
-  priceInGwei: number;
+  price: number;
 };
 
 type Context = {
