@@ -1,0 +1,16 @@
+version: "3"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: helloworld
+      POSTGRES_DB: merchant-service
+      PGDATA: /data/postgres
+    volumes:
+       - ./.postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    command: postgres -c listen_addresses='*'

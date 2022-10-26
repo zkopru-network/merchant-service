@@ -37,15 +37,14 @@ Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purc
 
 - Assets for sale has to be moved to Zkopru network by th merchant.
 - Customer facing app interact with Zkopru network using the browser extension.
-- The service is only support one store at the moment.
+- The service only supports one store at the moment (i.e no multi-tenancy).
 - Only ERC721 and ERC20 tokens are supported.
 
 <br />
 
 ## Domain Terms
 - **Merchant**: Vendor who sells the product.
-- **Product**: Item/asset that is available for sale. All products are tokens in either ERC20 or ERC721 format.
-- **Inventory**: Quantity of a product/asset available for sale. Stored along with the product.
+- **Product**: Item/asset that is available for sale. All products are tokens in either ERC20 or ERC721 format. To keep this simple quantity available (stock/inventory) for sale is also stores as part of the product.
 - **Order**: Transaction corresponding to the purchase of an item.
 
 <br />
