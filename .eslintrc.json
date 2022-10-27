@@ -2,7 +2,8 @@
   "env": {
     "browser": true,
     "es2021": true,
-    "node": true
+    "node": true,
+    "jest/globals": true
   },
   "parser": "@typescript-eslint/parser",
   "extends": [
@@ -15,7 +16,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint"],
+  "plugins": ["react", "@typescript-eslint", "jest"],
   "settings": {
     "import/resolver": {
       "node": {
@@ -48,7 +49,8 @@
     ],
     "jsx-a11y/click-events-have-key-events": [0],
     "no-restricted-syntax": [0],
-    "class-methods-use-this": [0]
+    "class-methods-use-this": [0],
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
   },
   "ignorePatterns": ["**/graphql.d.ts"]
 }

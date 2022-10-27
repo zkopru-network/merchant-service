@@ -1,3 +1,4 @@
+import { ValidationError } from '../common/error';
 import { TokenStandard } from '../common/interfaces';
 
 type IProduct = {
@@ -42,17 +43,17 @@ export default class Product {
 
     if (args.tokenStandard === TokenStandard.Erc721) {
       if (!args.tokenId) {
-        throw new Error('tokenId is required for Erc721 type token.');
+        throw new ValidationError('tokenId is required for Erc721 type token.');
       }
 
-      if (args.availableQuantity > 1) {
-        throw new Error('Erc721 type token cannot have more than one quantity available.');
+      if (args.availableQuantity !== 1) {
+        throw new ValidationError('Erc721 type token cannot have more than one quantity available.');
       }
     }
 
     if (args.tokenStandard === TokenStandard.Erc20) {
       if (args.tokenId) {
-        throw new Error('tokenId should not be found for Erc20 type token.');
+        throw new ValidationError('tokenId should not be found for Erc20 type token.');
       }
     }
 
