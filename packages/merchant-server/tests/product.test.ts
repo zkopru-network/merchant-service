@@ -5,7 +5,7 @@ import { TokenStandard } from '../common/interfaces';
 import Product from '../domain/product';
 
 describe('domain/product', () => {
-  test('should be able to construct a product correctly', () => {
+  test('should be able to construct a Erc20 product successfully', () => {
     const product = new Product({
       id: v4(),
       name: 'MealCoin',
@@ -15,6 +15,22 @@ describe('domain/product', () => {
       contractAddress: '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093',
       availableQuantity: 20,
       price: 0.5,
+    });
+
+    expect(product).toBeInstanceOf(Product);
+  });
+
+  test('should be able to construct a Erc721 product successfully', () => {
+    const product = new Product({
+      id: v4(),
+      name: 'BoredFrens',
+      description: 'Unique NFTs',
+      imageUrl: 'https://ipfs.io/721',
+      tokenStandard: TokenStandard.Erc721,
+      contractAddress: '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093',
+      tokenId: '123',
+      availableQuantity: 1,
+      price: 2,
     });
 
     expect(product).toBeInstanceOf(Product);
