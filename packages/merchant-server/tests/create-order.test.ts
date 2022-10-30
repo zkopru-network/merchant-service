@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/no-extraneous-dependencies */
 import {
-  beforeEach, describe, expect, jest, test,
+  afterEach, beforeEach, describe, expect, jest, test,
 } from '@jest/globals';
 import axios, { AxiosStatic, AxiosResponse } from 'axios';
 import Zkopru from '@zkopru/client';
@@ -22,6 +22,11 @@ import ZkopruService from '../infra/services/zkopru-service';
 import createOrderUseCase from '../use-cases/create-order';
 import { OrderRepository } from '../infra/repositories/order-repository';
 
+// Mocked constants and helpers for all tests
+const mockCoordinatorUrl = 'https://mock-coordinator';
+const merchantPrivateKey = '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1';
+const buyerPrivateKey = '0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773';
+
 // Mock axios
 jest.mock('axios');
 interface AxiosMock extends AxiosStatic {
@@ -29,15 +34,24 @@ interface AxiosMock extends AxiosStatic {
 }
 const mockedAxios = axios as AxiosMock;
 
-// Mocked constants and helpers for all tests
-const mockCoordinatorUrl = 'https://mock-coordinator';
-const merchantPrivateKey = '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1';
-const buyerPrivateKey = '0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773';
+// Mock snark calculation
+jest.mock('@zkopru/zk-wizard/dist/snark', () => ({
+  __esModule: true,
+  genSNARK: async () => ({
+    proof: {
+      pi_a: [Buffer.from('1'), Buffer.from('1')] as object[],
+      pi_b: [[Buffer.from('1'), Buffer.from('1')], [Buffer.from('1'), Buffer.from('1')]] as object[],
+      pi_c: [Buffer.from('1'), Buffer.from('1')] as object[],
+    },
+  }),
+}));
 
 function getMockedZkopru() : ZkopruNode {
   const node = {
     node: {
-      db: {},
+      db: {
+        transaction: () => ({}),
+      },
       layer1: {
         address: 'https://mock',
       },
@@ -47,8 +61,15 @@ function getMockedZkopru() : ZkopruNode {
       layer2: {
         grove: {
           utxoTree: {
-            merkleProof: () => ({}),
+            merkleProof: () => ({
+              siblings: [] as object[],
+              index: Fp.from(0),
+              root: Fp.from(0),
+            }),
           },
+        },
+        snarkVerifier: {
+          verifyTx: async () => true,
         },
       },
       running: true,
@@ -68,11 +89,6 @@ function getMockedZkopruWallet({
 
   // Override activeCoordinatorUrl to return mock url
   wallet.wallet.coordinatorManager.activeCoordinatorUrl = async () => mockCoordinatorUrl;
-
-  // Override shieldTx to prevent actual SNARK calculation
-  wallet.wallet.shieldTx = async ({ tx }: { tx: object }) => ({
-    encode: async () => Buffer.from(JSON.stringify(tx)), // only encode is used by the merchant-server.. return RaxTx
-  }) as unknown as ZkTx;
 
   // Create Utxo with given balances
   const utxo = Utxo.from(new Note(wallet.wallet.account.zkAddress, Fp.from('123'), {
@@ -123,6 +139,10 @@ describe('use-case/create-order', () => {
     expect(Fp).toBeTruthy();
 
     await zkopruService.updateBalance();
+  });
+
+  afterEach(() => {
+    zkopruService.stop();
   });
 
   test('should create an order successfully', async () => {
@@ -199,6 +219,71 @@ describe('use-case/create-order', () => {
       headers: { 'content-type': 'application/json' },
       data: JSON.stringify([buyerTransaction, sellerTransaction]),
     };
-    expect(mockedAxios).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
+    expect(mockedAxiosRequest).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
+  });
+
+  test('should fail creating order if transaction amount is lower', async () => {
+    // Fake wallet state to have enough balance for the token.
+    zkopruService.tokens = {
+      [TokenStandard.Erc20]: {
+        [tokenAddress]: toWei(new BN(10)),
+      },
+      [TokenStandard.Erc721]: {},
+    };
+
+    // Create a product with EC20 token and price as 1 ETH
+    const createdProduct = await createProductUseCase({
+      name: 'FoodToken',
+      description: 'Token exchangeable for a meal',
+      imageUrl: 'https://ethereum.org/food.png',
+      tokenStandard: TokenStandard.Erc20,
+      contractAddress: tokenAddress,
+      availableQuantity: 10,
+      price: 1,
+    }, {
+      productRepository: productRepo,
+      walletService: zkopruService,
+      logger,
+    });
+
+    // Create buyer transaction
+    const buyerWallet = getMockedZkopruWallet({
+      node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10, tokenAddress,
+    });
+    const buyerAddress = buyerWallet.wallet.account.zkAddress.toString();
+    const purchaseQuantity = 3;
+    const atomicSwapSalt = 500; // Random salt
+    const purchasePrice = new BN(createdProduct.price * purchaseQuantity - 1); // Send 1ETH less
+    const buyerTx = await buyerWallet.generateSwapTransaction(
+      zkopruService.wallet.wallet.account.zkAddress.toString(),
+      '0x0000000000000000000000000000000000000000', // Sending eth
+      toWei(purchasePrice).toString(),
+      createdProduct.contractAddress,
+      toWei(new BN(purchaseQuantity)).toString(),
+      (+48000 * (10 ** 9)).toString(), // Coordinator fee
+      atomicSwapSalt,
+    );
+    const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
+    const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
+
+    // Mock call to coordinator URL (axios)
+    mockedAxiosRequest = jest.fn(async () => ({ status: 200 }));
+    mockedAxios.mockImplementation(mockedAxiosRequest);
+
+    await expect(createOrderUseCase({
+      productId: createdProduct.id,
+      quantity: purchaseQuantity,
+      buyerAddress,
+      buyerTransaction: buyerTransactionEncoded,
+      atomicSwapSalt,
+    }, {
+      productRepository: productRepo,
+      orderRepository: orderRepo,
+      walletService: zkopruService,
+      logger,
+    })).rejects.toThrow('Desired swap not found in any the transaction outflow.');
+
+    // Coordinator should not be called
+    expect(mockedAxiosRequest).toBeCalledTimes(0);
   });
 });

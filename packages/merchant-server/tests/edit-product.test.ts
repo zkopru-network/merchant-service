@@ -114,7 +114,7 @@ describe('use-case/edit-product', () => {
       logger,
     });
 
-    expect(() => editProductUseCase({
+    await expect(() => editProductUseCase({
       id: createdProduct.id,
       productData: {
         name: 'HelloToken',

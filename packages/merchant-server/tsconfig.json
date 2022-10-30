@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
-    "typeRoots": ["./types"]
+    "typeRoots": ["./types"],
   },
   "include": ["./**/*"],
 }

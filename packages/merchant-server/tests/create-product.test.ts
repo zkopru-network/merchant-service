@@ -90,7 +90,7 @@ describe('use-case/create-product', () => {
       price: 0.1,
     };
 
-    expect(() => createProductUseCase(productInput, {
+    await expect(() => createProductUseCase(productInput, {
       productRepository: productRepo,
       walletService: zkopruService,
       logger,
@@ -125,7 +125,7 @@ describe('use-case/create-product', () => {
     });
 
     // Create product for same token with different description (balance still available)
-    expect(() => createProductUseCase({
+    await expect(() => createProductUseCase({
       name: 'MealToken ',
       description: 'Exchange this for a meal',
       imageUrl: 'https://ethereum.org/2.png',
@@ -214,7 +214,7 @@ describe('use-case/create-product', () => {
     });
 
     // Create product for same token with different tokenId
-    expect(() => createProductUseCase({
+    await expect(() => createProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',

@@ -6,6 +6,7 @@ import Zkopru from '@zkopru/client';
 import {
   ZkAccount, ZkopruNode, ZkopruWallet,
 } from '@zkopru/client/dist/node';
+import { ZkTx } from '@zkopru/transaction';
 import BN from 'bn.js';
 import { fromWei, toWei } from 'web3-utils';
 import { ILogger, TokenStandard, IWalletService } from '../../common/interfaces';
@@ -38,6 +39,8 @@ export default class ZkopruService implements IWalletService {
 
   tokens: Record<TokenStandard, Record<string, object | object[]>>;
 
+  private timer: NodeJS.Timeout;
+
   constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
     this.accountPrivateKey = params.accountPrivateKey;
     this.zkAccount = new ZkAccount(params.accountPrivateKey);
@@ -69,6 +72,10 @@ export default class ZkopruService implements IWalletService {
     await this.updateBalance();
   }
 
+  stop() {
+    clearTimeout(this.timer);
+  }
+
   async updateBalance() {
     this.logger.debug('Updating Zkopru balances');
 
@@ -79,7 +86,7 @@ export default class ZkopruService implements IWalletService {
       [TokenStandard.Erc20]: spendable.erc20,
     };
 
-    setTimeout(async () => {
+    this.timer = setTimeout(async () => {
       await this.updateBalance();
     }, 10000);
   }
@@ -107,22 +114,29 @@ export default class ZkopruService implements IWalletService {
 
   async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
     // Generate swap transaction (sell tx)
-    const sellTx = await this.wallet.generateSwapTransaction(
+    const merchantTx = await this.wallet.generateSwapTransaction(
       order.buyerAddress,
       order.product.contractAddress,
-      toWei(new BN(1)).toString(),
+      toWei(new BN(order.quantity)).toString(),
       ZERO_ADDRESS,
-      toWei(new BN(1)).toString(),
+      toWei(new BN(order.amount)).toString(),
       (+order.fee * (10 ** 9)).toString(), // TODO: Verify fee / weiPerByte calculation
       params.atomicSwapSalt,
     );
 
     // Create shielded transaction and encode it
-    const zkTx = await this.wallet.wallet.shieldTx({ tx: sellTx });
-    const sellerTransaction = zkTx.encode().toString('hex');
+    const merchantZkTx = await this.wallet.wallet.shieldTx({ tx: merchantTx });
+    const merchantTxEncoded = merchantZkTx.encode().toString('hex');
 
-    // const decodedBuyerTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
-    // console.log(zkTx.swap, decodedBuyerTx.swap);
+    const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
+
+    if (!merchantZkTx.outflow.some((o) => o.note.eq(buyerZkTx.swap))) {
+      throw new Error('Customer desired swap not found in generated merchant tx outflow.');
+    }
+
+    if (!buyerZkTx.outflow.some((o) => o.note.eq(merchantZkTx.swap))) {
+      throw new ValidationError('Desired swap not found in any the transaction outflow.');
+    }
 
     // Send both transactions to the coordinator
     const coordinatorUrl = await this.wallet.wallet.coordinatorManager.activeCoordinatorUrl();
@@ -131,15 +145,15 @@ export default class ZkopruService implements IWalletService {
       headers: {
         'content-type': 'application/json',
       },
-      data: JSON.stringify([order.buyerTransaction, sellerTransaction]),
+      data: JSON.stringify([order.buyerTransaction, merchantTxEncoded]),
     });
 
     // Revert UTXO status if tx fails
     if (response.status !== 200) {
-      await this.wallet.wallet.unlockUtxos(sellTx.inflow);
+      await this.wallet.wallet.unlockUtxos(merchantTx.inflow);
       throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
     }
 
-    return sellerTransaction;
+    return merchantTxEncoded;
   }
 }
