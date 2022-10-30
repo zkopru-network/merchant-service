@@ -1,6 +1,3 @@
-/* eslint-disable no-shadow */
-/* eslint-disable no-unused-vars */
-
 import type { Logger } from 'pino';
 import Product from '../domain/product';
 import Order from '../domain/order';
@@ -8,6 +5,7 @@ import Order from '../domain/order';
 // TODO: Can be changed to a custom type to avoid dependency on pino
 export type ILogger = Logger;
 
+/* eslint-disable no-shadow */
 export enum TokenStandard {
   Erc20 = 'Erc20',
   Erc721 = 'Erc721'

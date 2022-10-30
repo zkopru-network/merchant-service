@@ -10,14 +10,15 @@
     "test-watch": "jest --detectOpenHandles --watch",
     "graphql-codegen": "graphql-codegen --config codegen.yml",
     "migrate": "knex migrate:latest",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "link": "npm link @zkopru/transaction @zkopru/babyjubjub @zkopru/client"
   },
   "dependencies": {
     "@graphql-tools/graphql-file-loader": "^7.5.5",
     "@graphql-tools/load": "^7.7.7",
     "@graphql-tools/schema": "^9.0.4",
     "axios": "^1.1.3",
-    "bn.js": "^5.2.1",
+    "bn.js": "^5.2.0",
     "dotenv": "^16.0.3",
     "fastify": "^4.9.1",
     "graphql": "^16.6.0",

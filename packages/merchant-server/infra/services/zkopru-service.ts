@@ -36,7 +36,7 @@ export default class ZkopruService implements IWalletService {
 
   wallet: ZkopruWallet;
 
-  tokens: Record<TokenStandard, Record<string, BN | BN[]>>;
+  tokens: Record<TokenStandard, Record<string, object | object[]>>;
 
   constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
     this.accountPrivateKey = params.accountPrivateKey;
@@ -110,7 +110,7 @@ export default class ZkopruService implements IWalletService {
     const sellTx = await this.wallet.generateSwapTransaction(
       order.buyerAddress,
       order.product.contractAddress,
-      toWei(new BN(order.quantity)).toString(),
+      toWei(new BN(1)).toString(),
       ZERO_ADDRESS,
       toWei(new BN(1)).toString(),
       (+order.fee * (10 ** 9)).toString(), // TODO: Verify fee / weiPerByte calculation
@@ -120,6 +120,9 @@ export default class ZkopruService implements IWalletService {
     // Create shielded transaction and encode it
     const zkTx = await this.wallet.wallet.shieldTx({ tx: sellTx });
     const sellerTransaction = zkTx.encode().toString('hex');
+
+    // const decodedBuyerTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
+    // console.log(zkTx.swap, decodedBuyerTx.swap);
 
     // Send both transactions to the coordinator
     const coordinatorUrl = await this.wallet.wallet.coordinatorManager.activeCoordinatorUrl();

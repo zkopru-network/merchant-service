@@ -35,7 +35,7 @@ describe('use-case/edit-product', () => {
   });
 
   test('should be able to edit successfully', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
@@ -87,7 +87,7 @@ describe('use-case/edit-product', () => {
   });
 
   test('should throw error when edited quantity is not available in wallet', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.

@@ -35,7 +35,7 @@ describe('use-case/create-product', () => {
   });
 
   test('should set id for product and save successfully', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
@@ -69,7 +69,7 @@ describe('use-case/create-product', () => {
   });
 
   test('should throw validation error when wallet balance is low', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
@@ -98,7 +98,7 @@ describe('use-case/create-product', () => {
   });
 
   test('should throw error when there exist a product for same Erc20 token', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
@@ -141,7 +141,7 @@ describe('use-case/create-product', () => {
   });
 
   test('should be able to create multiple products for same Erc721 contract with different tokenId', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xd12Ffa318051d8aF4E5f2E2732d7049486fcE012';
 
     // Fake wallet state to have enough balance for the token.
@@ -186,7 +186,7 @@ describe('use-case/create-product', () => {
   });
 
   test('should throw error when creating multiple products for same Erc721 contract with same tokenId', async () => {
-    // Set a dummy contract address for out token
+    // Set a dummy contract address for the token
     const tokenAddress = '0xd12Ffa318051d8aF4E5f2E2732d7049486fcE012';
 
     // Fake wallet state to have enough balance for the token.
