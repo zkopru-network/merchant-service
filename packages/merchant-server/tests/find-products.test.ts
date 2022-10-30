@@ -10,8 +10,6 @@ import createProductUseCase from '../use-cases/create-product';
 import { IProductRepository, ILogger, TokenStandard } from '../common/interfaces';
 import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
-import editProductUseCase from '../use-cases/edit-product';
-import { ValidationError } from '../common/error';
 import findProductsUseCase from '../use-cases/find-products';
 
 describe('use-case/find-products', () => {

@@ -6,7 +6,7 @@ import {
 import axios, { AxiosStatic, AxiosResponse } from 'axios';
 import Zkopru from '@zkopru/client';
 import { ZkopruNode } from '@zkopru/client/dist/node';
-import { Note, ZkTx, Utxo } from '@zkopru/transaction';
+import { Note, Utxo } from '@zkopru/transaction';
 import { Fp } from '@zkopru/babyjubjub';
 import { newDb as pgMem } from 'pg-mem';
 import BN from 'bn.js';
@@ -112,7 +112,7 @@ describe('use-case/create-order', () => {
   let orderRepo: IOrderRepository;
   let logger: ILogger;
   let zkopruService: ZkopruService;
-  let mockedAxiosRequest: jest.MockedFunction<() => any>;
+  let mockedAxiosRequest: jest.MockedFunction<() => object>;
   const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
   beforeEach(async () => {
