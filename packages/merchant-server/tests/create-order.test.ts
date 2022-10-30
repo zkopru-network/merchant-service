@@ -1,6 +1,5 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable max-len */
 import {
   beforeEach, describe, expect, jest, test,
 } from '@jest/globals';
@@ -10,7 +9,7 @@ import { ZkopruNode } from '@zkopru/client/dist/node';
 import { Note, ZkTx, Utxo } from '@zkopru/transaction';
 import { Fp } from '@zkopru/babyjubjub';
 import { newDb as pgMem } from 'pg-mem';
-import { BN } from 'bn.js';
+import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { seed } from '../infra/db-migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';

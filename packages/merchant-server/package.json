@@ -1,5 +1,5 @@
 {
-  "name": "merchant-server",
+  "name": "@zkopru-merchant-service/server",
   "version": "0.1.0",
   "description": "",
   "scripts": {
@@ -11,7 +11,7 @@
     "graphql-codegen": "graphql-codegen --config codegen.yml",
     "migrate": "knex migrate:latest",
     "seed": "knex seed:run",
-    "link": "npm link @zkopru/transaction @zkopru/babyjubjub @zkopru/client"
+    "link-modules": "yarn link @zkopru/transaction @zkopru/babyjubjub @zkopru/client"
   },
   "dependencies": {
     "@graphql-tools/graphql-file-loader": "^7.5.5",
