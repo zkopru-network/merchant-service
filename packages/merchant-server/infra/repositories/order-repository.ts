@@ -62,7 +62,8 @@ export class OrderRepository implements IOrderRepository {
         if (filters.status) {
           qb.where('orders.status', filters.status.toString());
         }
-      });
+      })
+      .select('*', 'orders.id');
 
     return rows.map(this.mapDBRowToOrder);
   }
