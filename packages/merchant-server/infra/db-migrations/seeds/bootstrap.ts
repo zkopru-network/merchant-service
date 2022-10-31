@@ -23,6 +23,7 @@ export async function seed(knex: Knex) {
       table.string('buyer_address', 255).nullable();
       table.string('buyer_transaction', 5000).nullable();
       table.string('seller_transaction', 5000).nullable();
+      table.string('status', 100);
       table.float('fee').notNullable();
     });
 }

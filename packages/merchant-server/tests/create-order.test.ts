@@ -21,6 +21,7 @@ import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
 import createOrderUseCase from '../use-cases/create-order';
 import { OrderRepository } from '../infra/repositories/order-repository';
+import { OrderStatus } from '../domain/order';
 
 // Mocked constants and helpers for all tests
 const mockCoordinatorUrl = 'https://mock-coordinator';
@@ -46,11 +47,11 @@ jest.mock('@zkopru/zk-wizard/dist/snark', () => ({
   }),
 }));
 
-function getMockedZkopru() : ZkopruNode {
+async function getMockedZkopru() : Promise<ZkopruNode> {
   const node = {
     node: {
       db: {
-        transaction: () => ({}),
+        transaction: async () => ({}),
       },
       layer1: {
         address: 'https://mock',
@@ -112,7 +113,7 @@ describe('use-case/create-order', () => {
   let orderRepo: IOrderRepository;
   let logger: ILogger;
   let zkopruService: ZkopruService;
-  let mockedAxiosRequest: jest.MockedFunction<() => object>;
+  let mockedCoordinatorAPI: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
   const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
   beforeEach(async () => {
@@ -131,10 +132,12 @@ describe('use-case/create-order', () => {
       logger,
     });
 
-    zkopruService.node = getMockedZkopru();
+    zkopruService.node = await getMockedZkopru();
     zkopruService.wallet = getMockedZkopruWallet({
       node: zkopruService.node, privateKey: merchantPrivateKey, ethBalance: 0.1, erc20Balance: 10, tokenAddress,
     });
+
+    zkopruService.balanceUpdateInterval = 500; // Reduce interval to have quick updates based on mock values
 
     expect(Fp).toBeTruthy();
 
@@ -146,14 +149,6 @@ describe('use-case/create-order', () => {
   });
 
   test('should create an order successfully', async () => {
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
-
     // Create a product with EC20 token and price as 1 ETH
     const createdProduct = await createProductUseCase({
       name: 'FoodToken',
@@ -189,8 +184,8 @@ describe('use-case/create-order', () => {
     const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
 
     // Mock call to coordinator URL (axios)
-    mockedAxiosRequest = jest.fn(async () => ({ status: 200 }));
-    mockedAxios.mockImplementation(mockedAxiosRequest);
+    mockedCoordinatorAPI = jest.fn(async () => ({ status: 200 }));
+    mockedAxios.mockImplementation(mockedCoordinatorAPI);
 
     const createdOrder = await createOrderUseCase({
       productId: createdProduct.id,
@@ -217,20 +212,12 @@ describe('use-case/create-order', () => {
     const expectedCall = {
       method: 'post',
       headers: { 'content-type': 'application/json' },
-      data: JSON.stringify([buyerTransaction, sellerTransaction]),
+      data: JSON.stringify([sellerTransaction, buyerTransaction]),
     };
-    expect(mockedAxiosRequest).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
+    expect(mockedCoordinatorAPI).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
   });
 
   test('should fail creating order if transaction amount is lower', async () => {
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
-
     // Create a product with EC20 token and price as 1 ETH
     const createdProduct = await createProductUseCase({
       name: 'FoodToken',
@@ -267,9 +254,10 @@ describe('use-case/create-order', () => {
     const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
 
     // Mock call to coordinator URL (axios)
-    mockedAxiosRequest = jest.fn(async () => ({ status: 200 }));
-    mockedAxios.mockImplementation(mockedAxiosRequest);
+    mockedCoordinatorAPI = jest.fn(async () => ({ status: 200 }));
+    mockedAxios.mockImplementation(mockedCoordinatorAPI);
 
+    // Swap will not match is the price is different
     await expect(createOrderUseCase({
       productId: createdProduct.id,
       quantity: purchaseQuantity,
@@ -284,6 +272,75 @@ describe('use-case/create-order', () => {
     })).rejects.toThrow('Desired swap not found in any the transaction outflow.');
 
     // Coordinator should not be called
-    expect(mockedAxiosRequest).toBeCalledTimes(0);
+    expect(mockedCoordinatorAPI).toBeCalledTimes(0);
   });
+
+  test('should update order status when transaction is confirmed/finalized on chain', async () => {
+    // Create a product with EC20 token and price as 1 ETH
+    const createdProduct = await createProductUseCase({
+      name: 'FoodToken',
+      description: 'Token exchangeable for a meal',
+      imageUrl: 'https://ethereum.org/food.png',
+      tokenStandard: TokenStandard.Erc20,
+      contractAddress: tokenAddress,
+      availableQuantity: 10,
+      price: 1,
+    }, {
+      productRepository: productRepo,
+      walletService: zkopruService,
+      logger,
+    });
+
+    // Create buyer transaction
+    const buyerWallet = getMockedZkopruWallet({
+      node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10, tokenAddress,
+    });
+    const buyerAddress = buyerWallet.wallet.account.zkAddress.toString();
+    const purchaseQuantity = 3;
+    const atomicSwapSalt = 500; // Random salt
+    const buyerTx = await buyerWallet.generateSwapTransaction(
+      zkopruService.wallet.wallet.account.zkAddress.toString(),
+      '0x0000000000000000000000000000000000000000', // Sending eth
+      toWei(new BN(createdProduct.price).mul(new BN(purchaseQuantity))).toString(),
+      createdProduct.contractAddress,
+      toWei(new BN(purchaseQuantity)).toString(),
+      (+48000 * (10 ** 9)).toString(), // Coordinator fee
+      atomicSwapSalt,
+    );
+    const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
+    const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
+
+    // Mock call to coordinator URL (axios)
+    mockedCoordinatorAPI = jest.fn(async () => {
+      // Override and return customer's transaction.
+      // This would normally happen when coordinator produce a block that include the transactions
+      zkopruService.wallet.transactionsFor = async () => ({
+        pending: [],
+        history: [{ hash: buyerZkTx.hash().toString(), type: 'Receive' }],
+      });
+
+      return { status: 200 };
+    });
+    mockedAxios.mockImplementation(mockedCoordinatorAPI);
+
+    const createdOrder = await createOrderUseCase({
+      productId: createdProduct.id,
+      quantity: purchaseQuantity,
+      buyerAddress,
+      buyerTransaction: buyerTransactionEncoded,
+      atomicSwapSalt,
+    }, {
+      productRepository: productRepo,
+      orderRepository: orderRepo,
+      walletService: zkopruService,
+      logger,
+    });
+
+    expect(typeof createdOrder.id).toBe('string');
+
+    // Wait for the balance update checker
+    await new Promise((r) => { setTimeout(r, 3000); });
+
+    expect(createdOrder.status).toBe(OrderStatus.Completed);
+  }, 10 * 1000);
 });

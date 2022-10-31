@@ -22,6 +22,7 @@ declare module 'knex' {
       'buyer_transaction': string
       'seller_transaction': string
       'fee': number
+      'status': string
     }
   }
 }

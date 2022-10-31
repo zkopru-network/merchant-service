@@ -39,9 +39,16 @@ export default class ZkopruService implements IWalletService {
 
   tokens: Record<TokenStandard, Record<string, object | object[]>>;
 
+  balanceUpdateInterval : number;
+
   private timer: NodeJS.Timeout;
 
+  // transaction-hash/callback pair to listen for
+  private transactionListeners: Record<string, () => void>;
+
   constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
+    this.logger = context.logger;
+
     this.accountPrivateKey = params.accountPrivateKey;
     this.zkAccount = new ZkAccount(params.accountPrivateKey);
 
@@ -57,17 +64,22 @@ export default class ZkopruService implements IWalletService {
       [TokenStandard.Erc721]: {},
     };
 
-    this.logger = context.logger;
+    this.transactionListeners = {};
+
+    this.balanceUpdateInterval = 10 * 1000;
   }
 
   async start() {
-    this.logger.info('Starting Zkopru Node');
-
     await this.node.initNode();
 
     this.wallet = new Zkopru.Wallet(this.node, this.accountPrivateKey);
 
     await this.node.start();
+
+    this.logger.info({
+      ethAddress: this.wallet.wallet.account.ethAddress,
+      l2Address: this.wallet.wallet.account.zkAddress.toString(),
+    }, 'Started Zkopru Node');
 
     await this.updateBalance();
   }
@@ -77,18 +89,33 @@ export default class ZkopruService implements IWalletService {
   }
 
   async updateBalance() {
-    this.logger.debug('Updating Zkopru balances');
-
+    this.logger.debug('Updating wallet balances');
     const spendable = await this.wallet.wallet.getSpendableAmount();
 
     this.tokens = {
       [TokenStandard.Erc721]: spendable.erc721,
       [TokenStandard.Erc20]: spendable.erc20,
     };
+    this.logger.debug(this.tokens, 'Wallet balance');
+
+    if (Object.keys(this.transactionListeners).length > 0) {
+      this.logger.debug('Scanning for listened transactions');
+      const { history } = await this.wallet.transactionsFor(this.wallet.wallet.account.zkAddress.toString(), this.wallet.wallet.account.ethAddress);
+
+      const receivedTransactions = history.filter((t) => t.type === 'Receive');
+
+      for (const tx of receivedTransactions) {
+        if (this.transactionListeners[tx.hash]) {
+          // eslint-disable-next-line no-await-in-loop
+          await this.transactionListeners[tx.hash]();
+          delete this.transactionListeners[tx.hash];
+        }
+      }
+    }
 
     this.timer = setTimeout(async () => {
       await this.updateBalance();
-    }, 10000);
+    }, this.balanceUpdateInterval);
   }
 
   async ensureProductAvailability(product: Product, quantity: number) {
@@ -112,7 +139,7 @@ export default class ZkopruService implements IWalletService {
     }
   }
 
-  async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
+  async executeOrder(order: Order, params: { atomicSwapSalt: string }, confirmTransactionCallback?: () => void) {
     // Generate swap transaction (sell tx)
     const merchantTx = await this.wallet.generateSwapTransaction(
       order.buyerAddress,
@@ -124,36 +151,48 @@ export default class ZkopruService implements IWalletService {
       params.atomicSwapSalt,
     );
 
-    // Create shielded transaction and encode it
-    const merchantZkTx = await this.wallet.wallet.shieldTx({ tx: merchantTx });
-    const merchantTxEncoded = merchantZkTx.encode().toString('hex');
+    try {
+      // Create shielded transaction and encode it
+      const merchantZkTx = await this.wallet.wallet.shieldTx({ tx: merchantTx });
+      const merchantTxEncoded = merchantZkTx.encode().toString('hex');
 
-    const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
+      const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
 
-    if (!merchantZkTx.outflow.some((o) => o.note.eq(buyerZkTx.swap))) {
-      throw new Error('Customer desired swap not found in generated merchant tx outflow.');
-    }
+      this.logger.debug({ buyerZkTx, merchantTx }, 'Swap transactions');
 
-    if (!buyerZkTx.outflow.some((o) => o.note.eq(merchantZkTx.swap))) {
-      throw new ValidationError('Desired swap not found in any the transaction outflow.');
-    }
+      if (!merchantZkTx.outflow.some((o) => o.note.eq(buyerZkTx.swap))) {
+        throw new Error('Customer desired swap not found in generated merchant tx outflow.');
+      }
 
-    // Send both transactions to the coordinator
-    const coordinatorUrl = await this.wallet.wallet.coordinatorManager.activeCoordinatorUrl();
-    const response = await axios(`${coordinatorUrl}/txs`, {
-      method: 'post',
-      headers: {
-        'content-type': 'application/json',
-      },
-      data: JSON.stringify([order.buyerTransaction, merchantTxEncoded]),
-    });
+      if (!buyerZkTx.outflow.some((o) => o.note.eq(merchantZkTx.swap))) {
+        throw new ValidationError('Desired swap not found in any the transaction outflow.');
+      }
 
-    // Revert UTXO status if tx fails
-    if (response.status !== 200) {
+      // Send both transactions to the coordinator
+      const coordinatorUrl = await this.wallet.wallet.coordinatorManager.activeCoordinatorUrl();
+      const response = await axios(`${coordinatorUrl}/txs`, {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json',
+        },
+        data: JSON.stringify([merchantTxEncoded, order.buyerTransaction]),
+      });
+
+      // Revert UTXO status if tx fails
+      if (response.status !== 200) {
+        throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
+      }
+
+      if (confirmTransactionCallback) {
+        const txHash = buyerZkTx.hash().toString();
+        this.logger.debug(`Adding transaction for order ${order.id} to listener - ${txHash}`);
+        this.transactionListeners[txHash] = confirmTransactionCallback;
+      }
+
+      return merchantTxEncoded;
+    } catch (error) {
       await this.wallet.wallet.unlockUtxos(merchantTx.inflow);
-      throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
+      throw error;
     }
-
-    return merchantTxEncoded;
   }
 }

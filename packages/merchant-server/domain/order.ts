@@ -1,5 +1,10 @@
 import Product from './product';
 
+export enum OrderStatus {
+  Pending = 'Pending',
+  Completed = 'Completed'
+}
+
 type IOrder = {
   id: string;
   product: Product;
@@ -9,6 +14,7 @@ type IOrder = {
   sellerTransaction?: string;
   fee: number;
   amount: number;
+  status: OrderStatus;
 }
 
 export default class Order {
@@ -35,6 +41,8 @@ export default class Order {
   // Transaction fee for the seller transaction
   fee: number;
 
+  status: OrderStatus;
+
   constructor(args: IOrder) {
     this.id = args.id;
     this.product = args.product;
@@ -44,5 +52,10 @@ export default class Order {
     this.sellerTransaction = args.sellerTransaction;
     this.fee = args.fee;
     this.amount = args.amount;
+    this.status = args.status;
+  }
+
+  setStatus(newStatus: OrderStatus) {
+    this.status = newStatus;
   }
 }

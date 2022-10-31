@@ -42,6 +42,7 @@ type Order {
   buyerTransaction: String
   sellerTransaction: String
   amount: Float
+  status: String
 }
 
 input CreateOrderInput {

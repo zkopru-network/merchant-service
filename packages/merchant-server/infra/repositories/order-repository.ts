@@ -1,6 +1,6 @@
 import type { Knex, Tables } from 'knex';
 import { IOrderRepository, ILogger } from '../../common/interfaces';
-import Order from '../../domain/order';
+import Order, { OrderStatus } from '../../domain/order';
 import { ProductRepository } from './product-repository';
 
 export class OrderRepository implements IOrderRepository {
@@ -23,6 +23,7 @@ export class OrderRepository implements IOrderRepository {
       buyerTransaction: dbRow.buyer_transaction,
       sellerTransaction: dbRow.seller_transaction,
       fee: dbRow.fee,
+      status: dbRow.status === 'Completed' ? OrderStatus.Completed : OrderStatus.Pending,
     });
   }
 
@@ -36,6 +37,7 @@ export class OrderRepository implements IOrderRepository {
       buyer_transaction: order.buyerTransaction,
       seller_transaction: order.sellerTransaction,
       fee: order.fee,
+      status: order.status.toString(),
     };
   }
 

@@ -15,7 +15,7 @@ export enum TokenStandard {
 export interface IWalletService {
   start: () => void;
   ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
-  executeOrder: (order: Order, params: object) => Promise<string>;
+  executeOrder: (order: Order, params: object, confirmTransactionCallback? : () => Promise<void>) => Promise<string>;
 }
 
 export interface IProductRepository {
