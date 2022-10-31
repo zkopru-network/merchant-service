@@ -6,6 +6,8 @@ import { ProductRepository } from './repositories/product-repository';
 import editProductUseCase from '../use-cases/edit-product';
 import { OrderRepository } from './repositories/order-repository';
 import createOrderUseCase from '../use-cases/create-order';
+import findOrdersUseCase from '../use-cases/find-orders';
+import getOrderUseCase from '../use-cases/get-order';
 
 const resolvers : Resolvers<MercuriusContext> = {
   Mutation: {
@@ -55,6 +57,26 @@ const resolvers : Resolvers<MercuriusContext> = {
       });
 
       return products;
+    },
+    async findOrders(_, args, context) {
+      const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
+
+      const orders = await findOrdersUseCase({ status: args.status }, {
+        orderRepository: ordersRepo,
+        logger: context.logger,
+      });
+
+      return orders;
+    },
+    async getOrder(_, args, context) {
+      const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
+
+      const order = await getOrderUseCase(args.id, {
+        orderRepository: ordersRepo,
+        logger: context.logger,
+      });
+
+      return order;
     },
   },
 };

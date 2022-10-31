@@ -61,8 +61,13 @@ export type Order = {
   product?: Maybe<Product>;
   quantity?: Maybe<Scalars['Float']>;
   sellerTransaction?: Maybe<Scalars['String']>;
-  status?: Maybe<Scalars['String']>;
+  status?: Maybe<OrderStatus>;
 };
+
+export enum OrderStatus {
+  Complete = 'Complete',
+  Pending = 'Pending'
+}
 
 export type Product = {
   __typename?: 'Product';
@@ -90,7 +95,19 @@ export type ProductInput = {
 
 export type Query = {
   __typename?: 'Query';
+  findOrders?: Maybe<Array<Maybe<Order>>>;
   findProducts?: Maybe<Array<Maybe<Product>>>;
+  getOrder?: Maybe<Order>;
+};
+
+
+export type QueryFindOrdersArgs = {
+  status?: InputMaybe<OrderStatus>;
+};
+
+
+export type QueryGetOrderArgs = {
+  id?: InputMaybe<Scalars['String']>;
 };
 
 export enum TokenStandard {
@@ -174,6 +191,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   Order: ResolverTypeWrapper<Order>;
+  OrderStatus: OrderStatus;
   Product: ResolverTypeWrapper<Product>;
   ProductInput: ProductInput;
   Query: ResolverTypeWrapper<{}>;
@@ -210,7 +228,7 @@ export type OrderResolvers<ContextType = any, ParentType extends ResolversParent
   product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType>;
   quantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   sellerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['OrderStatus']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -228,7 +246,9 @@ export type ProductResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  findOrders?: Resolver<Maybe<Array<Maybe<ResolversTypes['Order']>>>, ParentType, ContextType, Partial<QueryFindOrdersArgs>>;
   findProducts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Product']>>>, ParentType, ContextType>;
+  getOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, Partial<QueryGetOrderArgs>>;
 };
 
 export type Resolvers<ContextType = any> = {

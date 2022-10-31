@@ -26,8 +26,8 @@ const zkopruService = new ZkopruService({
 });
 
 // Start ZKopru client when server starts
-app.addHook('onReady', () => {
-  zkopruService.start();
+app.addHook('onReady', async () => {
+  await zkopruService.start();
 
   // Execute updateExistingOrderStatusUseCase periodically
   async function updateOrderStatus() {
