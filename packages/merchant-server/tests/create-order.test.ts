@@ -22,6 +22,8 @@ import ZkopruService from '../infra/services/zkopru-service';
 import createOrderUseCase from '../use-cases/create-order';
 import { OrderRepository } from '../infra/repositories/order-repository';
 import { OrderStatus } from '../domain/order';
+import updateExistingOrderStatusUseCase from '../use-cases/update-existing-order-status';
+import getOrderUseCase from '../use-cases/get-order';
 
 // Mocked constants and helpers for all tests
 const mockCoordinatorUrl = 'https://mock-coordinator';
@@ -52,6 +54,7 @@ async function getMockedZkopru() : Promise<ZkopruNode> {
     node: {
       db: {
         transaction: async () => ({}),
+        update: async () => ({}),
       },
       layer1: {
         address: 'https://mock',
@@ -337,10 +340,22 @@ describe('use-case/create-order', () => {
     });
 
     expect(typeof createdOrder.id).toBe('string');
+    expect(createdOrder.status).toBe(OrderStatus.Pending);
 
-    // Wait for the balance update checker
-    await new Promise((r) => { setTimeout(r, 3000); });
+    // This would be executed periodically by the server
+    // Trigger manual call now for testing
+    await updateExistingOrderStatusUseCase({
+      logger,
+      orderRepository: orderRepo,
+      walletService: zkopruService,
+    });
 
-    expect(createdOrder.status).toBe(OrderStatus.Completed);
+    // Get updated order
+    const updatedOrder = await getOrderUseCase(createdOrder.id, {
+      logger,
+      orderRepository: orderRepo,
+    });
+
+    expect(updatedOrder.status).toBe(OrderStatus.Complete);
   }, 10 * 1000);
 });

@@ -33,13 +33,13 @@ describe('use-case/find-products', () => {
     });
   });
 
-  test('should be able to edit successfully', async () => {
+  test('should be able to fetch list of products successfully', async () => {
     // Set a dummy contract address for the token
     const tokenAddressErc20 = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
     const tokenAddressErc721 = '0x122Ffa318051d8aF4E5f2E2732d7049486fcE022';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
+    zkopruService.balances = {
       [TokenStandard.Erc20]: {
         [tokenAddressErc20]: toWei(new BN(400)),
       },

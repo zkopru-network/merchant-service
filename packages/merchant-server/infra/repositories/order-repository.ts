@@ -14,6 +14,10 @@ export class OrderRepository implements IOrderRepository {
   }
 
   private mapDBRowToOrder(dbRow: Tables['orders'] & Tables['products']) {
+    let status;
+    if (dbRow.status === 'Complete') { status = OrderStatus.Complete; }
+    if (dbRow.status === 'Pending') { status = OrderStatus.Pending; }
+
     return new Order({
       id: dbRow.id,
       product: ProductRepository.mapDBRowToProduct({ ...dbRow, id: dbRow.product_id }),
@@ -23,7 +27,7 @@ export class OrderRepository implements IOrderRepository {
       buyerTransaction: dbRow.buyer_transaction,
       sellerTransaction: dbRow.seller_transaction,
       fee: dbRow.fee,
-      status: dbRow.status === 'Completed' ? OrderStatus.Completed : OrderStatus.Pending,
+      status,
     });
   }
 
@@ -51,10 +55,15 @@ export class OrderRepository implements IOrderRepository {
     return this.mapDBRowToOrder(rows[0]);
   }
 
-  async findOrders() : Promise<Order[]> {
+  async findOrders(filters: { status: OrderStatus }) : Promise<Order[]> {
     const rows = await this.db.from('orders')
-      .innerJoin('products', 'order.product_id', 'products.id')
-      .select('*');
+      .innerJoin('products', 'orders.product_id', 'products.id')
+      .modify((qb) => {
+        if (filters.status) {
+          qb.where('orders.status', filters.status.toString());
+        }
+      });
+
     return rows.map(this.mapDBRowToOrder);
   }
 

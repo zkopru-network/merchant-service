@@ -9,7 +9,9 @@ import {
 import { ZkTx } from '@zkopru/transaction';
 import BN from 'bn.js';
 import { fromWei, toWei } from 'web3-utils';
-import { ILogger, TokenStandard, IWalletService } from '../../common/interfaces';
+import {
+  ILogger, TokenStandard, IWalletService,
+} from '../../common/interfaces';
 import Order from '../../domain/order';
 import Product from '../../domain/product';
 import { ValidationError } from '../../common/error';
@@ -25,8 +27,10 @@ type L2ServiceConstructor = {
 export default class ZkopruService implements IWalletService {
   logger: ILogger;
 
+  // URL for ETH node RPC (websocket)
   websocketUrl: string;
 
+  // Zkopru contract address on L1
   contractAddress: string;
 
   private accountPrivateKey: string;
@@ -37,8 +41,10 @@ export default class ZkopruService implements IWalletService {
 
   wallet: ZkopruWallet;
 
-  tokens: Record<TokenStandard, Record<string, object | object[]>>;
+  // Local state for storing token balances on L2
+  balances: Record<TokenStandard, Record<string, object | object[]>>;
 
+  // Interval to refresh L2 balance in ms
   balanceUpdateInterval : number;
 
   private timer: NodeJS.Timeout;
@@ -59,13 +65,12 @@ export default class ZkopruService implements IWalletService {
       databaseName: 'zkopru.db',
     });
 
-    this.tokens = {
+    this.balances = {
       [TokenStandard.Erc20]: {},
       [TokenStandard.Erc721]: {},
     };
 
     this.transactionListeners = {};
-
     this.balanceUpdateInterval = 10 * 1000;
   }
 
@@ -92,26 +97,11 @@ export default class ZkopruService implements IWalletService {
     this.logger.debug('Updating wallet balances');
     const spendable = await this.wallet.wallet.getSpendableAmount();
 
-    this.tokens = {
+    this.balances = {
       [TokenStandard.Erc721]: spendable.erc721,
       [TokenStandard.Erc20]: spendable.erc20,
     };
-    this.logger.debug(this.tokens, 'Wallet balance');
-
-    if (Object.keys(this.transactionListeners).length > 0) {
-      this.logger.debug('Scanning for listened transactions');
-      const { history } = await this.wallet.transactionsFor(this.wallet.wallet.account.zkAddress.toString(), this.wallet.wallet.account.ethAddress);
-
-      const receivedTransactions = history.filter((t) => t.type === 'Receive');
-
-      for (const tx of receivedTransactions) {
-        if (this.transactionListeners[tx.hash]) {
-          // eslint-disable-next-line no-await-in-loop
-          await this.transactionListeners[tx.hash]();
-          delete this.transactionListeners[tx.hash];
-        }
-      }
-    }
+    this.logger.debug(this.balances, 'Wallet balance');
 
     this.timer = setTimeout(async () => {
       await this.updateBalance();
@@ -120,7 +110,7 @@ export default class ZkopruService implements IWalletService {
 
   async ensureProductAvailability(product: Product, quantity: number) {
     if (product.tokenStandard === TokenStandard.Erc20) {
-      const available = this.tokens[product.tokenStandard][product.contractAddress] as BN;
+      const available = this.balances[product.tokenStandard][product.contractAddress] as BN;
       const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
 
       if (!available || requiredQuantity.gt(available)) {
@@ -129,7 +119,7 @@ export default class ZkopruService implements IWalletService {
         );
       }
     } else if (product.tokenStandard === TokenStandard.Erc721) {
-      const availableTokens = this.tokens[product.tokenStandard][product.contractAddress] as BN[] || [];
+      const availableTokens = this.balances[product.tokenStandard][product.contractAddress] as BN[] || [];
       const isAvailable = (availableTokens as BN[] || []).some((el) => el.eq(new BN(product.tokenId)));
       if (!isAvailable) {
         throw new ValidationError(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
@@ -139,7 +129,7 @@ export default class ZkopruService implements IWalletService {
     }
   }
 
-  async executeOrder(order: Order, params: { atomicSwapSalt: string }, confirmTransactionCallback?: () => void) {
+  async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
     // Generate swap transaction (sell tx)
     const merchantTx = await this.wallet.generateSwapTransaction(
       order.buyerAddress,
@@ -183,16 +173,26 @@ export default class ZkopruService implements IWalletService {
         throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
       }
 
-      if (confirmTransactionCallback) {
-        const txHash = buyerZkTx.hash().toString();
-        this.logger.debug(`Adding transaction for order ${order.id} to listener - ${txHash}`);
-        this.transactionListeners[txHash] = confirmTransactionCallback;
-      }
-
       return merchantTxEncoded;
     } catch (error) {
       await this.wallet.wallet.unlockUtxos(merchantTx.inflow);
       throw error;
     }
+  }
+
+  async filterConfirmedOrders(orders: Order[]) : Promise<Order[]> {
+    const { history } = await this.wallet.transactionsFor(this.wallet.wallet.account.zkAddress.toString(), this.wallet.wallet.account.ethAddress);
+
+    const receivedTransactions = history.filter((t) => t.type === 'Receive');
+
+    const confirmedOrders = orders.filter((order) => {
+      // Decode buyer transaction and calculate hash
+      const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
+      const hash = buyerZkTx.hash().toString();
+
+      return receivedTransactions.some((t) => t.hash === hash);
+    });
+
+    return confirmedOrders;
   }
 }

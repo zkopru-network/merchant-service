@@ -39,7 +39,7 @@ describe('use-case/create-product', () => {
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
+    zkopruService.balances = {
       [TokenStandard.Erc20]: {
         [tokenAddress]: toWei(new BN(10)),
       },
@@ -73,7 +73,7 @@ describe('use-case/create-product', () => {
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
+    zkopruService.balances = {
       [TokenStandard.Erc20]: {
         [tokenAddress]: toWei(new BN(10)),
       },
@@ -102,7 +102,7 @@ describe('use-case/create-product', () => {
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
+    zkopruService.balances = {
       [TokenStandard.Erc20]: {
         [tokenAddress]: toWei(new BN(10)),
       },
@@ -145,7 +145,7 @@ describe('use-case/create-product', () => {
     const tokenAddress = '0xd12Ffa318051d8aF4E5f2E2732d7049486fcE012';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
+    zkopruService.balances = {
       [TokenStandard.Erc20]: {},
       [TokenStandard.Erc721]: {
         [tokenAddress]: [new BN('10'), new BN('5'), new BN('15')],
@@ -190,7 +190,7 @@ describe('use-case/create-product', () => {
     const tokenAddress = '0xd12Ffa318051d8aF4E5f2E2732d7049486fcE012';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.tokens = {
+    zkopruService.balances = {
       [TokenStandard.Erc20]: {},
       [TokenStandard.Erc721]: {
         [tokenAddress]: [new BN('10'), new BN('5'), new BN('15')],

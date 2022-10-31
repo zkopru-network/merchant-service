@@ -37,15 +37,8 @@ export default async function createOrderUseCase(orderInput: CreateOrderInput, c
   // Ensure the token/quantity is available in the wallet
   await context.walletService.ensureProductAvailability(product, orderInput.quantity);
 
-  // Update order status if the transaction is confirmed on chain
-  async function onConfirmTransaction() {
-    context.logger.info(`Updating order status to Completed for order ${order.id}`);
-    order.setStatus(OrderStatus.Completed);
-    await context.orderRepository.updateOrder(order);
-  }
-
   // Create swap transaction and broadcast to blockchain
-  const sellerTransaction = await context.walletService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt }, onConfirmTransaction);
+  const sellerTransaction = await context.walletService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt });
   order.sellerTransaction = sellerTransaction;
 
   // Persist in DB

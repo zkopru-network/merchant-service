@@ -2,7 +2,7 @@ import Product from './product';
 
 export enum OrderStatus {
   Pending = 'Pending',
-  Completed = 'Completed'
+  Complete = 'Complete'
 }
 
 type IOrder = {

@@ -5,6 +5,8 @@ import { createLogger } from './common/logger';
 import resolvers from './infra/resolvers';
 import ZkopruService from './infra/services/zkopru-service';
 import { connectDB } from './infra/db';
+import updateExistingOrderStatusUseCase from './use-cases/update-existing-order-status';
+import { OrderRepository } from './infra/repositories/order-repository';
 
 const logger = createLogger();
 
@@ -26,6 +28,18 @@ const zkopruService = new ZkopruService({
 // Start ZKopru client when server starts
 app.addHook('onReady', () => {
   zkopruService.start();
+
+  // Execute updateExistingOrderStatusUseCase periodically
+  async function updateOrderStatus() {
+    await updateExistingOrderStatusUseCase({
+      logger,
+      orderRepository: new OrderRepository(db, { logger }),
+      walletService: zkopruService,
+    });
+    setTimeout(updateOrderStatus, 10 * 1000);
+  }
+
+  updateOrderStatus();
 });
 
 // Register GraphQL endpoint
