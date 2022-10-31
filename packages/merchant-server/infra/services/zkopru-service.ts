@@ -49,9 +49,6 @@ export default class ZkopruService implements IWalletService {
 
   private timer: NodeJS.Timeout;
 
-  // transaction-hash/callback pair to listen for
-  private transactionListeners: Record<string, () => void>;
-
   constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
     this.logger = context.logger;
 
@@ -70,7 +67,6 @@ export default class ZkopruService implements IWalletService {
       [TokenStandard.Erc721]: {},
     };
 
-    this.transactionListeners = {};
     this.balanceUpdateInterval = 10 * 1000;
   }
 
