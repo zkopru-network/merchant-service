@@ -244,6 +244,10 @@ describe('use-case/create-order', () => {
     expect(createdOrder.quantity).toBe(purchaseQuantity);
     expect(createdOrder.amount).toBe(createdProduct.price * createdOrder.quantity);
 
+    expect(createdOrder.createdAt).toBeInstanceOf(Date);
+    expect(createdOrder.updatedAt).toBeInstanceOf(Date);
+    expect(createdOrder.createdAt.getTime()).toBeGreaterThan(new Date().getTime() - 10000);
+
     const { buyerTransaction, sellerTransaction } = createdOrder;
 
     // Expect coordinator URL be called with both transactions

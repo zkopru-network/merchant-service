@@ -32,6 +32,8 @@ export default async function editProductUseCase(productInput: EditProductInput,
   product.availableQuantity = productData.availableQuantity;
   product.price = productData.price;
 
+  product.updatedAt = new Date(); // TODO: Check value change before changing date
+
   // Ensure the new quantity is available in the wallet
   await context.blockchainService.ensureProductAvailability(product, product.availableQuantity);
 

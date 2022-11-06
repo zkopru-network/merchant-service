@@ -12,6 +12,8 @@ declare module 'knex' {
       'token_id'?: string
       'available_quantity': number
       'price': number
+      'created_at': Date
+      'updated_at': Date
     },
     orders: {
       'id': string
@@ -23,6 +25,8 @@ declare module 'knex' {
       'seller_transaction': string
       'fee': number
       'status': string
+      'created_at': Date
+      'updated_at': Date
     }
   }
 }

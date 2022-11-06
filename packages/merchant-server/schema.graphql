@@ -18,6 +18,8 @@ type Product {
   tokenId: String
   availableQuantity: Int!
   price: Float!
+  createdAt: Int!
+  updatedAt: Int!
 }
 
 input ProductInput {
@@ -48,6 +50,8 @@ type Order {
   sellerTransaction: String
   amount: Float
   status: OrderStatus
+  createdAt: Int!
+  updatedAt: Int!
 }
 
 input CreateOrderInput {

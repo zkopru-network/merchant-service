@@ -27,6 +27,8 @@ export default async function createProductUseCase(productInput: CreateProductIn
   const product = new Product({
     id: uuid(),
     ...productInput,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   // Check for existing product with same token

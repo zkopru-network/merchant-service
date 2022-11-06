@@ -31,6 +31,8 @@ export class ProductRepository implements IProductRepository {
       contractAddress: dbRow.contract_address,
       availableQuantity: dbRow.available_quantity,
       price: dbRow.price,
+      createdAt: dbRow.created_at,
+      updatedAt: dbRow.updated_at,
     });
   }
 
@@ -45,6 +47,8 @@ export class ProductRepository implements IProductRepository {
       contract_address: product.contractAddress,
       available_quantity: product.availableQuantity,
       price: product.price,
+      created_at: product.createdAt,
+      updated_at: product.updatedAt,
     };
   }
 

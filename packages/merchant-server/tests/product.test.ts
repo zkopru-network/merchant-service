@@ -15,6 +15,8 @@ describe('domain/product', () => {
       contractAddress: '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093',
       availableQuantity: 20,
       price: 0.5,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     expect(product).toBeInstanceOf(Product);
@@ -31,6 +33,8 @@ describe('domain/product', () => {
       tokenId: '123',
       availableQuantity: 1,
       price: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     expect(product).toBeInstanceOf(Product);
@@ -49,6 +53,8 @@ describe('domain/product', () => {
         tokenId: '4473',
         availableQuantity: 2,
         price: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }).toThrowError(ValidationError);
   });
@@ -65,6 +71,8 @@ describe('domain/product', () => {
         contractAddress: '0xc11Ffa318051d8aF4E5f2E2732d7049486fcE094',
         availableQuantity: 2,
         price: 0.1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }).toThrowError(ValidationError);
   });

@@ -11,6 +11,8 @@ type IProduct = {
   tokenId?: string;
   availableQuantity: number;
   price: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default class Product {
@@ -31,6 +33,10 @@ export default class Product {
   price: number;
 
   availableQuantity: number;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 
   constructor(args: IProduct) {
     this.id = args.id;
@@ -59,5 +65,7 @@ export default class Product {
 
     this.tokenId = args.tokenId;
     this.availableQuantity = args.availableQuantity;
+    this.createdAt = args.createdAt;
+    this.updatedAt = args.updatedAt;
   }
 }

@@ -29,6 +29,7 @@ export default async function updateExistingOrderStatusUseCase(context: Context)
     if (order.status !== newStatus) {
       context.logger.info(`Updating order status from ${order.status} to ${newStatus} for order ${order.id}`);
       order.setStatus(newStatus);
+      order.updatedAt = new Date();
       // eslint-disable-next-line no-await-in-loop
       await context.orderRepository.updateOrder(order);
     }

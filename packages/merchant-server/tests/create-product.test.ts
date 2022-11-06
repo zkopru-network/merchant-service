@@ -66,6 +66,10 @@ describe('use-case/create-product', () => {
 
     // Verify id has been set
     expect(typeof createdProduct.id).toBe('string');
+
+    expect(createdProduct.createdAt).toBeInstanceOf(Date);
+    expect(createdProduct.updatedAt).toBeInstanceOf(Date);
+    expect(createdProduct.createdAt.getTime()).toBeGreaterThan(new Date().getTime() - 10000);
   });
 
   test('should throw validation error when wallet balance is low', async () => {

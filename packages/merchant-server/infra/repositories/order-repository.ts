@@ -13,14 +13,16 @@ export class OrderRepository implements IOrderRepository {
     this.logger = context.logger;
   }
 
-  private mapDBRowToOrder(dbRow: Tables['orders'] & Tables['products']) {
+  private mapDBRowToOrder(dbRow: Tables['orders'] & Tables['products'] & { product_created_at: Date, product_updated_at: Date }) {
     let status;
     if (dbRow.status === 'Complete') { status = OrderStatus.Complete; }
     if (dbRow.status === 'Pending') { status = OrderStatus.Pending; }
 
     return new Order({
       id: dbRow.id,
-      product: ProductRepository.mapDBRowToProduct({ ...dbRow, id: dbRow.product_id }),
+      product: ProductRepository.mapDBRowToProduct({
+        ...dbRow, id: dbRow.product_id, created_at: dbRow.product_created_at, updated_at: dbRow.product_updated_at,
+      }),
       quantity: dbRow.quantity,
       amount: dbRow.amount,
       buyerAddress: dbRow.buyer_address,
@@ -28,6 +30,8 @@ export class OrderRepository implements IOrderRepository {
       sellerTransaction: dbRow.seller_transaction,
       fee: dbRow.fee,
       status,
+      createdAt: dbRow.created_at,
+      updatedAt: dbRow.updated_at,
     });
   }
 
@@ -42,6 +46,8 @@ export class OrderRepository implements IOrderRepository {
       seller_transaction: order.sellerTransaction,
       fee: order.fee,
       status: order.status.toString(),
+      created_at: order.createdAt,
+      updated_at: order.updatedAt,
     };
   }
 
@@ -63,7 +69,14 @@ export class OrderRepository implements IOrderRepository {
           qb.where('orders.status', filters.status.toString());
         }
       })
-      .select('*', 'orders.id');
+      .select(
+        '*',
+        'orders.id as id',
+        'orders.created_at as created_at',
+        'orders.updated_at as updated_at',
+        'products.created_at as product_created_at',
+        'products.updated_at as product_updated_at',
+      );
 
     return rows.map(this.mapDBRowToOrder);
   }

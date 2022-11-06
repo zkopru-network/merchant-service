@@ -8,6 +8,25 @@ import { OrderRepository } from './repositories/order-repository';
 import createOrderUseCase from '../use-cases/create-order';
 import findOrdersUseCase from '../use-cases/find-orders';
 import getOrderUseCase from '../use-cases/get-order';
+import Order from '../domain/order';
+import Product from '../domain/product';
+
+function productToDTO(product: Product) {
+  return {
+    ...product,
+    createdAt: product.createdAt.getTime(),
+    updatedAt: product.updatedAt.getTime(),
+  };
+}
+
+function orderToDTO(order: Order) {
+  return {
+    ...order,
+    createdAt: order.createdAt.getTime(),
+    updatedAt: order.updatedAt.getTime(),
+    product: productToDTO(order.product),
+  };
+}
 
 const resolvers : Resolvers<MercuriusContext> = {
   Mutation: {
@@ -20,18 +39,18 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
-      return createdProduct;
+      return productToDTO(createdProduct);
     },
     async editProduct(_, args, context) {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
-      const createdProduct = await editProductUseCase({ id: args.id, productData: args.productData }, {
+      const editedProduct = await editProductUseCase({ id: args.id, productData: args.productData }, {
         blockchainService: context.zkopruService,
         productRepository: productRepo,
         logger: context.logger,
       });
 
-      return createdProduct;
+      return productToDTO(editedProduct);
     },
     async createOrder(_, args, context) {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
@@ -44,7 +63,7 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
-      return createdOrder;
+      return orderToDTO(createdOrder);
     },
   },
   Query: {
@@ -56,7 +75,7 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
-      return products;
+      return products.map(productToDTO);
     },
     async findOrders(_, args, context) {
       const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
@@ -66,7 +85,7 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
-      return orders;
+      return orders.map(orderToDTO);
     },
     async getOrder(_, args, context) {
       const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
@@ -76,7 +95,7 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
-      return order;
+      return orderToDTO(order);
     },
   },
 };

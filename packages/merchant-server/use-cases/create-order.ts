@@ -32,6 +32,8 @@ export default async function createOrderUseCase(orderInput: CreateOrderInput, c
     amount: orderInput.quantity * product.price,
     fee: ORDER_FEE,
     status: OrderStatus.Pending,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   // Ensure the token/quantity is available in the wallet

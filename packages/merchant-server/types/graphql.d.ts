@@ -57,11 +57,13 @@ export type Order = {
   amount?: Maybe<Scalars['Float']>;
   buyerAddress?: Maybe<Scalars['String']>;
   buyerTransaction?: Maybe<Scalars['String']>;
+  createdAt: Scalars['Int'];
   id?: Maybe<Scalars['String']>;
   product?: Maybe<Product>;
   quantity?: Maybe<Scalars['Float']>;
   sellerTransaction?: Maybe<Scalars['String']>;
   status?: Maybe<OrderStatus>;
+  updatedAt: Scalars['Int'];
 };
 
 export enum OrderStatus {
@@ -73,6 +75,7 @@ export type Product = {
   __typename?: 'Product';
   availableQuantity: Scalars['Int'];
   contractAddress: Scalars['String'];
+  createdAt: Scalars['Int'];
   description?: Maybe<Scalars['String']>;
   id: Scalars['String'];
   imageUrl?: Maybe<Scalars['String']>;
@@ -80,6 +83,7 @@ export type Product = {
   price: Scalars['Float'];
   tokenId?: Maybe<Scalars['String']>;
   tokenStandard: TokenStandard;
+  updatedAt: Scalars['Int'];
 };
 
 export type ProductInput = {
@@ -224,17 +228,20 @@ export type OrderResolvers<ContextType = any, ParentType extends ResolversParent
   amount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   buyerAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   buyerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType>;
   quantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   sellerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['OrderStatus']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
   availableQuantity?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -242,6 +249,7 @@ export type ProductResolvers<ContextType = any, ParentType extends ResolversPare
   price?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   tokenId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tokenStandard?: Resolver<ResolversTypes['TokenStandard'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

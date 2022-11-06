@@ -11,4 +11,5 @@
     "typeRoots": ["./types"],
   },
   "include": ["./**/*"],
+  "exclude": ["dist", "node_modules", "types"]
 }
