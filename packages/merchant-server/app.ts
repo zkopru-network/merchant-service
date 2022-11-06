@@ -34,7 +34,7 @@ app.addHook('onReady', async () => {
     await updateExistingOrderStatusUseCase({
       logger,
       orderRepository: new OrderRepository(db, { logger }),
-      walletService: zkopruService,
+      blockchainService: zkopruService,
     });
     setTimeout(updateOrderStatus, 10 * 1000);
   }

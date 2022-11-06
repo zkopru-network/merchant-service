@@ -1,31 +1,36 @@
 import {
-  ILogger, IWalletService, IOrderRepository,
+  ILogger, IBlockchainService, IOrderRepository,
 } from '../common/interfaces';
-import Order, { OrderStatus } from '../domain/order';
+import Order from '../domain/order';
 
 type Context = {
   logger: ILogger;
   orderRepository: IOrderRepository;
-  walletService: IWalletService;
+  blockchainService: IBlockchainService;
 };
 
 export default async function updateExistingOrderStatusUseCase(context: Context) : Promise<Order> {
   context.logger.debug('Starting updateExistingOrderStatus use-case');
 
-  const pendingOrders = await context.orderRepository.findOrders({ status: OrderStatus.Pending });
+  // Get all orders
+  const allOrders = await context.orderRepository.findOrders();
 
-  if (pendingOrders.length === 0) {
+  if (allOrders.length === 0) {
     return;
   }
 
-  context.logger.info(`Checking order status for ${pendingOrders.length} orders`);
+  context.logger.debug(`Checking order status for ${allOrders.length} orders`);
 
-  const confirmedOrders = await context.walletService.filterConfirmedOrders(pendingOrders);
+  const newOrderStatuses = await context.blockchainService.getConfirmationStatusForOrders(allOrders);
 
-  for (const order of confirmedOrders) {
-    context.logger.info(`Updating order status to Confirmed for order ${order.id}`);
-    order.setStatus(OrderStatus.Complete);
-    // eslint-disable-next-line no-await-in-loop
-    await context.orderRepository.updateOrder(order);
+  for (const order of allOrders) {
+    const newStatus = newOrderStatuses[order.id];
+
+    if (order.status !== newStatus) {
+      context.logger.info(`Updating order status from ${order.status} to ${newStatus} for order ${order.id}`);
+      order.setStatus(newStatus);
+      // eslint-disable-next-line no-await-in-loop
+      await context.orderRepository.updateOrder(order);
+    }
   }
 }

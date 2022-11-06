@@ -58,7 +58,7 @@ describe('use-case/edit-product', () => {
 
     const createdProduct = await createProductUseCase(productInput, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -73,7 +73,7 @@ describe('use-case/edit-product', () => {
       },
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -110,7 +110,7 @@ describe('use-case/edit-product', () => {
 
     const createdProduct = await createProductUseCase(productInput, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -125,7 +125,7 @@ describe('use-case/edit-product', () => {
       },
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     })).rejects.toThrowError(ValidationError);
   });

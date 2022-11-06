@@ -58,7 +58,7 @@ describe('use-case/create-product', () => {
 
     const createdProduct = await createProductUseCase(productInput, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -92,7 +92,7 @@ describe('use-case/create-product', () => {
 
     await expect(() => createProductUseCase(productInput, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     })).rejects.toThrowError(ValidationError);
   });
@@ -120,7 +120,7 @@ describe('use-case/create-product', () => {
       price: 0.1,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -135,7 +135,7 @@ describe('use-case/create-product', () => {
       price: 0.3,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     })).rejects.toThrowError(ValidationError);
   });
@@ -164,7 +164,7 @@ describe('use-case/create-product', () => {
       price: 0.1,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -180,7 +180,7 @@ describe('use-case/create-product', () => {
       price: 2,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
   });
@@ -209,7 +209,7 @@ describe('use-case/create-product', () => {
       price: 0.1,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -225,7 +225,7 @@ describe('use-case/create-product', () => {
       price: 2,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     })).rejects.toThrowError(ValidationError);
   });

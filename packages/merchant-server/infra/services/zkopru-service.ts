@@ -10,9 +10,9 @@ import { ZkTx } from '@zkopru/transaction';
 import BN from 'bn.js';
 import { fromWei, toWei } from 'web3-utils';
 import {
-  ILogger, TokenStandard, IWalletService,
+  ILogger, TokenStandard, IBlockchainService,
 } from '../../common/interfaces';
-import Order from '../../domain/order';
+import Order, { OrderStatus } from '../../domain/order';
 import Product from '../../domain/product';
 import { ValidationError } from '../../common/error';
 
@@ -24,7 +24,7 @@ type L2ServiceConstructor = {
   accountPrivateKey: string;
 }
 
-export default class ZkopruService implements IWalletService {
+export default class ZkopruService implements IBlockchainService {
   logger: ILogger;
 
   // URL for ETH node RPC (websocket)
@@ -176,19 +176,31 @@ export default class ZkopruService implements IWalletService {
     }
   }
 
-  async filterConfirmedOrders(orders: Order[]) : Promise<Order[]> {
+  async getConfirmationStatusForOrders(orders: Order[]) : Promise<Record<string, OrderStatus>> {
     const { history } = await this.wallet.transactionsFor(this.wallet.wallet.account.zkAddress.toString(), this.wallet.wallet.account.ethAddress);
 
-    const receivedTransactions = history.filter((t) => t.type === 'Receive');
+    const receivedTransactions = history.filter((t) => t.type === 'Receive') as { hash: string }[];
 
-    const confirmedOrders = orders.filter((order) => {
+    // Store as object for faster inclusion checks
+    const receivedTransactionHashes = receivedTransactions.reduce((acc, tx) => {
+      acc[tx.hash] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+
+    const orderStatuses : Record<string, OrderStatus> = {};
+
+    for (const order of orders) {
       // Decode buyer transaction and calculate hash
       const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
       const hash = buyerZkTx.hash().toString();
 
-      return receivedTransactions.some((t) => t.hash === hash);
-    });
+      if (receivedTransactionHashes[hash]) {
+        orderStatuses[order.id] = OrderStatus.Complete;
+      } else {
+        orderStatuses[order.id] = OrderStatus.Pending;
+      }
+    }
 
-    return confirmedOrders;
+    return orderStatuses;
   }
 }

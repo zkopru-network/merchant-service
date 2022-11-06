@@ -11,6 +11,7 @@ import { Fp } from '@zkopru/babyjubjub';
 import { newDb as pgMem } from 'pg-mem';
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
+import { ZkTx } from '@zkopru/transaction/src';
 import { seed } from '../infra/db-migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';
 import createProductUseCase from '../use-cases/create-product';
@@ -21,9 +22,10 @@ import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
 import createOrderUseCase from '../use-cases/create-order';
 import { OrderRepository } from '../infra/repositories/order-repository';
-import { OrderStatus } from '../domain/order';
+import Order, { OrderStatus } from '../domain/order';
 import updateExistingOrderStatusUseCase from '../use-cases/update-existing-order-status';
 import getOrderUseCase from '../use-cases/get-order';
+import Product from '../domain/product';
 
 // Mocked constants and helpers for all tests
 const mockCoordinatorUrl = 'https://mock-coordinator';
@@ -116,7 +118,6 @@ describe('use-case/create-order', () => {
   let orderRepo: IOrderRepository;
   let logger: ILogger;
   let zkopruService: ZkopruService;
-  let mockedCoordinatorAPI: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>>;
   const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
   beforeEach(async () => {
@@ -151,9 +152,9 @@ describe('use-case/create-order', () => {
     zkopruService.stop();
   });
 
-  test('should create an order successfully', async () => {
-    // Create a product with EC20 token and price as 1 ETH
-    const createdProduct = await createProductUseCase({
+  // Test helpers
+  function createSampleProduct() {
+    return createProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/food.png',
@@ -163,22 +164,34 @@ describe('use-case/create-order', () => {
       price: 1,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
+  }
 
-    // Create buyer transaction
+  async function createOrder({
+    product,
+    purchaseQuantity,
+    atomicSwapSalt,
+    purchasePrice,
+  } : {
+    product: Product,
+    purchaseQuantity: number,
+    atomicSwapSalt: number,
+    purchasePrice?: BN
+  }) : Promise<{ createdOrder: Order, buyerAddress: string, buyerZkTx: ZkTx }> {
+    // Create a new wallet for the buyer
     const buyerWallet = getMockedZkopruWallet({
       node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10, tokenAddress,
     });
+
     const buyerAddress = buyerWallet.wallet.account.zkAddress.toString();
-    const purchaseQuantity = 3;
-    const atomicSwapSalt = 500; // Random salt
+
     const buyerTx = await buyerWallet.generateSwapTransaction(
       zkopruService.wallet.wallet.account.zkAddress.toString(),
       '0x0000000000000000000000000000000000000000', // Sending eth
-      toWei(new BN(createdProduct.price).mul(new BN(purchaseQuantity))).toString(),
-      createdProduct.contractAddress,
+      purchasePrice ? toWei(purchasePrice.toString()) : toWei(new BN(product.price).mul(new BN(purchaseQuantity))).toString(),
+      product.contractAddress,
       toWei(new BN(purchaseQuantity)).toString(),
       (+48000 * (10 ** 9)).toString(), // Coordinator fee
       atomicSwapSalt,
@@ -186,12 +199,9 @@ describe('use-case/create-order', () => {
     const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
     const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
 
-    // Mock call to coordinator URL (axios)
-    mockedCoordinatorAPI = jest.fn(async () => ({ status: 200 }));
-    mockedAxios.mockImplementation(mockedCoordinatorAPI);
-
+    // Execute create order use-case
     const createdOrder = await createOrderUseCase({
-      productId: createdProduct.id,
+      productId: product.id,
       quantity: purchaseQuantity,
       buyerAddress,
       buyerTransaction: buyerTransactionEncoded,
@@ -199,8 +209,33 @@ describe('use-case/create-order', () => {
     }, {
       productRepository: productRepo,
       orderRepository: orderRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
+    });
+
+    return {
+      buyerZkTx, buyerAddress, createdOrder,
+    };
+  }
+
+  function mockCoordinatorAPI() : jest.MockedFunction<(...args: unknown[]) => Promise<unknown>> {
+    // Mock call to coordinator URL (axios)
+    const mockedCoordinatorAPI = jest.fn(async () => ({ status: 200 }));
+    mockedAxios.mockImplementation(mockedCoordinatorAPI);
+
+    return mockedCoordinatorAPI;
+  }
+
+  test('should create an order successfully', async () => {
+    const mockedCoordinatorAPI = mockCoordinatorAPI();
+
+    const createdProduct = await createSampleProduct();
+    const purchaseQuantity = 3;
+    const atomicSwapSalt = 500; // Random salt
+    const { buyerAddress, createdOrder } = await createOrder({
+      product: createdProduct,
+      atomicSwapSalt,
+      purchaseQuantity,
     });
 
     // Expect order to be created
@@ -217,126 +252,47 @@ describe('use-case/create-order', () => {
       headers: { 'content-type': 'application/json' },
       data: JSON.stringify([sellerTransaction, buyerTransaction]),
     };
+
     expect(mockedCoordinatorAPI).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
-  });
+  }, 10 * 1000);
 
   test('should fail creating order if transaction amount is lower', async () => {
-    // Create a product with EC20 token and price as 1 ETH
-    const createdProduct = await createProductUseCase({
-      name: 'FoodToken',
-      description: 'Token exchangeable for a meal',
-      imageUrl: 'https://ethereum.org/food.png',
-      tokenStandard: TokenStandard.Erc20,
-      contractAddress: tokenAddress,
-      availableQuantity: 10,
-      price: 1,
-    }, {
-      productRepository: productRepo,
-      walletService: zkopruService,
-      logger,
-    });
+    const mockedCoordinatorAPI = mockCoordinatorAPI();
 
-    // Create buyer transaction
-    const buyerWallet = getMockedZkopruWallet({
-      node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10, tokenAddress,
-    });
-    const buyerAddress = buyerWallet.wallet.account.zkAddress.toString();
+    const createdProduct = await createSampleProduct();
     const purchaseQuantity = 3;
     const atomicSwapSalt = 500; // Random salt
     const purchasePrice = new BN(createdProduct.price * purchaseQuantity - 1); // Send 1ETH less
-    const buyerTx = await buyerWallet.generateSwapTransaction(
-      zkopruService.wallet.wallet.account.zkAddress.toString(),
-      '0x0000000000000000000000000000000000000000', // Sending eth
-      toWei(purchasePrice).toString(),
-      createdProduct.contractAddress,
-      toWei(new BN(purchaseQuantity)).toString(),
-      (+48000 * (10 ** 9)).toString(), // Coordinator fee
-      atomicSwapSalt,
-    );
-    const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
-    const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
-
-    // Mock call to coordinator URL (axios)
-    mockedCoordinatorAPI = jest.fn(async () => ({ status: 200 }));
-    mockedAxios.mockImplementation(mockedCoordinatorAPI);
 
     // Swap will not match is the price is different
-    await expect(createOrderUseCase({
-      productId: createdProduct.id,
-      quantity: purchaseQuantity,
-      buyerAddress,
-      buyerTransaction: buyerTransactionEncoded,
+    await expect(createOrder({
+      product: createdProduct,
       atomicSwapSalt,
-    }, {
-      productRepository: productRepo,
-      orderRepository: orderRepo,
-      walletService: zkopruService,
-      logger,
+      purchaseQuantity,
+      purchasePrice,
     })).rejects.toThrow('Desired swap not found in any the transaction outflow.');
 
     // Coordinator should not be called
     expect(mockedCoordinatorAPI).toBeCalledTimes(0);
-  });
+  }, 10 * 1000);
 
-  test('should update order status when transaction is confirmed/finalized on chain', async () => {
-    // Create a product with EC20 token and price as 1 ETH
-    const createdProduct = await createProductUseCase({
-      name: 'FoodToken',
-      description: 'Token exchangeable for a meal',
-      imageUrl: 'https://ethereum.org/food.png',
-      tokenStandard: TokenStandard.Erc20,
-      contractAddress: tokenAddress,
-      availableQuantity: 10,
-      price: 1,
-    }, {
-      productRepository: productRepo,
-      walletService: zkopruService,
-      logger,
-    });
+  test('should update order status to confirmed when transaction is finalized on chain', async () => {
+    mockCoordinatorAPI();
 
-    // Create buyer transaction
-    const buyerWallet = getMockedZkopruWallet({
-      node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10, tokenAddress,
-    });
-    const buyerAddress = buyerWallet.wallet.account.zkAddress.toString();
+    const createdProduct = await createSampleProduct();
     const purchaseQuantity = 3;
     const atomicSwapSalt = 500; // Random salt
-    const buyerTx = await buyerWallet.generateSwapTransaction(
-      zkopruService.wallet.wallet.account.zkAddress.toString(),
-      '0x0000000000000000000000000000000000000000', // Sending eth
-      toWei(new BN(createdProduct.price).mul(new BN(purchaseQuantity))).toString(),
-      createdProduct.contractAddress,
-      toWei(new BN(purchaseQuantity)).toString(),
-      (+48000 * (10 ** 9)).toString(), // Coordinator fee
+    const { createdOrder, buyerZkTx } = await createOrder({
+      product: createdProduct,
       atomicSwapSalt,
-    );
-    const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
-    const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
-
-    // Mock call to coordinator URL (axios)
-    mockedCoordinatorAPI = jest.fn(async () => {
-      // Override and return customer's transaction.
-      // This would normally happen when coordinator produce a block that include the transactions
-      zkopruService.wallet.transactionsFor = async () => ({
-        pending: [],
-        history: [{ hash: buyerZkTx.hash().toString(), type: 'Receive' }],
-      });
-
-      return { status: 200 };
+      purchaseQuantity,
     });
-    mockedAxios.mockImplementation(mockedCoordinatorAPI);
 
-    const createdOrder = await createOrderUseCase({
-      productId: createdProduct.id,
-      quantity: purchaseQuantity,
-      buyerAddress,
-      buyerTransaction: buyerTransactionEncoded,
-      atomicSwapSalt,
-    }, {
-      productRepository: productRepo,
-      orderRepository: orderRepo,
-      walletService: zkopruService,
-      logger,
+    // Override and return customer's transaction.
+    // This would normally happen when coordinator produce a block that include the transactions
+    zkopruService.wallet.transactionsFor = async () => ({
+      pending: [],
+      history: [{ hash: buyerZkTx.hash().toString(), type: 'Receive' }],
     });
 
     expect(typeof createdOrder.id).toBe('string');
@@ -347,7 +303,7 @@ describe('use-case/create-order', () => {
     await updateExistingOrderStatusUseCase({
       logger,
       orderRepository: orderRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
     });
 
     // Get updated order
@@ -357,5 +313,62 @@ describe('use-case/create-order', () => {
     });
 
     expect(updatedOrder.status).toBe(OrderStatus.Complete);
+  }, 10 * 1000);
+
+  test('should update a confirmed order to pending if block containing the transaction is slashed', async () => {
+    mockCoordinatorAPI();
+
+    const createdProduct = await createSampleProduct();
+    const purchaseQuantity = 3;
+    const atomicSwapSalt = 500; // Random salt
+    const { createdOrder, buyerZkTx } = await createOrder({
+      product: createdProduct,
+      atomicSwapSalt,
+      purchaseQuantity,
+    });
+
+    expect(typeof createdOrder.id).toBe('string');
+    expect(createdOrder.status).toBe(OrderStatus.Pending);
+
+    zkopruService.wallet.transactionsFor = async () => ({
+      pending: [],
+      history: [{ hash: buyerZkTx.hash().toString(), type: 'Receive' }],
+    });
+
+    await updateExistingOrderStatusUseCase({
+      logger,
+      orderRepository: orderRepo,
+      blockchainService: zkopruService,
+    });
+
+    // Get updated order
+    const updatedOrder = await getOrderUseCase(createdOrder.id, {
+      logger,
+      orderRepository: orderRepo,
+    });
+
+    expect(updatedOrder.status).toBe(OrderStatus.Complete);
+
+    // Mock a slash event - transaction removed from chain
+    zkopruService.wallet.transactionsFor = async () => ({
+      pending: [],
+      history: [],
+    });
+
+    // Rune updateStatus use case again
+    await updateExistingOrderStatusUseCase({
+      logger,
+      orderRepository: orderRepo,
+      blockchainService: zkopruService,
+    });
+
+    // Get updated order
+    const updatedOrder2 = await getOrderUseCase(createdOrder.id, {
+      logger,
+      orderRepository: orderRepo,
+    });
+
+    // Transaction would be back to Pending
+    expect(updatedOrder2.status).toBe(OrderStatus.Pending);
   }, 10 * 1000);
 });

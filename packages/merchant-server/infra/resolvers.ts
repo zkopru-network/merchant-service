@@ -15,7 +15,7 @@ const resolvers : Resolvers<MercuriusContext> = {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
       const createdProduct = await createProductUseCase(args.product, {
-        walletService: context.zkopruService,
+        blockchainService: context.zkopruService,
         productRepository: productRepo,
         logger: context.logger,
       });
@@ -26,7 +26,7 @@ const resolvers : Resolvers<MercuriusContext> = {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
       const createdProduct = await editProductUseCase({ id: args.id, productData: args.productData }, {
-        walletService: context.zkopruService,
+        blockchainService: context.zkopruService,
         productRepository: productRepo,
         logger: context.logger,
       });
@@ -38,7 +38,7 @@ const resolvers : Resolvers<MercuriusContext> = {
       const orderRepo = new OrderRepository(context.db, { logger: context.logger });
 
       const createdOrder = await createOrderUseCase(args.order, {
-        walletService: context.zkopruService,
+        blockchainService: context.zkopruService,
         productRepository: productRepo,
         orderRepository: orderRepo,
         logger: context.logger,

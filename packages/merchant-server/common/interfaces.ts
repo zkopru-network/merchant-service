@@ -12,11 +12,11 @@ export enum TokenStandard {
 }
 
 // Interface for the service interacting with the Blockchain
-export interface IWalletService {
+export interface IBlockchainService {
   start: () => void;
   ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
   executeOrder: (order: Order, params: object) => Promise<string>;
-  filterConfirmedOrders: (orders: Order[]) => Promise<Order[]>; // Given a list of orders, return confirmed orders (transactions confirmed on chain)
+  getConfirmationStatusForOrders: (orders: Order[]) => Promise<Record<string, OrderStatus>>; // Given a list of orders, return { orderId: "pending | complete" } based on transaction finalization
 }
 
 export interface IProductRepository {
@@ -29,7 +29,7 @@ export interface IProductRepository {
 
 export interface IOrderRepository {
   getById: (id: string) => Promise<Order>;
-  findOrders: (filters: { status: OrderStatus }) => Promise<Order[]>;
+  findOrders: (filters?: { status: OrderStatus }) => Promise<Order[]>;
   createOrder: (order: Order) => Promise<void>;
   updateOrder: (order: Order) => Promise<void>;
 }

@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { ValidationError } from '../common/error';
 import {
-  IProductRepository, TokenStandard, ILogger, IWalletService,
+  IProductRepository, TokenStandard, ILogger, IBlockchainService,
 } from '../common/interfaces';
 import Product from '../domain/product';
 
@@ -19,7 +19,7 @@ type CreateProductInput = {
 type Context = {
   logger: ILogger;
   productRepository: IProductRepository;
-  walletService: IWalletService;
+  blockchainService: IBlockchainService;
 };
 
 export default async function createProductUseCase(productInput: CreateProductInput, context: Context) : Promise<Product> {
@@ -36,7 +36,7 @@ export default async function createProductUseCase(productInput: CreateProductIn
   }
 
   // Ensure the token/quantity is available in the wallet
-  await context.walletService.ensureProductAvailability(product, product.availableQuantity);
+  await context.blockchainService.ensureProductAvailability(product, product.availableQuantity);
 
   // Add to repo
   await context.productRepository.createProduct(product);

@@ -58,7 +58,7 @@ describe('use-case/find-products', () => {
       price: 1,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
@@ -73,7 +73,7 @@ describe('use-case/find-products', () => {
       price: 2.4,
     }, {
       productRepository: productRepo,
-      walletService: zkopruService,
+      blockchainService: zkopruService,
       logger,
     });
 
