@@ -1,5 +1,5 @@
 import {
-  IProductRepository, ILogger, IWalletService,
+  IProductRepository, ILogger, IBlockchainService,
 } from '../common/interfaces';
 import Product from '../domain/product';
 
@@ -10,14 +10,14 @@ type EditProductInput = {
     description?: string;
     imageUrl?: string;
     availableQuantity: number;
-    priceInGwei: number;
+    price: number;
   }
 };
 
 type Context = {
   logger: ILogger;
   productRepository: IProductRepository;
-  walletService: IWalletService;
+  blockchainService: IBlockchainService;
 };
 
 export default async function editProductUseCase(productInput: EditProductInput, context: Context) : Promise<Product> {
@@ -30,10 +30,12 @@ export default async function editProductUseCase(productInput: EditProductInput,
   product.description = productData.description;
   product.imageUrl = productData.imageUrl;
   product.availableQuantity = productData.availableQuantity;
-  product.priceInGwei = productData.priceInGwei;
+  product.price = productData.price;
+
+  product.updatedAt = new Date(); // TODO: Check value change before changing date
 
   // Ensure the new quantity is available in the wallet
-  await context.walletService.ensureProductAvailability(product, product.availableQuantity);
+  await context.blockchainService.ensureProductAvailability(product, product.availableQuantity);
 
   // Add to repo
   await context.productRepository.updateProduct(product);

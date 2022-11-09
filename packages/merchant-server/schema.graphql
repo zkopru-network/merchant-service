@@ -3,6 +3,11 @@ enum TokenStandard {
   Erc20
 }
 
+enum OrderStatus {
+  Pending
+  Complete
+}
+
 type Product {
   id: String!
   name: String!
@@ -12,7 +17,9 @@ type Product {
   contractAddress: String!
   tokenId: String
   availableQuantity: Int!
-  priceInGwei: Int!
+  price: Float!
+  createdAt: Int!
+  updatedAt: Int!
 }
 
 input ProductInput {
@@ -23,7 +30,7 @@ input ProductInput {
   contractAddress: String!
   tokenId: String
   availableQuantity: Int!
-  priceInGwei: Int!
+  price: Float!
 }
 
 input EditProductInput {
@@ -31,14 +38,38 @@ input EditProductInput {
   description: String
   imageUrl: String
   availableQuantity: Int!
-  priceInGwei: Int!
+  price: Float!
+}
+
+type Order {
+  id: String
+  product: Product
+  quantity: Float
+  buyerAddress: String
+  buyerTransaction: String
+  sellerTransaction: String
+  amount: Float
+  status: OrderStatus
+  createdAt: Int!
+  updatedAt: Int!
+}
+
+input CreateOrderInput {
+  productId: String!
+  quantity: Float!
+  buyerAddress: String!
+  buyerTransaction: String!
+  atomicSwapSalt: Int!
 }
 
 type Query {
   findProducts: [Product]
+  getOrder(id: String): Order
+  findOrders(status: OrderStatus): [Order]
 }
 
 type Mutation {
   createProduct(product: ProductInput) : Product
   editProduct(id: String, productData: EditProductInput) : Product
+  createOrder(order: CreateOrderInput) : Order
 }

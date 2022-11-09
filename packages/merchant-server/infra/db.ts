@@ -11,7 +11,22 @@ declare module 'knex' {
       'contract_address': string
       'token_id'?: string
       'available_quantity': number
-      'price_in_gwei': number
+      'price': number
+      'created_at': Date
+      'updated_at': Date
+    },
+    orders: {
+      'id': string
+      'product_id': string
+      'quantity': number
+      'amount': number
+      'buyer_address': string
+      'buyer_transaction': string
+      'seller_transaction': string
+      'fee': number
+      'status': string
+      'created_at': Date
+      'updated_at': Date
     }
   }
 }

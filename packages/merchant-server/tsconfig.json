@@ -4,13 +4,12 @@
     "esModuleInterop": true,
     "target": "es6",
     "noImplicitAny": true,
+    "composite": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
-    "paths": {
-      "*": ["./node_modules/*"],
-    },
-    "typeRoots": ["./types"]
+    "typeRoots": ["./types"],
   },
   "include": ["./**/*"],
+  "exclude": ["dist", "node_modules", "types"]
 }

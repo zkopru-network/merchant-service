@@ -3,7 +3,7 @@
 
 ![Architecture Diagram](./assets/architecture.png)
 
-### Components
+## Components
 
 - **merchant-server** - Server hosting the API responsible for managing products, inventory and orders. Connects to a SQL database.
 
@@ -11,9 +11,6 @@
 
 - **app** - Customer facing app for viewing products and placing orders. Connects to the Zkopru browser extension for creating transactions.
 
+<br />
 
-### Tools
-
-- GraphQL for the merchant server API
-- Postgres database for storing product data
-- NodeJS for the server and React for the Apps
+[Low Level Design](./low-level-design)

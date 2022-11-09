@@ -50,4 +50,5 @@ Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purc
 <br />
 
 ## Docs
-- [Architecture](./docs/ARCHITECTURE.md)
+- [Architecture](./docs/architecture.md)
+- [Low Level Design](./docs/low-level-design.md)
