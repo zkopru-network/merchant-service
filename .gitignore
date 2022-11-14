@@ -4,7 +4,7 @@
 *.db
 
 .postgres
-
+.parcel-cache
 .env
 
 # compiled output

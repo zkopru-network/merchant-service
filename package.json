@@ -7,7 +7,9 @@
   },
   "private": true,
   "devDependencies": {
+    "@parcel/transformer-sass": "2.8.0",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "buffer": "^5.5.0",
     "eslint": "^8.25.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-standard-with-typescript": "^23.0.0",
