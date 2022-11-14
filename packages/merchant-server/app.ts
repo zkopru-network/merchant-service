@@ -1,8 +1,7 @@
 import fastify from 'fastify';
-import mercurius, { IResolvers } from 'mercurius';
-import { schema } from './infra/graphql';
+import mercurius from 'mercurius';
+import { buildContext, schema } from './infra/graphql';
 import { createLogger } from './common/logger';
-import resolvers from './infra/resolvers';
 import ZkopruService from './infra/services/zkopru-service';
 import { connectDB } from './infra/db';
 import updateExistingOrderStatusUseCase from './use-cases/update-existing-order-status';
@@ -43,16 +42,9 @@ app.addHook('onReady', async () => {
 });
 
 // Register GraphQL endpoint
-export const buildContext = () => ({
-  db,
-  logger,
-  zkopruService,
-});
-
 app.register(mercurius, {
   schema,
-  context: buildContext,
-  resolvers: resolvers as IResolvers,
+  context: (req) => buildContext(req, logger, zkopruService, db),
   graphiql: true,
 });
 

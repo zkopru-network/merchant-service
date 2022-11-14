@@ -203,4 +203,12 @@ export default class ZkopruService implements IBlockchainService {
 
     return orderStatuses;
   }
+
+  getWalletAddress() {
+    return this.wallet.wallet.account.ethAddress;
+  }
+
+  async signMessage(message: string) {
+    return this.wallet.wallet.account.ethAccount.sign(message).signature;
+  }
 }

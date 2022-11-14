@@ -19,7 +19,9 @@ A variant/lighter version of **Domain Driven Design** is used to architect the c
   - GraphQL API resolvers call the use-case after creating domain objects from the input and constructing repositories and services required. Resolvers also pass the output of a use-case to the response after any required transformation to DTO.
 
 ### Authentication
-  - Authentication is merchant-service is powered by [EIP-4361: Sign-In with Ethereum](https://eips.ethereum.org/EIPS/eip-4361).
-  - Merchant signs a message (from the merchant-admin app ideally) using their wallet (Metamask) and pass the signature as `Authorization` header along with each requests.
-  - `merchant-server` verifies the signature is valid and also its signed using the same private key configured for the merchant in the server. i.e Merchant would need to use the same private key for both Metamask and Merchant server.
+  - Authentication is merchant-service is powered by [EIP-4361: Sign In with Ethereum](https://eips.ethereum.org/EIPS/eip-4361).
+  - Merchant signs a message (from the merchant-admin app ideally) using their wallet (Metamask) and pass the message and signature to `signIn` API.
+  - API verifies the signature validity and ensure its signed using the same private key configured for the merchant in the server. i.e Merchant would need to use the same private key for both Metamask and Merchant server.
+  - Additionally server also verify if the message used to sign includes `zkopru merchant service`.
+  - Upon successful verification, server issue a JWT token which should be included as `Authorization` header along with subsequent requests.
   - [SIWE](https://login.xyz/) libraries are used to implement EIP-4361 based login.

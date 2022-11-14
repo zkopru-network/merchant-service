@@ -10,6 +10,7 @@ import findOrdersUseCase from '../use-cases/find-orders';
 import getOrderUseCase from '../use-cases/get-order';
 import Order from '../domain/order';
 import Product from '../domain/product';
+import signInUseCase from '../use-cases/sign-in';
 
 function productToDTO(product: Product) {
   return {
@@ -30,6 +31,14 @@ function orderToDTO(order: Order) {
 
 const resolvers : Resolvers<MercuriusContext> = {
   Mutation: {
+    async signIn(_, args, context) {
+      const authToken = await signInUseCase(args, {
+        blockchainService: context.zkopruService,
+        logger: context.logger,
+      });
+
+      return authToken;
+    },
     async createProduct(_, args, context) {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 

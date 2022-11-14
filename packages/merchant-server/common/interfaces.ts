@@ -17,6 +17,8 @@ export interface IBlockchainService {
   ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
   executeOrder: (order: Order, params: object) => Promise<string>;
   getConfirmationStatusForOrders: (orders: Order[]) => Promise<Record<string, OrderStatus>>; // Given a list of orders, return { orderId: "pending | complete" } based on transaction finalization
+  signMessage: (message: string) => Promise<string>
+  getWalletAddress: () => string
 }
 
 export interface IProductRepository {

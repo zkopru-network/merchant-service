@@ -4,6 +4,7 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -34,22 +35,29 @@ export type Mutation = {
   createOrder?: Maybe<Order>;
   createProduct?: Maybe<Product>;
   editProduct?: Maybe<Product>;
+  signIn?: Maybe<Scalars['String']>;
 };
 
 
 export type MutationCreateOrderArgs = {
-  order?: InputMaybe<CreateOrderInput>;
+  order: CreateOrderInput;
 };
 
 
 export type MutationCreateProductArgs = {
-  product?: InputMaybe<ProductInput>;
+  product: ProductInput;
 };
 
 
 export type MutationEditProductArgs = {
-  id?: InputMaybe<Scalars['String']>;
-  productData?: InputMaybe<EditProductInput>;
+  id: Scalars['String'];
+  productData: EditProductInput;
+};
+
+
+export type MutationSignInArgs = {
+  message: Scalars['String'];
+  signature: Scalars['String'];
 };
 
 export type Order = {
@@ -219,9 +227,10 @@ export type ResolversParentTypes = {
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, Partial<MutationCreateOrderArgs>>;
-  createProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<MutationCreateProductArgs>>;
-  editProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<MutationEditProductArgs>>;
+  createOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, RequireFields<MutationCreateOrderArgs, 'order'>>;
+  createProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<MutationCreateProductArgs, 'product'>>;
+  editProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<MutationEditProductArgs, 'id' | 'productData'>>;
+  signIn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSignInArgs, 'message' | 'signature'>>;
 };
 
 export type OrderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Order'] = ResolversParentTypes['Order']> = {

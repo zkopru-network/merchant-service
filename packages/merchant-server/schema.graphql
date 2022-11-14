@@ -8,18 +8,13 @@ enum OrderStatus {
   Complete
 }
 
-type Product {
-  id: String!
-  name: String!
-  description: String
-  imageUrl: String
-  tokenStandard: TokenStandard!
-  contractAddress: String!
-  tokenId: String
-  availableQuantity: Int!
-  price: Float!
-  createdAt: Int!
-  updatedAt: Int!
+
+input CreateOrderInput {
+  productId: String!
+  quantity: Float!
+  buyerAddress: String!
+  buyerTransaction: String!
+  atomicSwapSalt: Int!
 }
 
 input ProductInput {
@@ -41,6 +36,21 @@ input EditProductInput {
   price: Float!
 }
 
+
+type Product {
+  id: String!
+  name: String!
+  description: String
+  imageUrl: String
+  tokenStandard: TokenStandard!
+  contractAddress: String!
+  tokenId: String
+  availableQuantity: Int!
+  price: Float!
+  createdAt: Int!
+  updatedAt: Int!
+}
+
 type Order {
   id: String
   product: Product
@@ -54,22 +64,16 @@ type Order {
   updatedAt: Int!
 }
 
-input CreateOrderInput {
-  productId: String!
-  quantity: Float!
-  buyerAddress: String!
-  buyerTransaction: String!
-  atomicSwapSalt: Int!
-}
 
 type Query {
-  findProducts: [Product]
-  getOrder(id: String): Order
-  findOrders(status: OrderStatus): [Order]
+  findProducts: [Product]  @auth
+  getOrder(id: String): Order  @auth
+  findOrders(status: OrderStatus): [Order]  @auth
 }
 
 type Mutation {
-  createProduct(product: ProductInput) : Product
-  editProduct(id: String, productData: EditProductInput) : Product
-  createOrder(order: CreateOrderInput) : Order
+  signIn(message: String!, signature: String!) : String
+  createProduct(product: ProductInput!) : Product  @auth
+  editProduct(id: String!, productData: EditProductInput!) : Product  @auth
+  createOrder(order: CreateOrderInput!) : Order  @auth
 }
