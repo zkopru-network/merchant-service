@@ -14,6 +14,7 @@
     "link-modules": "yarn link @zkopru/transaction @zkopru/babyjubjub @zkopru/client @zkopru/zk-wizard"
   },
   "dependencies": {
+    "@fastify/cors": "^8.2.0",
     "@graphql-tools/graphql-file-loader": "^7.5.5",
     "@graphql-tools/load": "^7.7.7",
     "@graphql-tools/schema": "^9.0.9",

@@ -8,6 +8,7 @@ import { FastifyRequest } from 'fastify';
 import resolvers from './resolvers';
 import authMiddleware from './middleware/auth';
 import { IBlockchainService, ILogger } from '../common/interfaces';
+import { AuthenticationError, ValidationError } from '../common/error';
 
 const typeDefs = loadSchemaSync('./schema.graphql', {
   loaders: [new GraphQLFileLoader()],
@@ -22,7 +23,25 @@ const schemaRaw = makeExecutableSchema({
   resolvers,
 });
 
-const schemaWithMiddleware = applyMiddleware(schemaRaw, authMiddleware);
+const errorHandlerMiddleware = async (
+  resolve: any,
+  root: any,
+  args: any,
+  context: any,
+  info: any,
+) => {
+  try {
+    const result = await resolve(root, args, context, info);
+    return result;
+  } catch (error) {
+    if (error instanceof ValidationError || error instanceof AuthenticationError) {
+      return error;
+    }
+    return new Error('Unexpected error ocurred');
+  }
+};
+
+const schemaWithMiddleware = applyMiddleware(schemaRaw, errorHandlerMiddleware, authMiddleware);
 
 const schemaWithDirectives = mapSchema(schemaWithMiddleware, {
   // eslint-disable-next-line consistent-return
@@ -43,21 +62,6 @@ const schemaWithDirectives = mapSchema(schemaWithMiddleware, {
     }
   },
 });
-
-// const errorHandlerMiddleware = async (
-//   resolve: any,
-//   root: any,
-//   args: any,
-//   context: any,
-//   info: any
-// ) => {
-//   try {
-//     const result = await resolve(root, args, context, info);
-//     return result;
-//   } catch (error) {
-//     return "Unexpected error";
-//   }
-// };
 
 export const schema = schemaWithDirectives;
 
