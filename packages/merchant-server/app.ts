@@ -52,7 +52,7 @@ app.register(mercurius, {
   schema,
   context: (req) => buildContext(req, logger, zkopruService, db),
   graphiql: true,
-  errorFormatter: (result) => ({ statusCode: (result.errors[0].originalError as AuthenticationError)?.statusCode, response: result }),
+  errorFormatter: (result) => ({ statusCode: (result.errors[0].originalError as AuthenticationError)?.statusCode ?? 500, response: result }),
 });
 
 export default app;

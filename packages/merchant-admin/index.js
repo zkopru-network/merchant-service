@@ -1,10 +1,11 @@
-import './styles.scss';
+import './styles/main.scss';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Modal from 'react-modal';
 import HomePage from './pages/home-page';
 import LoginPage from './pages/login-page';
+import ProductsPage from './pages/products-page';
 import Layout from './components/layout';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
 
       </Route>
     </Routes>

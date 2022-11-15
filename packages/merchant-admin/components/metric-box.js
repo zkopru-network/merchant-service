@@ -24,14 +24,14 @@ function MetricBox(props) {
     >
       {!loading && (
         <>
-          <div className="metric-box-label">{label}</div>
+          <div className="metric-box__label">{label}</div>
           <div className="is-flex is-flex-row">
-            {showChangeIndicator && value && value > 0 && <span className="metric-box-indicator">&#9650;</span>}
-            {showChangeIndicator && value && value < 0 && <span className="metric-box-indicator">&#9660;</span>}
-            <div className="metric-box-value">
+            {showChangeIndicator && value && value > 0 && <span className="metric-box__indicator">&#9650;</span>}
+            {showChangeIndicator && value && value < 0 && <span className="metric-box__indicator">&#9660;</span>}
+            <div className="metric-box__value">
               {value}
             </div>
-            <div className="metric-box-unit">{unit}</div>
+            <div className="metric-box__unit">{unit}</div>
           </div>
         </>
       )}

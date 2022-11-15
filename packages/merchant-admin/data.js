@@ -81,3 +81,33 @@ export async function findOrders() {
 
   return result.findOrders;
 }
+
+/**
+ * @typedef Product
+ * @param name {String}
+ */
+
+/**
+ *
+ * @returns Promise<string[]>
+ */
+export async function findProducts() {
+  const result = await queryGraphQL({
+    data: {
+      query: `
+        query {
+          findProducts {
+            id
+            name
+            price
+            availableQuantity
+            tokenStandard
+            tokenId
+          }
+        }
+      `,
+    },
+  });
+
+  return result.findProducts;
+}

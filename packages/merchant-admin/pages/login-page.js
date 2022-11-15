@@ -28,8 +28,8 @@ function LoginPage() {
           Zkopru Merchant Service
         </div>
 
-        <div className="section login-form">
-          <div className="section-title">
+        <div className="login-form">
+          <div className="title">
             Sign in with Ethereum
           </div>
           <p>
