@@ -66,25 +66,13 @@ p {
   width: 100%;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  border-bottom: 1px solid var(--border-color);
-  padding: 0rem 2rem;
-  height: $header_height;
-}
-
 .logo {
   font-size: 1.4rem;
   font-weight: 600;
   text-align: left;
-  padding: 0.5rem 2rem;
 
   a {
     color: var(--text-color);
-    line-height: 3.5rem;
   }
 
   &:hover {
@@ -102,13 +90,14 @@ p {
 }
 
 .content {
-  max-width: 1280px;
   padding: 2rem;
+  max-width: 1280px;
   width: 100%;
   margin: 0 auto;
 }
 
 .sidebar {
+  padding: 2rem;
   width: 300px;
   background-color: var(--gray-100);
   border-right: 1px solid var(--border-color);
@@ -116,16 +105,16 @@ p {
 }
 
 .sidebar-menu {
-  margin-top: 1rem;
+  margin-top: 2rem;
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-menu-item {
-  padding: 0.25rem 2rem;
-  font-size: 1.1rem;
+  padding-top: 0.5rem;
+  font-size: 1.2rem;
   font-weight: 500;
-  color: var(--gray-700) !important;
+  color: var(--blue-700) !important;
 
   &:hover {
     text-decoration: underline;
@@ -154,7 +143,11 @@ p {
 .page-title {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .login-page {
@@ -187,6 +180,14 @@ p {
   &:hover {
     opacity: 1;
   }
+}
+
+.new-product-form {
+  max-width: 700px;
+  background-color: var(--gray-100);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 2rem;
 }
 
 .icon-button {

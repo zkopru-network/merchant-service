@@ -8,7 +8,7 @@ import { FastifyRequest } from 'fastify';
 import resolvers from './resolvers';
 import authMiddleware from './middleware/auth';
 import { IBlockchainService, ILogger } from '../common/interfaces';
-import { AuthenticationError, ValidationError } from '../common/error';
+import errorHandlerMiddleware from './middleware/error-handler';
 
 const typeDefs = loadSchemaSync('./schema.graphql', {
   loaders: [new GraphQLFileLoader()],
@@ -22,24 +22,6 @@ const schemaRaw = makeExecutableSchema({
   ],
   resolvers,
 });
-
-const errorHandlerMiddleware = async (
-  resolve: any,
-  root: any,
-  args: any,
-  context: any,
-  info: any,
-) => {
-  try {
-    const result = await resolve(root, args, context, info);
-    return result;
-  } catch (error) {
-    if (error instanceof ValidationError || error instanceof AuthenticationError) {
-      return error;
-    }
-    return new Error('Unexpected error ocurred');
-  }
-};
 
 const schemaWithMiddleware = applyMiddleware(schemaRaw, errorHandlerMiddleware, authMiddleware);
 

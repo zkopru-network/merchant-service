@@ -1,22 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
+import { useMutation, gql } from '@apollo/client';
 import SIWEButton from '../components/siwe-button';
-import { getAuthToken, setAuthToken, signIn } from '../data';
+
+const signInQuery = gql`
+  mutation signIn($message: String!, $signature: String!) {
+    authToken: signIn(message: $message, signature: $signature)
+  }
+`;
 
 function LoginPage() {
   const navigate = useNavigate();
-
-  // Redirect to homepage if token is present
-  React.useEffect(() => {
-    const authToken = getAuthToken();
-    if (authToken) {
-      navigate('/');
-    }
-  }, []);
+  const [signInMutation] = useMutation(signInQuery);
 
   async function onSignIn({ message, signature }) {
-    const authToken = await signIn({ message, signature });
-    setAuthToken(authToken);
+    const { data } = await signInMutation({ variables: { message, signature } });
+    window.localStorage.setItem('authToken', data.authToken);
     navigate('/');
   }
 

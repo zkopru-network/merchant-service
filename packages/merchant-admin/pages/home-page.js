@@ -1,10 +1,19 @@
 import React from 'react';
+import { useQuery, gql } from '@apollo/client';
 import MetricBox from '../components/metric-box';
-import { findOrders } from '../data';
-import usePromise from '../hooks/use-promise';
+
+const findOrdersQuery = gql`
+  query findOrders {
+    orders: findOrders {
+      id
+      amount
+      status
+    }
+  }
+`;
 
 function HomePage() {
-  const [orders, { isFetching, error }] = usePromise(() => findOrders());
+  const { loading, error, data } = useQuery(findOrdersQuery);
 
   return (
     <div className="page home-page">
@@ -13,7 +22,8 @@ function HomePage() {
 
         <MetricBox
           label="Orders"
-          value={orders?.length}
+          loading={loading}
+          value={data?.orders?.length}
         />
 
       </div>

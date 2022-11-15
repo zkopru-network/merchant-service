@@ -1,15 +1,21 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { getAuthToken } from '../data';
 
 export default function Layout() {
   const isLoginPage = window.location.pathname.includes('/login');
+  const authToken = window.localStorage.getItem('authToken');
+
   const navigate = useNavigate();
 
   React.useEffect(() => {
     if (!isLoginPage) {
-      if (!getAuthToken()) {
+      if (!authToken) {
         navigate('/login');
+      }
+    }
+    if (isLoginPage) {
+      if (authToken) {
+        navigate('/');
       }
     }
   }, [isLoginPage]);

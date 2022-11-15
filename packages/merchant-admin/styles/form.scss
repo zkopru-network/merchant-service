@@ -2,15 +2,33 @@
 .form {
   button[type="submit"] {
     margin-top: 1rem;
+    font-size: 1.2rem;
+
+    &:hover {
+      background-color: var(--green-700) !important;
+    }
   }
+
+  label {
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+
+  color: var(--text-color);
+}
+
+.field {
+  margin-bottom: 2rem;
 }
 
 .form-input {
   display: block;
   width: 100%;
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   font-size: 1.2rem;
-  border: 1px solid var(--text-color);
-  border-radius: 0;
+  border: 1px solid var(--gray-500);
+  border-radius: 3px;
 }

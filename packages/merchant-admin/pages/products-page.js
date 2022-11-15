@@ -1,11 +1,24 @@
 import React from 'react';
-import { findProducts } from '../data';
-import usePromise from '../hooks/use-promise';
+import { Link } from 'react-router-dom';
+import { useQuery, gql } from '@apollo/client';
+
+const findOrdersQuery = gql`
+  query findProducts {
+    products: findProducts {
+      id
+      name
+      price
+      availableQuantity
+      tokenStandard
+      tokenId
+    }
+  }
+`;
 
 function ProductsPage() {
-  const [products, { isFetching, error }] = usePromise(() => findProducts());
+  const { loading, error, data } = useQuery(findOrdersQuery);
 
-  if (isFetching) {
+  if (loading) {
     return (
       <div className="page products-page">
 
@@ -20,7 +33,11 @@ function ProductsPage() {
   return (
     <div className="page products-page">
 
-      <div className="page-title">Products</div>
+      <div className="page-title">
+        Products
+
+        <Link className="button" to="/products/new">Create Product</Link>
+      </div>
 
       <div className="list">
         <div className="columns list__header">
@@ -31,7 +48,7 @@ function ProductsPage() {
           <div className="column list__title">Price</div>
         </div>
 
-        {products.map((product) => (
+        {data?.products?.map((product) => (
           <div key={product.id} className="list-item list-item--clickable">
             <div className="columns">
               <div className="column list-item__value">{product.name}</div>
