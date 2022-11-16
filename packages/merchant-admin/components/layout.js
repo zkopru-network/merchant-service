@@ -32,15 +32,22 @@ export default function Layout() {
       <div className="sidebar">
 
         <h1 className="logo">
-          <Link to="/">
-            ZMS
-          </Link>
+          ZMS
         </h1>
 
         <div className="sidebar-menu">
-          <Link className="sidebar-menu-item" to="/">Home</Link>
-          <Link className="sidebar-menu-item" to="/products">Products</Link>
-          <Link className="sidebar-menu-item" to="/orders">Orders</Link>
+          <Link className="sidebar-menu-item" to="/">
+            <i className="icon icon-home" />
+            Home
+          </Link>
+          <Link className="sidebar-menu-item" to="/products">
+            <i className="icon icon-products" />
+            Products
+          </Link>
+          <Link className="sidebar-menu-item" to="/orders">
+            <i className="icon icon-orders" />
+            Orders
+          </Link>
         </div>
 
       </div>

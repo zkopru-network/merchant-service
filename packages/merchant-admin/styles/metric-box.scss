@@ -21,7 +21,7 @@
     margin-right: 0;
   }
 
-  &.loading {
+  &--loading {
     &::after {
       position: absolute;
       top: 0;
@@ -45,25 +45,25 @@
   &.is-link {
     cursor: pointer;
   }
-}
 
-.metric-box__label {
-  font-size: 12px;
-  font-weight: bold;
-  opacity: 0.7;
-}
+  &__label {
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0.7;
+  }
 
-.metric-box__value {
-  font-size: 2.5rem;
-  font-weight: 500;
-  opacity: 0.9;
-  align-self: flex-end;
-  line-height: 2.5rem;
-}
+  &__value {
+    font-size: 2.5rem;
+    font-weight: 500;
+    opacity: 0.9;
+    align-self: flex-end;
+    line-height: 2.5rem;
+  }
 
-.metric-box__unit {
-  margin-left: 0.25rem;
-  justify-self: flex-end;
-  align-self: flex-end;
-  font-size: 0.9rem;
+  &__unit {
+    margin-left: 0.25rem;
+    justify-self: flex-end;
+    align-self: flex-end;
+    font-size: 0.9rem;
+  }
 }

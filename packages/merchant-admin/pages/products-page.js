@@ -18,25 +18,13 @@ const findOrdersQuery = gql`
 function ProductsPage() {
   const { loading, error, data } = useQuery(findOrdersQuery);
 
-  if (loading) {
-    return (
-      <div className="page products-page">
-
-        <div className="product-item loading" />
-        <div className="product-item loading" />
-        <div className="product-item loading" />
-
-      </div>
-    );
-  }
-
   return (
     <div className="page products-page">
 
       <div className="page-title">
         Products
 
-        <Link className="button" to="/products/new">Create Product</Link>
+        <Link className="button" to="/products/new">Add Product</Link>
       </div>
 
       <div className="list">
@@ -48,7 +36,15 @@ function ProductsPage() {
           <div className="column list__title">Price</div>
         </div>
 
-        {data?.products?.map((product) => (
+        {loading && (
+          <>
+            <div className="list-item list-item--loading" />
+            <div className="list-item list-item--loading" />
+            <div className="list-item list-item--loading" />
+          </>
+        )}
+
+        {!loading && data?.products?.map((product) => (
           <div key={product.id} className="list-item list-item--clickable">
             <div className="columns">
               <div className="column list-item__value">{product.name}</div>

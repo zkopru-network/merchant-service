@@ -9,7 +9,7 @@ function MetricBox(props) {
 
   let className = 'metric-box';
   if (loading) {
-    className += ' loading';
+    className += ' metric-box--loading';
   }
   if (to) {
     className += ' is-link';
