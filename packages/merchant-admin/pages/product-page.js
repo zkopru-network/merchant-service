@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
-import { trimAddress } from '../common/utils';
+import { formatEther, trimAddress } from '../common/utils';
 import List from '../components/list';
 
 const getProductQuery = gql`
@@ -81,7 +81,6 @@ function ProductPage() {
             )}
             <div className="product-page__label">Price</div>
             <div className="product-page__value">Ξ {product.price}</div>
-
             {!isNFT && (
               <>
                 <div className="product-page__label">Available Quantity</div>
@@ -95,24 +94,22 @@ function ProductPage() {
         </div>
       </div>
 
-      {hasSold && (
-        <>
-          <hr />
-          <div className="title">Orders</div>
-          <List
-            loading={loading}
-            items={data?.matchingOrders}
-            fields={{
-              buyerAddress: 'Buyer',
-              quantity: 'Quantity',
-              amount: 'Total Amount',
-              status: 'Status',
-            }}
-            formatters={{ buyerAddress: trimAddress }}
-            redirectTo={(order) => `/orders/${order.id}`}
-          />
-        </>
-      )}
+      <hr />
+
+      <div className="title">Orders</div>
+      <List
+        itemName="matching order"
+        loading={loading}
+        items={data?.matchingOrders}
+        fields={{
+          buyerAddress: 'Buyer',
+          quantity: 'Quantity',
+          amount: 'Total Amount',
+          status: 'Status',
+        }}
+        formatters={{ buyerAddress: trimAddress, amount: formatEther }}
+        redirectTo={(order) => `/orders/${order.id}`}
+      />
 
     </div>
   );

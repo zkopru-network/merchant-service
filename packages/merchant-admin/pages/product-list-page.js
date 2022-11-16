@@ -22,7 +22,7 @@ function ProductsListPage() {
   const { loading, error, data } = useQuery(findProductsQuery);
 
   return (
-    <div className="page products-page">
+    <div className="page product-list-page">
 
       <div className="page-title">
         Products
@@ -35,6 +35,7 @@ function ProductsListPage() {
 
       {!error && (
         <List
+          itemName="product"
           loading={loading}
           items={data?.products}
           fields={{

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function List(props) {
   const {
-    loading, items = [], fields, formatters, redirectTo, keyField = 'id',
+    loading, items = [], fields, formatters, redirectTo, keyField = 'id', itemName,
   } = props;
 
   function renderColumns(item) {
@@ -34,11 +34,14 @@ export default function List(props) {
 
   return (
     <div className="list">
-      <div className="columns list__header">
-        {Object.keys(fields).map((f) => (
-          <div key={f} className="column list__title">{fields[f]}</div>
-        ))}
-      </div>
+
+      {(loading || items.length) > 0 && (
+        <div className="columns list__header">
+          {Object.keys(fields).map((f) => (
+            <div key={f} className="column list__title">{fields[f]}</div>
+          ))}
+        </div>
+      )}
 
       {loading && (
         <>
@@ -48,7 +51,13 @@ export default function List(props) {
         </>
       )}
 
-      {!loading && items.map(renderListItem)}
+      {!loading && items.length === 0 && (
+        <div className="message">
+          No {itemName}s found
+        </div>
+      )}
+
+      {!loading && items.length > 0 && items.map(renderListItem)}
     </div>
   );
 }

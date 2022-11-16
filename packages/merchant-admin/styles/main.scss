@@ -158,6 +158,10 @@ p {
 
 .message {
   padding: 1rem;
+  background-color: var(--gray-100);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  font-size: 1.1rem;
 }
 
 .flex-row {
