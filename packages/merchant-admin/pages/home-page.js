@@ -13,10 +13,14 @@ const findOrdersQuery = gql`
 `;
 
 function HomePage() {
-  const { loading, error, data } = useQuery(findOrdersQuery);
+  const { loading, data } = useQuery(findOrdersQuery);
 
   return (
     <div className="page home-page">
+
+      <div className="page-title">
+        Dashboard
+      </div>
 
       <div className="metrics">
 

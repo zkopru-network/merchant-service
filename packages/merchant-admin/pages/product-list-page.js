@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
+import List from '../components/list';
+import { formatEther } from '../common/utils';
+import ErrorView from '../components/error-view';
 
 const findProductsQuery = gql`
   query findProducts {
@@ -23,39 +26,28 @@ function ProductsListPage() {
 
       <div className="page-title">
         Products
-
         <Link className="button" to="/products/new">Add Product</Link>
       </div>
 
-      <div className="list">
-        <div className="columns list__header">
-          <div className="column list__title">Name</div>
-          <div className="column list__title">Token Standard</div>
-          <div className="column list__title">Token ID</div>
-          <div className="column list__title">Quantity</div>
-          <div className="column list__title">Price</div>
-        </div>
+      {error && (
+        <ErrorView error={error} />
+      )}
 
-        {loading && (
-          <>
-            <div className="list-item list-item--loading" />
-            <div className="list-item list-item--loading" />
-            <div className="list-item list-item--loading" />
-          </>
-        )}
-
-        {!loading && data?.products?.map((product) => (
-          <Link to={`/products/${product.id}`} key={product.id} className="list-item list-item--clickable">
-            <div className="columns">
-              <div className="column list-item__value">{product.name}</div>
-              <div className="column list-item__value">{product.tokenStandard}</div>
-              <div className="column list-item__value">{product.tokenId}</div>
-              <div className="column list-item__value">{product.availableQuantity}</div>
-              <div className="column list-item__value">Ξ {product.price}</div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {!error && (
+        <List
+          loading={loading}
+          items={data?.products}
+          fields={{
+            name: 'Name',
+            tokenStandard: 'Token Standard',
+            tokenId: 'Token ID',
+            availableQuantity: 'Quantity',
+            price: 'Price',
+          }}
+          formatters={{ price: formatEther }}
+          redirectTo={(product) => `/products/${product.id}`}
+        />
+      )}
 
     </div>
   );

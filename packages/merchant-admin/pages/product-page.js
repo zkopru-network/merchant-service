@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
 import { trimAddress } from '../common/utils';
+import List from '../components/list';
 
 const getProductQuery = gql`
   query getProduct($id: String!) {
@@ -97,35 +98,19 @@ function ProductPage() {
       {hasSold && (
         <>
           <hr />
-          <div className="list">
-            <div className="title">Orders</div>
-
-            <div className="columns list__header">
-              <div className="column list__title">Buyer</div>
-              <div className="column list__title">Quantity</div>
-              <div className="column list__title">Total Amount</div>
-              <div className="column list__title">Status</div>
-            </div>
-
-            {loading && (
-            <>
-              <div className="list-item list-item--loading" />
-              <div className="list-item list-item--loading" />
-              <div className="list-item list-item--loading" />
-            </>
-            )}
-
-            {!loading && data?.matchingOrders?.map((order) => (
-              <Link to={`/order/${order.id}`} key={order.id} className="list-item list-item--clickable">
-                <div className="columns">
-                  <div className="column list-item__value">{trimAddress(order.buyerAddress)}</div>
-                  <div className="column list-item__value">{order.quantity}</div>
-                  <div className="column list-item__value">{order.amount}</div>
-                  <div className="column list-item__value">{order.status}</div>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <div className="title">Orders</div>
+          <List
+            loading={loading}
+            items={data?.matchingOrders}
+            fields={{
+              buyerAddress: 'Buyer',
+              quantity: 'Quantity',
+              amount: 'Total Amount',
+              status: 'Status',
+            }}
+            formatters={{ buyerAddress: trimAddress }}
+            redirectTo={(order) => `/orders/${order.id}`}
+          />
         </>
       )}
 

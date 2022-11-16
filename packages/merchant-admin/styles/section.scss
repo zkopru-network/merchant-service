@@ -6,6 +6,11 @@
   position: relative;
   color: var(--text-color) !important;
 
+  &--error {
+    background-color: var(--red-300);
+    border-color: var(--red-300);
+  }
+
   &__title {
     font-weight: 500;
     font-size: 1.5rem;
