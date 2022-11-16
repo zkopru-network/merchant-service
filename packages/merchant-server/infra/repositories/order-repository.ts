@@ -61,12 +61,15 @@ export class OrderRepository implements IOrderRepository {
     return this.mapDBRowToOrder(rows[0]);
   }
 
-  async findOrders(filters?: { status: OrderStatus }) : Promise<Order[]> {
+  async findOrders(filters?: { status: OrderStatus, productId: string }) : Promise<Order[]> {
     const rows = await this.db.from('orders')
       .innerJoin('products', 'orders.product_id', 'products.id')
       .modify((qb) => {
         if (filters?.status) {
           qb.where('orders.status', filters.status.toString());
+        }
+        if (filters?.productId) {
+          qb.where('orders.product_id', filters.productId);
         }
       })
       .select(

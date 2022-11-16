@@ -31,7 +31,7 @@ export interface IProductRepository {
 
 export interface IOrderRepository {
   getById: (id: string) => Promise<Order>;
-  findOrders: (filters?: { status: OrderStatus }) => Promise<Order[]>;
+  findOrders: (filters?: { status?: OrderStatus, productId?: string }) => Promise<Order[]>;
   createOrder: (order: Order) => Promise<void>;
   updateOrder: (order: Order) => Promise<void>;
 }

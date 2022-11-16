@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
 
-const findOrdersQuery = gql`
+const findProductsQuery = gql`
   query findProducts {
     products: findProducts {
       id
@@ -15,8 +15,8 @@ const findOrdersQuery = gql`
   }
 `;
 
-function ProductsPage() {
-  const { loading, error, data } = useQuery(findOrdersQuery);
+function ProductsListPage() {
+  const { loading, error, data } = useQuery(findProductsQuery);
 
   return (
     <div className="page products-page">
@@ -45,7 +45,7 @@ function ProductsPage() {
         )}
 
         {!loading && data?.products?.map((product) => (
-          <div key={product.id} className="list-item list-item--clickable">
+          <Link to={`/products/${product.id}`} key={product.id} className="list-item list-item--clickable">
             <div className="columns">
               <div className="column list-item__value">{product.name}</div>
               <div className="column list-item__value">{product.tokenStandard}</div>
@@ -53,7 +53,7 @@ function ProductsPage() {
               <div className="column list-item__value">{product.availableQuantity}</div>
               <div className="column list-item__value">Ξ {product.price}</div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -61,4 +61,4 @@ function ProductsPage() {
   );
 }
 
-export default ProductsPage;
+export default ProductsListPage;

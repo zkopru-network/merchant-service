@@ -7,8 +7,9 @@ import { ApolloProvider } from '@apollo/client';
 import graphQLClient from './common/graphql-client';
 import HomePage from './pages/home-page';
 import LoginPage from './pages/login-page';
-import ProductsPage from './pages/products-page';
+import ProductsListPage from './pages/product-list-page';
 import AddProductPage from './pages/add-product-page';
+import ProductPage from './pages/product-page';
 import Layout from './components/layout';
 
 function App() {
@@ -17,8 +18,9 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products" element={<ProductsListPage />} />
         <Route path="/products/new" element={<AddProductPage />} />
+        <Route path="/products/:id" element={<ProductPage />} />
       </Route>
     </Routes>
   );

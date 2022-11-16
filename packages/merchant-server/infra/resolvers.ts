@@ -11,6 +11,7 @@ import getOrderUseCase from '../use-cases/get-order';
 import Order from '../domain/order';
 import Product from '../domain/product';
 import signInUseCase from '../use-cases/sign-in';
+import getProductUseCase from '../use-cases/get-product';
 
 function productToDTO(product: Product) {
   return {
@@ -76,6 +77,16 @@ const resolvers : Resolvers<MercuriusContext> = {
     },
   },
   Query: {
+    async getProduct(_, args, context) {
+      const productsRepo = new ProductRepository(context.db, { logger: context.logger });
+
+      const product = await getProductUseCase(args.id, {
+        productRepository: productsRepo,
+        logger: context.logger,
+      });
+
+      return productToDTO(product);
+    },
     async findProducts(_, args, context) {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
@@ -89,7 +100,7 @@ const resolvers : Resolvers<MercuriusContext> = {
     async findOrders(_, args, context) {
       const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
 
-      const orders = await findOrdersUseCase({ status: args.status }, {
+      const orders = await findOrdersUseCase(args, {
         orderRepository: ordersRepo,
         logger: context.logger,
       });

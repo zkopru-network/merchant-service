@@ -110,15 +110,22 @@ export type Query = {
   findOrders?: Maybe<Array<Maybe<Order>>>;
   findProducts?: Maybe<Array<Maybe<Product>>>;
   getOrder?: Maybe<Order>;
+  getProduct?: Maybe<Product>;
 };
 
 
 export type QueryFindOrdersArgs = {
+  productId?: InputMaybe<Scalars['String']>;
   status?: InputMaybe<OrderStatus>;
 };
 
 
 export type QueryGetOrderArgs = {
+  id?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryGetProductArgs = {
   id?: InputMaybe<Scalars['String']>;
 };
 
@@ -266,6 +273,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   findOrders?: Resolver<Maybe<Array<Maybe<ResolversTypes['Order']>>>, ParentType, ContextType, Partial<QueryFindOrdersArgs>>;
   findProducts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Product']>>>, ParentType, ContextType>;
   getOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, Partial<QueryGetOrderArgs>>;
+  getProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryGetProductArgs>>;
 };
 
 export type Resolvers<ContextType = any> = {

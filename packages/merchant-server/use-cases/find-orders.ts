@@ -8,9 +8,13 @@ type Context = {
 
 type FindOrdersInput = {
   status?: OrderStatus
+  productId? : string
 }
 
 export default async function findOrdersUseCase(findOrdersInput: FindOrdersInput, context: Context) : Promise<Order[]> {
-  const result = await context.orderRepository.findOrders({ status: findOrdersInput.status });
+  const result = await context.orderRepository.findOrders({
+    status: findOrdersInput.status,
+    productId: findOrdersInput.productId,
+  });
   return result;
 }

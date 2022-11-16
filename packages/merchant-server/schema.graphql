@@ -66,14 +66,15 @@ type Order {
 
 
 type Query {
-  findProducts: [Product]  @auth
-  getOrder(id: String): Order  @auth
-  findOrders(status: OrderStatus): [Order]  @auth
+  getProduct(id: String): Product @auth
+  findProducts: [Product] @auth
+  getOrder(id: String): Order @auth
+  findOrders(status: OrderStatus, productId: String): [Order] @auth
 }
 
 type Mutation {
   signIn(message: String!, signature: String!) : String
-  createProduct(product: ProductInput!) : Product  @auth
-  editProduct(id: String!, productData: EditProductInput!) : Product  @auth
-  createOrder(order: CreateOrderInput!) : Order  @auth
+  createProduct(product: ProductInput!) : Product @auth
+  editProduct(id: String!, productData: EditProductInput!) : Product @auth
+  createOrder(order: CreateOrderInput!) : Order
 }

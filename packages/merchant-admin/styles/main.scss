@@ -12,6 +12,8 @@
 @import "./list.scss";
 @import "./icons.css";
 @import "./sidebar.scss";
+@import "./section.scss";
+@import "./custom.scss";
 
 $header_height: 4.5rem;
 
@@ -100,10 +102,14 @@ p {
   width: 100%;
 }
 
-.page-title {
+.title {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  @extend .title;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
