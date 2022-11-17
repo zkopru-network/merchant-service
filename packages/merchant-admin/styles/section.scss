@@ -23,6 +23,9 @@
   }
 
   &--loading {
+    min-height: 10rem;
+    overflow: hidden;
+
     &::after {
       position: absolute;
       top: 0;

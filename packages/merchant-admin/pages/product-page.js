@@ -34,7 +34,6 @@ function ProductPage() {
     variables: { id },
   });
   const { product, matchingOrders } = data;
-
   const hasSold = matchingOrders?.length > 0;
   const totalSold = hasSold ? matchingOrders.reduce((acc, o) => acc + o.amount, 0) : 0;
 
