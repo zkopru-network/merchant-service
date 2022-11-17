@@ -1,11 +1,12 @@
 import {
-  ILogger, IBlockchainService, IOrderRepository,
+  ILogger, IBlockchainService, IOrderRepository, IProductRepository,
 } from '../common/interfaces';
-import Order from '../domain/order';
+import Order, { OrderStatus } from '../domain/order';
 
 type Context = {
   logger: ILogger;
   orderRepository: IOrderRepository;
+  productRepository: IProductRepository;
   blockchainService: IBlockchainService;
 };
 
@@ -25,6 +26,14 @@ export default async function updateExistingOrderStatusUseCase(context: Context)
 
   for (const order of allOrders) {
     const newStatus = newOrderStatuses[order.id];
+
+    if (order.status === OrderStatus.Complete && newStatus === OrderStatus.Pending) {
+      // Revert product's available quantity
+      // eslint-disable-next-line no-await-in-loop
+      const product = await context.productRepository.getById(order.product.id);
+      product.availableQuantity += order.quantity;
+      context.productRepository.updateProduct(product);
+    }
 
     if (order.status !== newStatus) {
       context.logger.info(`Updating order status from ${order.status} to ${newStatus} for order ${order.id}`);

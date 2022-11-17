@@ -8,6 +8,7 @@ import { connectDB } from './infra/db';
 import updateExistingOrderStatusUseCase from './use-cases/update-existing-order-status';
 import { OrderRepository } from './infra/repositories/order-repository';
 import { AuthenticationError } from './common/error';
+import { ProductRepository } from './infra/repositories/product-repository';
 
 const logger = createLogger();
 
@@ -39,6 +40,7 @@ app.addHook('onReady', async () => {
     await updateExistingOrderStatusUseCase({
       logger,
       orderRepository: new OrderRepository(db, { logger }),
+      productRepository: new ProductRepository(db, { logger }),
       blockchainService: zkopruService,
     });
     setTimeout(updateOrderStatus, 10 * 1000);

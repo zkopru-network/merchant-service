@@ -43,8 +43,12 @@ export default async function createOrderUseCase(orderInput: CreateOrderInput, c
   const sellerTransaction = await context.blockchainService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt });
   order.sellerTransaction = sellerTransaction;
 
+  // Deduct quantity from product's available quantity
+  product.availableQuantity -= order.quantity;
+
   // Persist in DB
   await context.orderRepository.createOrder(order);
+  await context.productRepository.updateProduct(product);
 
   return order;
 }

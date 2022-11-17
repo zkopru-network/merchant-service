@@ -26,6 +26,7 @@ import Order, { OrderStatus } from '../domain/order';
 import updateExistingOrderStatusUseCase from '../use-cases/update-existing-order-status';
 import getOrderUseCase from '../use-cases/get-order';
 import Product from '../domain/product';
+import getProductUseCase from '../use-cases/get-product';
 
 // Mocked constants and helpers for all tests
 const mockCoordinatorUrl = 'https://mock-coordinator';
@@ -260,6 +261,28 @@ describe('use-case/create-order', () => {
     expect(mockedCoordinatorAPI).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
   }, 10 * 1000);
 
+  test('should reduce available quantity of product after creating order', async () => {
+    mockCoordinatorAPI();
+
+    const createdProduct = await createSampleProduct();
+    const purchaseQuantity = 3;
+    const atomicSwapSalt = 500; // Random salt
+    const { createdOrder } = await createOrder({
+      product: createdProduct,
+      atomicSwapSalt,
+      purchaseQuantity,
+    });
+
+    expect(typeof createdOrder.id).toBe('string');
+
+    // Expect available quantity to be reduced
+    const updatedProduct = await getProductUseCase(createdProduct.id, {
+      logger,
+      productRepository: productRepo,
+    });
+    expect(updatedProduct.availableQuantity).toEqual(createdProduct.availableQuantity - createdOrder.quantity);
+  }, 10 * 1000);
+
   test('should fail creating order if transaction amount is lower', async () => {
     const mockedCoordinatorAPI = mockCoordinatorAPI();
 
@@ -308,6 +331,7 @@ describe('use-case/create-order', () => {
       logger,
       orderRepository: orderRepo,
       blockchainService: zkopruService,
+      productRepository: productRepo,
     });
 
     // Get updated order
@@ -343,6 +367,7 @@ describe('use-case/create-order', () => {
       logger,
       orderRepository: orderRepo,
       blockchainService: zkopruService,
+      productRepository: productRepo,
     });
 
     // Get updated order
@@ -364,6 +389,7 @@ describe('use-case/create-order', () => {
       logger,
       orderRepository: orderRepo,
       blockchainService: zkopruService,
+      productRepository: productRepo,
     });
 
     // Get updated order
@@ -374,5 +400,12 @@ describe('use-case/create-order', () => {
 
     // Transaction would be back to Pending
     expect(updatedOrder2.status).toBe(OrderStatus.Pending);
+
+    // Deducted quantity should be reverted back
+    const updatedProduct = await getProductUseCase(createdProduct.id, {
+      logger,
+      productRepository: productRepo,
+    });
+    expect(updatedProduct.availableQuantity).toEqual(createdProduct.availableQuantity);
   }, 10 * 1000);
 });
