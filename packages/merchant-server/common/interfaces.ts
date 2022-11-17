@@ -27,6 +27,7 @@ export interface IProductRepository {
   productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
   addProduct: (product: Product) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
+  getProductMetrics: () => Promise<{ totalProducts: number }>;
 }
 
 export interface IOrderRepository {
@@ -34,4 +35,6 @@ export interface IOrderRepository {
   findOrders: (filters?: { status?: OrderStatus, productId?: string }) => Promise<Order[]>;
   createOrder: (order: Order) => Promise<void>;
   updateOrder: (order: Order) => Promise<void>;
+  getOrderMetrics: () => Promise<{ totalOrders: number, totalOrderAmount: number }>;
+  getDailyOrderMetrics: (startDate: Date, endDate: Date) => Promise<{ timestamp: Date, totalOrders: number, totalOrderAmount: number }[]>;
 }

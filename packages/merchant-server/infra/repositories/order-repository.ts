@@ -98,4 +98,36 @@ export class OrderRepository implements IOrderRepository {
       this.mapOrderToDbRow(order),
     ).where({ id: order.id });
   }
+
+  async getDailyOrderMetrics(startDate: Date, endDate: Date) : Promise<{ timestamp: Date; totalOrders: number; totalOrderAmount: number; }[]> {
+    const stats = await this.db('orders')
+      .select<{ timestamp: Date, totalOrders: number, totalOrderAmount: number }[]>(
+        this.db.raw('date_trunc(\'day\', "created_at") as timestamp'),
+        this.db.raw('SUM(1) as "totalOrders"'),
+        this.db.raw('SUM("amount") as "totalOrderAmount"'),
+      )
+      .where('created_at', '>', startDate)
+      .andWhere('created_at', '<', endDate)
+      .groupBy('timestamp');
+
+    return stats.map((s) => ({
+      timestamp: s.timestamp,
+      totalOrders: Number(s.totalOrders),
+      totalOrderAmount: Number(s.totalOrderAmount),
+    }));
+  }
+
+  async getOrderMetrics() : Promise<{ totalOrders: number; totalOrderAmount: number; }> {
+    const [stat] = await this.db('orders')
+      .select<{ totalOrders: number, totalOrderAmount: number }[]>(
+        this.db.raw('SUM(1) as "totalOrders"'),
+        this.db.raw('SUM(amount) as "totalOrderAmount"'),
+      )
+      .groupBy('created_at');
+
+    return {
+      totalOrders: Number(stat.totalOrders),
+      totalOrderAmount: Number(stat.totalOrderAmount),
+    };
+  }
 }

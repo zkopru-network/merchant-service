@@ -12,20 +12,21 @@ import Order from '../domain/order';
 import Product from '../domain/product';
 import signInUseCase from '../use-cases/sign-in';
 import getProductUseCase from '../use-cases/get-product';
+import getStoreMetricsUseCase from '../use-cases/get-store-metrics';
 
 function productToDTO(product: Product) {
   return {
     ...product,
-    createdAt: product.createdAt.getTime(),
-    updatedAt: product.updatedAt.getTime(),
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
   };
 }
 
 function orderToDTO(order: Order) {
   return {
     ...order,
-    createdAt: order.createdAt.getTime(),
-    updatedAt: order.updatedAt.getTime(),
+    createdAt: order.createdAt.toISOString(),
+    updatedAt: order.updatedAt.toISOString(),
     product: productToDTO(order.product),
   };
 }
@@ -116,6 +117,24 @@ const resolvers : Resolvers<MercuriusContext> = {
       });
 
       return orderToDTO(order);
+    },
+    async getStoreMetrics(_, args, context) {
+      const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
+      const productRepo = new ProductRepository(context.db, { logger: context.logger });
+
+      const metrics = await getStoreMetricsUseCase({ historyDays: 7 }, {
+        orderRepository: ordersRepo,
+        productRepository: productRepo,
+        logger: context.logger,
+      });
+
+      return {
+        ...metrics,
+        orderHistory: metrics.orderHistory.map((h) => ({
+          ...h,
+          timestamp: h.timestamp.toISOString(),
+        })),
+      };
     },
   },
 };

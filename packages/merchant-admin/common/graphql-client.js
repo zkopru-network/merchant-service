@@ -28,9 +28,10 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     // eslint-disable-next-line no-console
     console.error(`[Network error]: ${networkError}`);
 
+    // Clear auth token on 401 responses
     if (networkError.statusCode === 401) {
       removeAuthToken();
-      window.location.reload();
+      window.location.reload(); // Reload to trigger a redirect to login page
     }
   }
 });

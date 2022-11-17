@@ -89,4 +89,12 @@ export class ProductRepository implements IProductRepository {
 
     return exists;
   }
+
+  async getProductMetrics() : Promise<{ totalProducts: number; }> {
+    const rows = await this.db('products').count('id');
+
+    return {
+      totalProducts: Number(rows[0].count),
+    };
+  }
 }

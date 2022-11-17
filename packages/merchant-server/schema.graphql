@@ -47,8 +47,8 @@ type Product {
   tokenId: String
   availableQuantity: Int!
   price: Float!
-  createdAt: Int!
-  updatedAt: Int!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Order {
@@ -60,16 +60,29 @@ type Order {
   sellerTransaction: String
   amount: Float
   status: OrderStatus
-  createdAt: Int!
-  updatedAt: Int!
+  createdAt: String!
+  updatedAt: String!
 }
 
+type OrderHistoryItem {
+  timestamp: String!
+  totalOrders: Int!
+  totalOrderAmount: Float!
+}
+
+type StoreMetrics {
+  totalProducts: Int!
+  totalOrders: Int!
+  totalOrderAmount: Float!
+  orderHistory(numDays: Int): [OrderHistoryItem!]!
+}
 
 type Query {
   getProduct(id: String): Product @auth
   findProducts: [Product] @auth
   getOrder(id: String): Order @auth
   findOrders(status: OrderStatus, productId: String): [Order] @auth
+  getStoreMetrics: StoreMetrics
 }
 
 type Mutation {
