@@ -67,7 +67,7 @@ export class ProductRepository implements IProductRepository {
     return rows.map(ProductRepository.mapDBRowToProduct);
   }
 
-  async createProduct(product: Product) {
+  async addProduct(product: Product) {
     await this.db('products').insert(
       ProductRepository.mapProductToDbRow(product),
     );

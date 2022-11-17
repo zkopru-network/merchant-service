@@ -25,7 +25,7 @@ export interface IProductRepository {
   getById: (id: string) => Promise<Product>;
   findProducts: () => Promise<Product[]>;
   productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
-  createProduct: (product: Product) => Promise<void>;
+  addProduct: (product: Product) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
 }
 

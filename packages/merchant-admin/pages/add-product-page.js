@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, gql } from '@apollo/client';
 
-const createProductQuery = gql`
-  mutation createProduct($productInput: ProductInput!) {
-    createProduct(product: $productInput) {
+const addProductQuery = gql`
+  mutation addProduct($productInput: ProductInput!) {
+    addProduct(product: $productInput) {
       id
       name
       price
@@ -15,12 +15,12 @@ const createProductQuery = gql`
   }
 `;
 
-function CreateProductPage() {
+function AddProductPage() {
   const navigate = useNavigate();
 
   const [product, setProduct] = React.useState({});
 
-  const [createProductMutation] = useMutation(createProductQuery);
+  const [addProductMutation] = useMutation(addProductQuery);
 
   const isNFT = product.tokenStandard === 'Erc721';
 
@@ -29,7 +29,7 @@ function CreateProductPage() {
     e.stopPropagation();
 
     try {
-      await createProductMutation({ variables: { productInput: product } });
+      await addProductMutation({ variables: { productInput: product } });
       navigate('/products');
     } catch (error) {
       // eslint-disable-next-line no-alert
@@ -181,4 +181,4 @@ function CreateProductPage() {
   );
 }
 
-export default CreateProductPage;
+export default AddProductPage;

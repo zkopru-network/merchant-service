@@ -6,7 +6,7 @@ import { BN } from 'bn.js';
 import { toWei } from 'web3-utils';
 import { seed } from '../infra/db-migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';
-import createProductUseCase from '../use-cases/create-product';
+import addProductUseCase from '../use-cases/add-product';
 import { IProductRepository, ILogger, TokenStandard } from '../common/interfaces';
 import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
@@ -48,7 +48,7 @@ describe('use-case/find-products', () => {
       },
     };
 
-    await createProductUseCase({
+    await addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',
@@ -62,7 +62,7 @@ describe('use-case/find-products', () => {
       logger,
     });
 
-    await createProductUseCase({
+    await addProductUseCase({
       name: 'BoredFrens',
       description: 'Awesome NFT',
       imageUrl: 'https://ethereum.org/nft.png',

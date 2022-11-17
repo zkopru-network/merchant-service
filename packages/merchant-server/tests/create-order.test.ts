@@ -14,7 +14,7 @@ import { toWei } from 'web3-utils';
 import { ZkTx } from '@zkopru/transaction/src';
 import { seed } from '../infra/db-migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';
-import createProductUseCase from '../use-cases/create-product';
+import addProductUseCase from '../use-cases/add-product';
 import {
   ILogger, TokenStandard, IOrderRepository, IProductRepository,
 } from '../common/interfaces';
@@ -154,7 +154,7 @@ describe('use-case/create-order', () => {
 
   // Test helpers
   function createSampleProduct() {
-    return createProductUseCase({
+    return addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/food.png',

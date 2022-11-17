@@ -32,20 +32,20 @@ export type EditProductInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addProduct?: Maybe<Product>;
   createOrder?: Maybe<Order>;
-  createProduct?: Maybe<Product>;
   editProduct?: Maybe<Product>;
   signIn?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationCreateOrderArgs = {
-  order: CreateOrderInput;
+export type MutationAddProductArgs = {
+  product: ProductInput;
 };
 
 
-export type MutationCreateProductArgs = {
-  product: ProductInput;
+export type MutationCreateOrderArgs = {
+  order: CreateOrderInput;
 };
 
 
@@ -234,8 +234,8 @@ export type ResolversParentTypes = {
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  addProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<MutationAddProductArgs, 'product'>>;
   createOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, RequireFields<MutationCreateOrderArgs, 'order'>>;
-  createProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<MutationCreateProductArgs, 'product'>>;
   editProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<MutationEditProductArgs, 'id' | 'productData'>>;
   signIn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSignInArgs, 'message' | 'signature'>>;
 };

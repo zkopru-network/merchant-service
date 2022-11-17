@@ -11,7 +11,7 @@
 ## Merchant Server Design
 
 A variant/lighter version of **Domain Driven Design** is used to architect the codebase of merchant-server.
-  - All actions user (merchant/customer) are build as use-cases - for example `createOrder`, `createProduct`.
+  - All actions user (merchant/customer) are build as use-cases - for example `createOrder`, `addProduct`.
   - All business entities are Domains and have validation login built into them.
   - Use-cases take Domain object as inputs, modify them and then pass on the to the repositories.
   - Any repository/service required for the use-case is injected in to them.

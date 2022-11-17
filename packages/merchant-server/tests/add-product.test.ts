@@ -7,7 +7,7 @@ import { toWei } from 'web3-utils';
 import { seed } from '../infra/db-migrations/seeds/bootstrap';
 import Product from '../domain/product';
 import { ProductRepository } from '../infra/repositories/product-repository';
-import createProductUseCase from '../use-cases/create-product';
+import addProductUseCase from '../use-cases/add-product';
 import { IProductRepository, ILogger, TokenStandard } from '../common/interfaces';
 import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
@@ -56,7 +56,7 @@ describe('use-case/create-product', () => {
       price: 0.1,
     };
 
-    const createdProduct = await createProductUseCase(productInput, {
+    const createdProduct = await addProductUseCase(productInput, {
       productRepository: productRepo,
       blockchainService: zkopruService,
       logger,
@@ -94,7 +94,7 @@ describe('use-case/create-product', () => {
       price: 0.1,
     };
 
-    await expect(() => createProductUseCase(productInput, {
+    await expect(() => addProductUseCase(productInput, {
       productRepository: productRepo,
       blockchainService: zkopruService,
       logger,
@@ -114,7 +114,7 @@ describe('use-case/create-product', () => {
     };
 
     // Create product
-    await createProductUseCase({
+    await addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',
@@ -129,7 +129,7 @@ describe('use-case/create-product', () => {
     });
 
     // Create product for same token with different description (balance still available)
-    await expect(() => createProductUseCase({
+    await expect(() => addProductUseCase({
       name: 'MealToken ',
       description: 'Exchange this for a meal',
       imageUrl: 'https://ethereum.org/2.png',
@@ -157,7 +157,7 @@ describe('use-case/create-product', () => {
     };
 
     // Create product
-    await createProductUseCase({
+    await addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',
@@ -173,7 +173,7 @@ describe('use-case/create-product', () => {
     });
 
     // Create product for same token with different tokenId
-    await createProductUseCase({
+    await addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',
@@ -202,7 +202,7 @@ describe('use-case/create-product', () => {
     };
 
     // Create product
-    await createProductUseCase({
+    await addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',
@@ -218,7 +218,7 @@ describe('use-case/create-product', () => {
     });
 
     // Create product for same token with different tokenId
-    await expect(() => createProductUseCase({
+    await expect(() => addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',

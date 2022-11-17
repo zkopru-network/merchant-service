@@ -74,7 +74,7 @@ type Query {
 
 type Mutation {
   signIn(message: String!, signature: String!) : String
-  createProduct(product: ProductInput!) : Product @auth
+  addProduct(product: ProductInput!) : Product @auth
   editProduct(id: String!, productData: EditProductInput!) : Product @auth
   createOrder(order: CreateOrderInput!) : Order
 }

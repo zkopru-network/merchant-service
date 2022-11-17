@@ -1,5 +1,5 @@
 import type { MercuriusContext } from 'mercurius';
-import createProductUseCase from '../use-cases/create-product';
+import addProductUseCase from '../use-cases/add-product';
 import findProductsUseCase from '../use-cases/find-products';
 import { Resolvers } from '../types/graphql.d';
 import { ProductRepository } from './repositories/product-repository';
@@ -40,10 +40,10 @@ const resolvers : Resolvers<MercuriusContext> = {
 
       return authToken;
     },
-    async createProduct(_, args, context) {
+    async addProduct(_, args, context) {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
-      const createdProduct = await createProductUseCase(args.product, {
+      const createdProduct = await addProductUseCase(args.product, {
         blockchainService: context.zkopruService,
         productRepository: productRepo,
         logger: context.logger,

@@ -5,7 +5,7 @@ import {
 } from '../common/interfaces';
 import Product from '../domain/product';
 
-type CreateProductInput = {
+type AddProductInput = {
   name: string;
   description?: string;
   imageUrl?: string;
@@ -22,7 +22,7 @@ type Context = {
   blockchainService: IBlockchainService;
 };
 
-export default async function createProductUseCase(productInput: CreateProductInput, context: Context) : Promise<Product> {
+export default async function addProductUseCase(productInput: AddProductInput, context: Context) : Promise<Product> {
   // Create domain object
   const product = new Product({
     id: uuid(),
@@ -41,7 +41,7 @@ export default async function createProductUseCase(productInput: CreateProductIn
   await context.blockchainService.ensureProductAvailability(product, product.availableQuantity);
 
   // Add to repo
-  await context.productRepository.createProduct(product);
+  await context.productRepository.addProduct(product);
 
   return product;
 }
