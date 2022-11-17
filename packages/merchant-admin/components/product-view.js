@@ -10,7 +10,7 @@ function ProductView(props) {
 
   if (loading) {
     return (
-      <div style={{ height: '20rem' }} className="section section--loading" />
+      <div className="section section--loading" />
     );
   }
 

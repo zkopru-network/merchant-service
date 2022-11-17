@@ -83,21 +83,6 @@ p {
   overflow-y: auto;
 }
 
-.link {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--text-color);
-  background: none;
-  padding: 0;
-  border: 0;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--text-color);
-    text-decoration: underline;
-  }
-}
-
 .w-100 {
   width: 100%;
 }
@@ -117,36 +102,10 @@ p {
   min-height: 2.75rem;
 }
 
-.login-page {
-  height: 100%;
-  width: 100%;
-  background-color: var(--gray-100);
-  display: flex;
-  flex-direction: column;
-  padding-top: 10rem;
-  align-items: center;
-}
-
-.login-form {
-  font-size: 1.1rem;
-  max-width: 500px;
-  background-color: #fff;
-  height: auto;
-}
-
-.siwe-button {
-  width: 250px;  
-  border: none;
-  cursor: pointer;
-  opacity: 0.9;
-  margin: 0;
-  padding: 0;
-  background-color: inherit;
-  margin-top: 1rem;
-
-  &:hover {
-    opacity: 1;
-  }
+.page-description {
+  margin-top: -1.75rem;
+  margin-bottom: 2rem;
+  font-size: 1rem;
 }
 
 .icon-button {
@@ -164,16 +123,4 @@ p {
   border-radius: 3px;
   font-size: 1.1rem;
   font-weight: 500;
-}
-
-.flex-row {
-  display: flex;
-  flex-direction: row;
-}
-
-@media screen and (max-width:641px) {
-  // Disable create dashboard and widgets on small screens
-  .menu {
-    display: none;
-  }
 }

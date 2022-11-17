@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, gql } from '@apollo/client';
 import SIWEButton from '../components/siwe-button';
+import { setAuthToken } from '../common/auth-helpers';
 
 const signInQuery = gql`
   mutation signIn($message: String!, $signature: String!) {
@@ -15,7 +16,7 @@ function LoginPage() {
 
   async function onSignIn({ message, signature }) {
     const { data } = await signInMutation({ variables: { message, signature } });
-    window.localStorage.setItem('authToken', data.authToken);
+    setAuthToken(data.authToken);
     navigate('/');
   }
 
@@ -27,8 +28,12 @@ function LoginPage() {
           Zkopru Merchant Service
         </div>
 
-        <div className="login-form">
-          <div className="title">
+        <div className="page-description">
+          A privacy friendly digital store for tokenized assets, powered by Zkopru. 
+        </div>
+
+        <div className="section">
+          <div className="section__title">
             Sign in with Ethereum
           </div>
           <p>
@@ -36,6 +41,7 @@ function LoginPage() {
             <br />
             If you are the merchant of this store, you can login with the same account you configured in merchant server.
           </p>
+
           <SIWEButton onSignIn={({ message, signature }) => onSignIn({ message, signature })} />
         </div>
 

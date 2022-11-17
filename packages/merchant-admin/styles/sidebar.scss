@@ -22,15 +22,18 @@
   background-color: var(--gray-200);
   border-right: 1px solid var(--border-color);
   height: 100%;
-}
-
-.sidebar-menu {
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
 }
 
-.sidebar-menu-item {
+.sidebar__menu {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.sidebar__menu-item {
   padding: 0.5rem 2rem;
   font-size: 1.1rem;
   font-weight: 500;
@@ -46,5 +49,17 @@
 
   .icon {
     margin-right: 0.5rem;
+  }
+}
+
+.sidebar__footer {
+  padding: 2rem 0;
+
+  button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 2rem;
+    @extend .sidebar__menu-item;
   }
 }

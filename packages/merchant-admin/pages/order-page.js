@@ -42,40 +42,36 @@ function OrderPage() {
     return <ErrorView error={error} />;
   }
 
-  if (loading) {
-    return (
-      <div className="page products-page">
-        Loading
-      </div>
-    );
-  }
-
   return (
-    <div className="page product-page">
+    <div className="page order-page">
 
       <div className="page-title">
-        Order for {product.name}
+        {product && `Order for ${product.name}`}
       </div>
 
-      <div className="section mb-5 pl-1 ">
+      <div className={`section mb-5 pl-1 ${loading ? 'section--loading' : ''}`}>
         <div className="product-view__details">
-          <div className="product-view__label">Quantity</div>
-          <div className="product-view__value">{order.quantity}</div>
+          {!loading && order && (
+            <>
+              <div className="product-view__label">Quantity</div>
+              <div className="product-view__value">{order.quantity}</div>
 
-          <div className="product-view__label">Total Amount</div>
-          <div className="product-view__value">{order.amount}</div>
+              <div className="product-view__label">Total Amount</div>
+              <div className="product-view__value">{order.amount}</div>
 
-          <div className="product-view__label">Status</div>
-          <div className="product-view__value">{order.status}</div>
+              <div className="product-view__label">Status</div>
+              <div className="product-view__value">{order.status}</div>
 
-          <div className="product-view__label">Customer Address</div>
-          <div className="product-view__value">{trimAddress(order.buyerAddress)}</div>
+              <div className="product-view__label">Customer Address</div>
+              <div className="product-view__value">{trimAddress(order.buyerAddress)}</div>
 
-          <div className="product-view__label">Customer Transaction</div>
-          <div className="product-view__value">{trimAddress(order.buyerTransaction)}</div>
+              <div className="product-view__label">Customer Transaction</div>
+              <div className="product-view__value">{trimAddress(order.buyerTransaction)}</div>
 
-          <div className="product-view__label">Merchant Transaction</div>
-          <div className="product-view__value">{trimAddress(order.sellerTransaction)}</div>
+              <div className="product-view__label">Merchant Transaction</div>
+              <div className="product-view__value">{trimAddress(order.sellerTransaction)}</div>
+            </>
+          )}
         </div>
       </div>
 
