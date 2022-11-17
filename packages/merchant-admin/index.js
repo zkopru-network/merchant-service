@@ -11,6 +11,7 @@ import ProductsListPage from './pages/product-list-page';
 import OrdersListPage from './pages/order-list-page';
 import AddProductPage from './pages/add-product-page';
 import ProductPage from './pages/product-page';
+import OrderPage from './pages/order-page';
 import Layout from './components/layout';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/products/new" element={<AddProductPage />} />
         <Route path="/products/:id" element={<ProductPage />} />
         <Route path="/orders" element={<OrdersListPage />} />
+        <Route path="/orders/:id" element={<OrderPage />} />
       </Route>
     </Routes>
   );

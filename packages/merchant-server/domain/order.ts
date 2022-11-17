@@ -1,5 +1,6 @@
 import Product from './product';
 
+// eslint-disable-next-line no-shadow
 export enum OrderStatus {
   Pending = 'Pending',
   Complete = 'Complete',

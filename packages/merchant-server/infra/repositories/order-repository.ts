@@ -52,16 +52,16 @@ export class OrderRepository implements IOrderRepository {
   }
 
   async getById(id: string) : Promise<Order> {
-    const rows = await this.db('orders').select('*').where({ id });
+    const orders = await this.findOrders({ id });
 
-    if (rows.length !== 1) {
+    if (orders.length !== 1) {
       throw new Error(`Cannot find order with id ${id}`);
     }
 
-    return this.mapDBRowToOrder(rows[0]);
+    return orders[0];
   }
 
-  async findOrders(filters?: { status: OrderStatus, productId: string }) : Promise<Order[]> {
+  async findOrders(filters?: { id?: string, status?: OrderStatus, productId?: string }) : Promise<Order[]> {
     const rows = await this.db.from('orders')
       .innerJoin('products', 'orders.product_id', 'products.id')
       .modify((qb) => {
@@ -70,6 +70,9 @@ export class OrderRepository implements IOrderRepository {
         }
         if (filters?.productId) {
           qb.where('orders.product_id', filters.productId);
+        }
+        if (filters?.id) {
+          qb.where('orders.id', filters.id);
         }
       })
       .select(

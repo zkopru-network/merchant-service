@@ -105,7 +105,6 @@ export default class ZkopruService implements IBlockchainService {
   }
 
   async ensureProductAvailability(product: Product, quantity: number) {
-    console.log(this.balances)
     if (product.tokenStandard === TokenStandard.Erc20) {
       const available = this.balances[product.tokenStandard][product.contractAddress] as BN;
       const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));

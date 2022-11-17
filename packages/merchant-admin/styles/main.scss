@@ -13,6 +13,7 @@
 @import "./icons.css";
 @import "./sidebar.scss";
 @import "./section.scss";
+@import "./product-view.scss";
 @import "./custom.scss";
 
 $header_height: 4.5rem;
@@ -114,6 +115,7 @@ p {
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
+  min-height: 2.75rem;
 }
 
 .login-page {
@@ -162,6 +164,7 @@ p {
   border: 1px solid var(--border-color);
   border-radius: 3px;
   font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .flex-row {

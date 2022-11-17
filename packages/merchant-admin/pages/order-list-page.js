@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
 import List from '../components/list';
 import { formatEther, trimAddress } from '../common/utils';
@@ -35,7 +34,7 @@ function OrdersListPage() {
         <List
           itemName="order"
           loading={loading}
-          items={data?.matchingOrders}
+          items={data?.orders}
           fields={{
             buyerAddress: 'Buyer',
             quantity: 'Quantity',
