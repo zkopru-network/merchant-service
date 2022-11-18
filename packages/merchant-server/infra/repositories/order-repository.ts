@@ -1,5 +1,7 @@
 import type { Knex, Tables } from 'knex';
-import { IOrderRepository, ILogger } from '../../common/interfaces';
+import {
+  IOrderRepository, ILogger, DailyOrderSnapshot, OrderMetrics,
+} from '../../common/interfaces';
 import Order, { OrderStatus } from '../../domain/order';
 import { ProductRepository } from './product-repository';
 
@@ -99,7 +101,7 @@ export class OrderRepository implements IOrderRepository {
     ).where({ id: order.id });
   }
 
-  async getDailyOrderMetrics(startDate: Date, endDate: Date) : Promise<{ timestamp: Date; totalOrders: number; totalOrderAmount: number; }[]> {
+  async getDailyOrderMetrics(startDate: Date, endDate: Date) : Promise<DailyOrderSnapshot[]> {
     const stats = await this.db('orders')
       .select<{ timestamp: Date, totalOrders: number, totalOrderAmount: number }[]>(
         this.db.raw('date_trunc(\'day\', "created_at") as timestamp'),
@@ -117,17 +119,56 @@ export class OrderRepository implements IOrderRepository {
     }));
   }
 
-  async getOrderMetrics() : Promise<{ totalOrders: number; totalOrderAmount: number; }> {
-    const [stat] = await this.db('orders')
+  async getOrderMetrics(startDate: Date, endDate: Date) : Promise<OrderMetrics> {
+    const getTotalPromise = this.db('orders')
       .select<{ totalOrders: number, totalOrderAmount: number }[]>(
         this.db.raw('SUM(1) as "totalOrders"'),
         this.db.raw('SUM(amount) as "totalOrderAmount"'),
       )
-      .groupBy('created_at');
+      .where('created_at', '>', startDate)
+      .andWhere('created_at', '<', endDate);
+
+    const getTopProductsPromise = this.db('orders')
+      .select<{ productName: string, totalOrderAmount: number }[]>(
+        this.db.raw('MIN("name") as "productName"'),
+        this.db.raw('SUM("amount") as "totalOrderAmount"'),
+      )
+      .innerJoin('products', 'orders.product_id', 'products.id')
+      .where('orders.created_at', '>', startDate)
+      .andWhere('orders.created_at', '<', endDate)
+      .groupBy('orders.product_id');
+
+    const getTopBuyersPromise = this.db('orders')
+      .select<{ buyerAddress: string, totalOrderAmount: number }[]>(
+        this.db.raw('buyer_address as "buyerAddress"'),
+        this.db.raw('SUM("amount") as "totalOrderAmount"'),
+      )
+      .innerJoin('products', 'orders.product_id', 'products.id')
+      .where('orders.created_at', '>', startDate)
+      .andWhere('orders.created_at', '<', endDate)
+      .groupBy('orders.buyer_address');
+
+    const [
+      [{ totalOrders, totalOrderAmount }],
+      topProducts,
+      topBuyers,
+    ] = await Promise.all([
+      getTotalPromise,
+      getTopProductsPromise,
+      getTopBuyersPromise,
+    ]);
 
     return {
-      totalOrders: Number(stat.totalOrders),
-      totalOrderAmount: Number(stat.totalOrderAmount),
+      totalOrders: Number(totalOrders),
+      totalOrderAmount: Number(totalOrderAmount),
+      topProducts: topProducts.map((p) => ({
+        productName: p.productName,
+        totalOrderAmount: Number(p.totalOrderAmount),
+      })),
+      topBuyers: topBuyers.map((b) => ({
+        buyerAddress: b.buyerAddress,
+        totalOrderAmount: Number(b.totalOrderAmount),
+      })),
     };
   }
 }

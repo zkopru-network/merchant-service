@@ -64,17 +64,30 @@ type Order {
   updatedAt: String!
 }
 
-type OrderHistoryItem {
+type DailyOrderSnapshot {
   timestamp: String!
   totalOrders: Int!
-  totalOrderAmount: Float!
+  totalOrderAmount: Int!
+}
+
+type TopProduct {
+  productName: String!
+  totalOrderAmount: Int!
+}
+
+type TopBuyer {
+  buyerAddress: String!
+  totalOrderAmount: Int!
 }
 
 type StoreMetrics {
   totalProducts: Int!
+  totalInventoryValue: Int!
   totalOrders: Int!
   totalOrderAmount: Float!
-  orderHistory(numDays: Int): [OrderHistoryItem!]!
+  dailyOrderSnapshots: [DailyOrderSnapshot!]!
+  topProducts: [TopProduct!]!
+  topBuyers: [TopBuyer!]!
 }
 
 type Query {
@@ -82,7 +95,7 @@ type Query {
   findProducts: [Product] @auth
   getOrder(id: String): Order @auth
   findOrders(status: OrderStatus, productId: String): [Order] @auth
-  getStoreMetrics: StoreMetrics
+  getStoreMetrics(startDate: String, endDate: String): StoreMetrics
 }
 
 type Mutation {

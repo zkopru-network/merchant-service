@@ -55,6 +55,10 @@ app.register(mercurius, {
   context: (req) => buildContext(req, logger, zkopruService, db),
   graphiql: true,
   errorFormatter: (result) => ({ statusCode: (result.errors[0].originalError as AuthenticationError)?.statusCode ?? 200, response: result }),
+  errorHandler(error, request, reply) {
+    logger.error(error);
+    reply.send({ errors: error.errors || [{ message: 'Unexpected error ocurred' }] });
+  },
 });
 
 export default app;

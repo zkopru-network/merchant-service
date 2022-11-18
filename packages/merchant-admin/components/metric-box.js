@@ -31,7 +31,7 @@ function MetricBox(props) {
             <div className="metric-box__value">
               {value}
             </div>
-            <div className="metric-box__unit">{unit}</div>
+            {value !== undefined && unit !== undefined && (<div className="metric-box__unit">{unit}</div>)}
           </div>
         </>
       )}

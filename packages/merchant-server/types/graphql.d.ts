@@ -22,6 +22,13 @@ export type CreateOrderInput = {
   quantity: Scalars['Float'];
 };
 
+export type DailyOrderSnapshot = {
+  __typename?: 'DailyOrderSnapshot';
+  timestamp: Scalars['String'];
+  totalOrderAmount: Scalars['Int'];
+  totalOrders: Scalars['Int'];
+};
+
 export type EditProductInput = {
   availableQuantity: Scalars['Int'];
   description?: InputMaybe<Scalars['String']>;
@@ -72,13 +79,6 @@ export type Order = {
   sellerTransaction?: Maybe<Scalars['String']>;
   status?: Maybe<OrderStatus>;
   updatedAt: Scalars['String'];
-};
-
-export type OrderHistoryItem = {
-  __typename?: 'OrderHistoryItem';
-  timestamp: Scalars['String'];
-  totalOrderAmount: Scalars['Float'];
-  totalOrders: Scalars['Int'];
 };
 
 export enum OrderStatus {
@@ -137,23 +137,39 @@ export type QueryGetProductArgs = {
   id?: InputMaybe<Scalars['String']>;
 };
 
+
+export type QueryGetStoreMetricsArgs = {
+  endDate?: InputMaybe<Scalars['String']>;
+  startDate?: InputMaybe<Scalars['String']>;
+};
+
 export type StoreMetrics = {
   __typename?: 'StoreMetrics';
-  orderHistory: Array<OrderHistoryItem>;
+  dailyOrderSnapshots: Array<DailyOrderSnapshot>;
+  topBuyers: Array<TopBuyer>;
+  topProducts: Array<TopProduct>;
+  totalInventoryValue: Scalars['Int'];
   totalOrderAmount: Scalars['Float'];
   totalOrders: Scalars['Int'];
   totalProducts: Scalars['Int'];
-};
-
-
-export type StoreMetricsOrderHistoryArgs = {
-  numDays?: InputMaybe<Scalars['Int']>;
 };
 
 export enum TokenStandard {
   Erc20 = 'Erc20',
   Erc721 = 'Erc721'
 }
+
+export type TopBuyer = {
+  __typename?: 'TopBuyer';
+  buyerAddress: Scalars['String'];
+  totalOrderAmount: Scalars['Int'];
+};
+
+export type TopProduct = {
+  __typename?: 'TopProduct';
+  productName: Scalars['String'];
+  totalOrderAmount: Scalars['Int'];
+};
 
 
 
@@ -226,12 +242,12 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateOrderInput: CreateOrderInput;
+  DailyOrderSnapshot: ResolverTypeWrapper<DailyOrderSnapshot>;
   EditProductInput: EditProductInput;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   Order: ResolverTypeWrapper<Order>;
-  OrderHistoryItem: ResolverTypeWrapper<OrderHistoryItem>;
   OrderStatus: OrderStatus;
   Product: ResolverTypeWrapper<Product>;
   ProductInput: ProductInput;
@@ -239,23 +255,34 @@ export type ResolversTypes = {
   StoreMetrics: ResolverTypeWrapper<StoreMetrics>;
   String: ResolverTypeWrapper<Scalars['String']>;
   TokenStandard: TokenStandard;
+  TopBuyer: ResolverTypeWrapper<TopBuyer>;
+  TopProduct: ResolverTypeWrapper<TopProduct>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   CreateOrderInput: CreateOrderInput;
+  DailyOrderSnapshot: DailyOrderSnapshot;
   EditProductInput: EditProductInput;
   Float: Scalars['Float'];
   Int: Scalars['Int'];
   Mutation: {};
   Order: Order;
-  OrderHistoryItem: OrderHistoryItem;
   Product: Product;
   ProductInput: ProductInput;
   Query: {};
   StoreMetrics: StoreMetrics;
   String: Scalars['String'];
+  TopBuyer: TopBuyer;
+  TopProduct: TopProduct;
+};
+
+export type DailyOrderSnapshotResolvers<ContextType = any, ParentType extends ResolversParentTypes['DailyOrderSnapshot'] = ResolversParentTypes['DailyOrderSnapshot']> = {
+  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalOrderAmount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalOrders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
@@ -279,13 +306,6 @@ export type OrderResolvers<ContextType = any, ParentType extends ResolversParent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type OrderHistoryItemResolvers<ContextType = any, ParentType extends ResolversParentTypes['OrderHistoryItem'] = ResolversParentTypes['OrderHistoryItem']> = {
-  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  totalOrderAmount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  totalOrders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type ProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
   availableQuantity?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -306,23 +326,40 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   findProducts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Product']>>>, ParentType, ContextType>;
   getOrder?: Resolver<Maybe<ResolversTypes['Order']>, ParentType, ContextType, Partial<QueryGetOrderArgs>>;
   getProduct?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryGetProductArgs>>;
-  getStoreMetrics?: Resolver<Maybe<ResolversTypes['StoreMetrics']>, ParentType, ContextType>;
+  getStoreMetrics?: Resolver<Maybe<ResolversTypes['StoreMetrics']>, ParentType, ContextType, Partial<QueryGetStoreMetricsArgs>>;
 };
 
 export type StoreMetricsResolvers<ContextType = any, ParentType extends ResolversParentTypes['StoreMetrics'] = ResolversParentTypes['StoreMetrics']> = {
-  orderHistory?: Resolver<Array<ResolversTypes['OrderHistoryItem']>, ParentType, ContextType, Partial<StoreMetricsOrderHistoryArgs>>;
+  dailyOrderSnapshots?: Resolver<Array<ResolversTypes['DailyOrderSnapshot']>, ParentType, ContextType>;
+  topBuyers?: Resolver<Array<ResolversTypes['TopBuyer']>, ParentType, ContextType>;
+  topProducts?: Resolver<Array<ResolversTypes['TopProduct']>, ParentType, ContextType>;
+  totalInventoryValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   totalOrderAmount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   totalOrders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   totalProducts?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type TopBuyerResolvers<ContextType = any, ParentType extends ResolversParentTypes['TopBuyer'] = ResolversParentTypes['TopBuyer']> = {
+  buyerAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalOrderAmount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TopProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['TopProduct'] = ResolversParentTypes['TopProduct']> = {
+  productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalOrderAmount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
+  DailyOrderSnapshot?: DailyOrderSnapshotResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Order?: OrderResolvers<ContextType>;
-  OrderHistoryItem?: OrderHistoryItemResolvers<ContextType>;
   Product?: ProductResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   StoreMetrics?: StoreMetricsResolvers<ContextType>;
+  TopBuyer?: TopBuyerResolvers<ContextType>;
+  TopProduct?: TopProductResolvers<ContextType>;
 };
 

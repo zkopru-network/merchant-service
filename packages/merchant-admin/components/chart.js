@@ -6,7 +6,7 @@ const COLORS = ['var(--blue-500)', 'var(--green-300)', 'var(--yellow-500)'];
 
 function Chart(props) {
   const {
-    data, xAxisKey, yAxisKeys, xAxisFormatter, yAxisFormatter, yAxisLabels = [], loading,
+    title, data, xAxisKey, yAxisKeys, xAxisFormatter, yAxisFormatter, yAxisLabels = [], loading, height, className,
   } = props;
 
   if (loading) {
@@ -14,9 +14,13 @@ function Chart(props) {
   }
 
   return (
-    <div className="section h-100">
+    <div className={`section h-100 ${className} p-4`}>
 
-      <ResponsiveContainer>
+      <div className="section__subtitle">
+        {title}
+      </div>
+
+      <ResponsiveContainer minHeight={height}>
         <ComposedChart
           data={data}
           margin={{

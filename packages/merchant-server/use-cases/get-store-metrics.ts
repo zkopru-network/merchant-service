@@ -1,5 +1,7 @@
 import { addDays, startOfDay, endOfDay } from 'date-fns';
-import { ILogger, IOrderRepository, IProductRepository } from '../common/interfaces';
+import {
+  DailyOrderSnapshot, ILogger, IOrderRepository, IProductRepository, OrderMetrics, ProductMetrics,
+} from '../common/interfaces';
 
 type Context = {
   logger: ILogger;
@@ -7,35 +9,42 @@ type Context = {
   orderRepository: IOrderRepository;
 };
 
-type StoreMetrics = {
-  totalProducts: number;
-  totalOrders: number;
-  totalOrderAmount: number;
-  orderHistory: {
-    timestamp: Date;
-    totalOrders: number;
-    totalOrderAmount: number;
-  }[]
+type Filters = {
+  startDate?: Date,
+  endDate?: Date,
 }
 
-export default async function getStoreMetricsUseCase({ historyDays }: { historyDays: number }, context: Context) : Promise<StoreMetrics> {
-  const startDate = startOfDay(addDays(new Date(), historyDays * -1));
-  const endDate = endOfDay(addDays(new Date(), -1));
+type StoreMetrics = ProductMetrics & OrderMetrics & {
+  dailyOrderSnapshots: DailyOrderSnapshot[]
+}
+
+const DEFAULT_DIFF_DAYS = 30;
+
+export default async function getStoreMetricsUseCase(args: Filters, context: Context) : Promise<StoreMetrics> {
+  let { startDate, endDate } = args;
+
+  startDate = startDate || startOfDay(addDays(new Date(), DEFAULT_DIFF_DAYS * -1));
+  endDate = endDate || endOfDay(addDays(new Date(), -1));
 
   const [
-    { totalProducts },
-    { totalOrderAmount, totalOrders },
-    history,
+    { totalProducts, totalInventoryValue },
+    {
+      totalOrderAmount, totalOrders, topProducts, topBuyers,
+    },
+    dailyOrderSnapshots,
   ] = await Promise.all([
     context.productRepository.getProductMetrics(),
-    context.orderRepository.getOrderMetrics(),
+    context.orderRepository.getOrderMetrics(startDate, endDate),
     context.orderRepository.getDailyOrderMetrics(startDate, endDate),
   ]);
 
   return {
     totalProducts,
+    totalInventoryValue,
     totalOrders,
     totalOrderAmount,
-    orderHistory: history,
+    topProducts,
+    topBuyers,
+    dailyOrderSnapshots,
   };
 }

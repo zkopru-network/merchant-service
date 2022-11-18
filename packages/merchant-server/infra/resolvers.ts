@@ -122,7 +122,10 @@ const resolvers : Resolvers<MercuriusContext> = {
       const ordersRepo = new OrderRepository(context.db, { logger: context.logger });
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
-      const metrics = await getStoreMetricsUseCase({ historyDays: 7 }, {
+      const metrics = await getStoreMetricsUseCase({
+        startDate: args.startDate ? new Date(args.startDate) : null,
+        endDate: args.endDate ? new Date(args.endDate) : null,
+      }, {
         orderRepository: ordersRepo,
         productRepository: productRepo,
         logger: context.logger,
@@ -130,7 +133,7 @@ const resolvers : Resolvers<MercuriusContext> = {
 
       return {
         ...metrics,
-        orderHistory: metrics.orderHistory.map((h) => ({
+        dailyOrderSnapshots: metrics.dailyOrderSnapshots.map((h) => ({
           ...h,
           timestamp: h.timestamp.toISOString(),
         })),

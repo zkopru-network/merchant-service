@@ -9,9 +9,18 @@ const getStoreMetricsQuery = gql`
       totalProducts
       totalOrders
       totalOrderAmount
-      orderHistory {
+      totalInventoryValue
+      dailyOrderSnapshots {
         timestamp
         totalOrders
+        totalOrderAmount
+      }
+      topBuyers {
+        buyerAddress
+        totalOrderAmount
+      }
+      topProducts {
+        productName
         totalOrderAmount
       }
     }
@@ -21,6 +30,19 @@ const getStoreMetricsQuery = gql`
 function HomePage() {
   const { loading, data } = useQuery(getStoreMetricsQuery);
   const { metrics = {} } = data || {};
+
+  // const startDate = startOfDay(addDays(new Date(), historyDays * -1));
+  // const endDate = endOfDay(addDays(new Date(), -1));
+
+  const {
+    totalProducts,
+    totalOrders,
+    totalOrderAmount,
+    totalInventoryValue,
+    dailyOrderSnapshots = [],
+    topBuyers = [],
+    topProducts = [],
+  } = metrics;
 
   return (
     <div className="page home-page">
@@ -33,34 +55,37 @@ function HomePage() {
         <MetricBox
           label="Products"
           loading={loading}
-          value={metrics.totalProducts}
+          value={totalProducts}
+        />
+        <MetricBox
+          label="Current Inventory Value"
+          loading={loading}
+          value={totalInventoryValue}
+          unit="Ξ"
         />
         <MetricBox
           label="Orders"
           loading={loading}
-          value={metrics.totalOrders}
+          value={totalOrders}
         />
         <MetricBox
-          label="Total Sale Amount"
+          label="Sale Amount"
           loading={loading}
-          value={metrics.totalOrderAmount}
-          unit="Ξ "
+          value={totalOrderAmount}
+          unit="Ξ"
         />
       </div>
 
-      <div className="mt-5">
-        <div className="subtitle">Order Trend</div>
-
-        <div style={{ height: '350px' }}>
-          <Chart
-            loading={loading}
-            data={[...metrics.orderHistory || []].reverse()}
-            xAxisKey="timestamp"
-            yAxisKeys={['totalOrders', 'totalOrderAmount']}
-            xAxisFormatter={(a) => new Date(a)}
-          />
-        </div>
-      </div>
+      <Chart
+        title="Order Trend"
+        className="mt-5"
+        height={300}
+        loading={loading}
+        data={dailyOrderSnapshots}
+        xAxisKey="timestamp"
+        yAxisKeys={['totalOrders', 'totalOrderAmount']}
+        xAxisFormatter={(a) => new Date(a).toDateString()}
+      />
 
     </div>
   );

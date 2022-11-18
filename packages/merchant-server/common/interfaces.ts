@@ -11,6 +11,30 @@ export enum TokenStandard {
   Erc721 = 'Erc721'
 }
 
+export type ProductMetrics = {
+  totalProducts: number;
+  totalInventoryValue: number;
+}
+
+export type DailyOrderSnapshot = {
+  timestamp: Date;
+  totalOrders: number;
+  totalOrderAmount: number;
+}
+
+export type OrderMetrics = {
+  totalOrders: number;
+  totalOrderAmount: number;
+  topProducts: {
+    productName: string,
+    totalOrderAmount: number
+  }[]
+  topBuyers: {
+    buyerAddress: string;
+    totalOrderAmount: number
+  }[]
+}
+
 // Interface for the service interacting with the Blockchain
 export interface IBlockchainService {
   start: () => void;
@@ -27,7 +51,7 @@ export interface IProductRepository {
   productExist: (contractAddress: string, tokenId?: string) => Promise<boolean>;
   addProduct: (product: Product) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
-  getProductMetrics: () => Promise<{ totalProducts: number }>;
+  getProductMetrics: () => Promise<ProductMetrics>;
 }
 
 export interface IOrderRepository {
@@ -35,6 +59,6 @@ export interface IOrderRepository {
   findOrders: (filters?: { status?: OrderStatus, productId?: string }) => Promise<Order[]>;
   createOrder: (order: Order) => Promise<void>;
   updateOrder: (order: Order) => Promise<void>;
-  getOrderMetrics: () => Promise<{ totalOrders: number, totalOrderAmount: number }>;
-  getDailyOrderMetrics: (startDate: Date, endDate: Date) => Promise<{ timestamp: Date, totalOrders: number, totalOrderAmount: number }[]>;
+  getOrderMetrics: (startDate: Date, endDate: Date) => Promise<OrderMetrics>;
+  getDailyOrderMetrics: (startDate: Date, endDate: Date) => Promise<DailyOrderSnapshot[]>;
 }
