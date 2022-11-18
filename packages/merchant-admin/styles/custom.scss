@@ -68,3 +68,17 @@
     font-size: 1.25rem;
   }
 }
+
+.date-picker {
+  input {
+    font-size: 1.1rem;
+    background-color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 3px;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    text-align: left;
+    width: 150px;
+    cursor: pointer;
+  }
+}

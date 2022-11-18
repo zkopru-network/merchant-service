@@ -2,7 +2,7 @@ import {
   Line, ComposedChart, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
-const COLORS = ['var(--blue-500)', 'var(--green-300)', 'var(--yellow-500)'];
+const COLORS = ['#2548E4', '#F6641C'];
 
 function Chart(props) {
   const {
@@ -37,10 +37,9 @@ function Chart(props) {
               name={yAxisLabels[i] || yAxisKey}
               type="monotone"
               strokeLinecap="round"
-              strokeWidth={2}
+              strokeWidth={3}
               dataKey={yAxisKey}
               stroke={COLORS[i]}
-              dot={false}
               legendType="none"
             />
           ))}

@@ -1,14 +1,19 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
 import format from 'date-fns/format';
+import isValid from 'date-fns/isValid';
+import DatePicker from 'react-datepicker';
+import startOfDay from 'date-fns/startOfDay';
+import addDays from 'date-fns/addDays';
+import endOfDay from 'date-fns/endOfDay';
 import MetricBox from '../components/metric-box';
 import Chart from '../components/chart';
 import TopItems from '../components/top-items';
 import { formatEther, trimAddress } from '../common/utils';
 
 const getStoreMetricsQuery = gql`
-  query getStoreMetrics {
-    metrics: getStoreMetrics {
+  query getStoreMetrics($startDate: String, $endDate: String) {
+    metrics: getStoreMetrics(startDate: $startDate, endDate: $endDate) {
       totalProducts
       totalOrders
       totalOrderAmount
@@ -35,11 +40,27 @@ const getStoreMetricsQuery = gql`
 `;
 
 function HomePage() {
-  const { loading, data } = useQuery(getStoreMetricsQuery);
-  const { metrics = {} } = data || {};
+  const [startDate, setStartDate] = React.useState(startOfDay(addDays(new Date(), 30 * -1)));
+  const [endDate, setEndDate] = React.useState(endOfDay(addDays(new Date(), -1)));
+  const [dateRange, setDateRange] = React.useState([startDate, endDate]);
 
-  // const startDate = startOfDay(addDays(new Date(), historyDays * -1));
-  // const endDate = endOfDay(addDays(new Date(), -1));
+  React.useEffect(() => {
+    const [start, end] = dateRange;
+    if (start && end) {
+      setStartDate(start);
+      setEndDate(end);
+    }
+  }, [dateRange]);
+
+  const { loading, data } = useQuery(getStoreMetricsQuery, {
+    variables: {
+      startDate: startDate?.toISOString(),
+      endDate: endDate?.toISOString(),
+    },
+    skip: !startDate || !endDate,
+  });
+
+  const { metrics = {} } = data || {};
 
   const {
     totalProducts,
@@ -52,11 +73,24 @@ function HomePage() {
     topProductsByQuantity = [],
   } = metrics;
 
+  const avgOrderAmount = totalOrderAmount ? (totalOrderAmount / totalOrders).toFixed(2) : '';
+
   return (
     <div className="page home-page">
 
       <div className="page-title">
         Dashboard
+
+        <div className="date-picker">
+          <DatePicker
+            selectsRange
+            onChange={setDateRange}
+            startDate={dateRange[0]}
+            endDate={dateRange[1]}
+            dateFormat="MMM dd"
+            maxDate={new Date()}
+          />
+        </div>
       </div>
 
       <div className="flex-row">
@@ -77,25 +111,31 @@ function HomePage() {
           value={totalOrders}
         />
         <MetricBox
-          label="Sale Amount"
+          label="Total Sales"
           loading={loading}
           value={totalOrderAmount}
+          unit="Ξ"
+        />
+        <MetricBox
+          label="Avg. Order Amount"
+          loading={loading}
+          value={avgOrderAmount}
           unit="Ξ"
         />
       </div>
 
       <Chart
         title="Daily Orders"
-        className="mt-5 mb-5"
+        className="mt-4"
         height={300}
         loading={loading}
         data={dailyOrderSnapshots}
         xAxisKey="timestamp"
         yAxisKeys={['totalOrders', 'totalOrderAmount']}
-        xAxisFormatter={(a) => (a instanceof Date ? format(a, 'MMM dd') : a)}
+        xAxisFormatter={(a) => (isValid(new Date(a)) ? format(new Date(a), 'MMM dd') : a)}
       />
 
-      <div className="mt-5 mb-5 columns">
+      <div className="mt-4 columns">
 
         <div className="column is-4">
           <TopItems

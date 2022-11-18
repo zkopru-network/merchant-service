@@ -2,6 +2,7 @@
 @import "../../../node_modules/bulma/sass/helpers/spacing.sass";
 @import "../../../node_modules/bulma/sass/utilities/_all.sass";
 @import "../../../node_modules/bulma/sass/grid/_all.sass";
+@import "../../../node_modules/react-datepicker/dist/react-datepicker.css";
 
 @import "./animations.scss";
 @import "./button.scss";
@@ -77,7 +78,7 @@ p {
 
 .content {
   padding: 2rem;
-  max-width: 1280px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   overflow-y: auto;
