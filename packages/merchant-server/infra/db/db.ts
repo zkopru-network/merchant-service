@@ -1,4 +1,5 @@
 import knex, { Knex } from 'knex';
+import { ILogger } from '../../common/interfaces';
 
 declare module 'knex' {
   interface Tables {
@@ -33,7 +34,7 @@ declare module 'knex' {
 
 let db : Knex;
 
-export function connectDB() {
+export function connectDB({ logger } : { logger: ILogger }) {
   if (db) {
     return db;
   }
@@ -42,6 +43,12 @@ export function connectDB() {
     client: 'pg',
     connection: process.env.DB_CONNECTION_STRING,
   });
+
+  if (logger.level === 'debug') {
+    db.on('query', (params) => {
+      logger.info({ data: { query: params.sql } }, 'Executing SQL query');
+    });
+  }
 
   return db;
 }

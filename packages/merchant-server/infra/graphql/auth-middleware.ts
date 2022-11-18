@@ -1,7 +1,7 @@
 import { GraphQLFieldResolver, GraphQLResolveInfo } from 'graphql';
 import JWT from 'jsonwebtoken';
 import { AuthenticationError } from '../../common/error';
-import { GraphQLContext } from '../graphql';
+import { GraphQLContext } from './graphql';
 
 async function authMiddleware(
   resolve: GraphQLFieldResolver<object, GraphQLContext>,
@@ -14,6 +14,8 @@ async function authMiddleware(
 
   // Verify JWT token
   if (context.requireAuth) {
+    context.logger.debug('Validating authToken from request header');
+
     const authHeader = request.headers.authorization as string;
     const bearerToken = authHeader?.split('Bearer ')[1];
 
@@ -23,6 +25,7 @@ async function authMiddleware(
 
     try {
       JWT.verify(bearerToken, process.env.JWT_SECRET);
+      context.logger.debug('Auth token validated successfully');
     } catch {
       throw new AuthenticationError('Auth token validation failed');
     }

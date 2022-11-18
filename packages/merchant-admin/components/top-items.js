@@ -2,7 +2,8 @@ import React from 'react';
 
 export default function TopItems(props) {
   const {
-    loading, items = [], title, itemName, nameKey = 'name', valueKey = 'value', valueFormatter, nameFormatter,
+    loading, items = [], title, itemName, nameKey = 'name',
+    valueKey = 'value', valueFormatter, nameFormatter, valueLabel = 'Count',
   } = props;
 
   function renderListItem(item) {
@@ -26,7 +27,7 @@ export default function TopItems(props) {
       {(loading || items.length) > 0 && (
         <div className="top-items__header">
           <div>{itemName}</div>
-          <div>Count</div>
+          <div>{valueLabel}</div>
         </div>
       )}
 

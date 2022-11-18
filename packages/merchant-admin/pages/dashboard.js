@@ -146,6 +146,7 @@ function Dashboard() {
             nameKey="productName"
             valueKey="totalOrderAmount"
             valueFormatter={(v) => formatEther(v)}
+            valueLabel="Amount"
           />
         </div>
 
@@ -158,6 +159,7 @@ function Dashboard() {
             nameKey="productName"
             valueKey="totalSold"
             valueFormatter={(v) => formatEther(v)}
+            valueLabel="Total Sold"
           />
         </div>
 
@@ -171,6 +173,7 @@ function Dashboard() {
             valueKey="totalOrderAmount"
             nameFormatter={trimAddress}
             valueFormatter={(v) => formatEther(v)}
+            valueLabel="Total Amount"
           />
         </div>
 

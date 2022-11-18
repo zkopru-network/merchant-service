@@ -40,6 +40,7 @@ Suppose a merchant want to sell a NFT for 1.5 ETH, and Alice is planning to purc
 - The service only supports one store at the moment (i.e no multi-tenancy).
 - Only ERC721 and ERC20 tokens are supported.
 - One order can have only one product (one token), but can have any number of quantity for the same item (for ERC20 tokens)
+- Ony ETH is supported as a currency for now
 
 <br />
 

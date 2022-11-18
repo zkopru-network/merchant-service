@@ -12,7 +12,7 @@ import { newDb as pgMem } from 'pg-mem';
 import BN from 'bn.js';
 import { toWei } from 'web3-utils';
 import { ZkTx } from '@zkopru/transaction/src';
-import { seed } from '../infra/db-migrations/seeds/bootstrap';
+import { seed } from '../infra/db/migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';
 import addProductUseCase from '../use-cases/add-product';
 import {

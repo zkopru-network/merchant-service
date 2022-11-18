@@ -6,9 +6,9 @@ import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
 import { Knex } from 'knex';
 import { FastifyRequest } from 'fastify';
 import resolvers from './resolvers';
-import authMiddleware from './middleware/auth';
-import { IBlockchainService, ILogger } from '../common/interfaces';
-import errorHandlerMiddleware from './middleware/error-handler';
+import authMiddleware from './auth-middleware';
+import { IBlockchainService, ILogger } from '../../common/interfaces';
+import errorHandlerMiddleware from './error-handler-middleware';
 
 const typeDefs = loadSchemaSync('./schema.graphql', {
   loaders: [new GraphQLFileLoader()],
@@ -61,3 +61,9 @@ export const buildContext = (request: FastifyRequest, logger: ILogger, zkopruSer
   zkopruService,
   request,
 });
+
+// Set mercurius type
+declare module 'mercurius' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface MercuriusContext extends ReturnType<typeof buildContext> {}
+}

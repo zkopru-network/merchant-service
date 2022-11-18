@@ -78,8 +78,10 @@ export default class ZkopruService implements IBlockchainService {
     await this.node.start();
 
     this.logger.info({
-      ethAddress: this.wallet.wallet.account.ethAddress,
-      l2Address: this.wallet.wallet.account.zkAddress.toString(),
+      data: {
+        ethAddress: this.wallet.wallet.account.ethAddress,
+        l2Address: this.wallet.wallet.account.zkAddress.toString(),
+      },
     }, 'Started Zkopru Node');
 
     await this.updateBalance();
@@ -97,7 +99,7 @@ export default class ZkopruService implements IBlockchainService {
       [TokenStandard.Erc721]: spendable.erc721,
       [TokenStandard.Erc20]: spendable.erc20,
     };
-    this.logger.debug(this.balances, 'Wallet balance');
+    this.logger.debug({ data: this.balances }, 'Wallet balance updated');
 
     this.timer = setTimeout(async () => {
       await this.updateBalance();
@@ -111,7 +113,7 @@ export default class ZkopruService implements IBlockchainService {
 
       if (!available || requiredQuantity.gt(available)) {
         throw new ValidationError(
-          `No enough balance in wallet for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`,
+          `Wallet don't have enough balance for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`,
         );
       }
     } else if (product.tokenStandard === TokenStandard.Erc721) {
@@ -144,7 +146,7 @@ export default class ZkopruService implements IBlockchainService {
 
       const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
 
-      this.logger.debug({ buyerZkTx, merchantTx }, 'Swap transactions');
+      this.logger.debug({ data: { buyerZkTx, merchantTx } }, 'Swap transactions');
 
       if (!merchantZkTx.outflow.some((o) => o.note.eq(buyerZkTx.swap))) {
         throw new Error('Customer desired swap not found in generated merchant tx outflow.');

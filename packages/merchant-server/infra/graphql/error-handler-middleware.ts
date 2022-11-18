@@ -1,6 +1,6 @@
 import { GraphQLFieldResolver, GraphQLResolveInfo } from 'graphql';
 import { AuthenticationError, ValidationError } from '../../common/error';
-import { GraphQLContext } from '../graphql';
+import { GraphQLContext } from './graphql';
 
 async function errorHandlerMiddleware(
   resolve: GraphQLFieldResolver<object, GraphQLContext>,

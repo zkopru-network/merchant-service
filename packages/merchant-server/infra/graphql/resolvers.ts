@@ -1,18 +1,18 @@
 import type { MercuriusContext } from 'mercurius';
-import addProductUseCase from '../use-cases/add-product';
-import findProductsUseCase from '../use-cases/find-products';
-import { Resolvers } from '../types/graphql.d';
-import { ProductRepository } from './repositories/product-repository';
-import editProductUseCase from '../use-cases/edit-product';
-import { OrderRepository } from './repositories/order-repository';
-import createOrderUseCase from '../use-cases/create-order';
-import findOrdersUseCase from '../use-cases/find-orders';
-import getOrderUseCase from '../use-cases/get-order';
-import Order from '../domain/order';
-import Product from '../domain/product';
-import signInUseCase from '../use-cases/sign-in';
-import getProductUseCase from '../use-cases/get-product';
-import getStoreMetricsUseCase from '../use-cases/get-store-metrics';
+import addProductUseCase from '../../use-cases/add-product';
+import findProductsUseCase from '../../use-cases/find-products';
+import { Resolvers } from '../../types/graphql.d';
+import { ProductRepository } from '../repositories/product-repository';
+import { OrderRepository } from '../repositories/order-repository';
+import editProductUseCase from '../../use-cases/edit-product';
+import createOrderUseCase from '../../use-cases/create-order';
+import findOrdersUseCase from '../../use-cases/find-orders';
+import getOrderUseCase from '../../use-cases/get-order';
+import Order from '../../domain/order';
+import Product from '../../domain/product';
+import signInUseCase from '../../use-cases/sign-in';
+import getProductUseCase from '../../use-cases/get-product';
+import getStoreMetricsUseCase from '../../use-cases/get-store-metrics';
 
 function productToDTO(product: Product) {
   return {
