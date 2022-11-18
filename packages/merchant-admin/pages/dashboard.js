@@ -39,7 +39,7 @@ const getStoreMetricsQuery = gql`
   }
 `;
 
-function HomePage() {
+function Dashboard() {
   const [startDate, setStartDate] = React.useState(startOfDay(addDays(new Date(), 30 * -1)));
   const [endDate, setEndDate] = React.useState(endOfDay(addDays(new Date(), -1)));
   const [dateRange, setDateRange] = React.useState([startDate, endDate]);
@@ -180,4 +180,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default Dashboard;

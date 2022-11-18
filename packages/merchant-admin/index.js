@@ -5,7 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Modal from 'react-modal';
 import { ApolloProvider } from '@apollo/client';
 import graphQLClient from './common/graphql-client';
-import HomePage from './pages/home-page';
+import Dashboard from './pages/dashboard';
 import LoginPage from './pages/login-page';
 import ProductsListPage from './pages/product-list-page';
 import OrdersListPage from './pages/order-list-page';
@@ -19,7 +19,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<ProductsListPage />} />
         <Route path="/products/new" element={<AddProductPage />} />
         <Route path="/products/:id" element={<ProductPage />} />
