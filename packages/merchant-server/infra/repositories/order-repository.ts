@@ -128,10 +128,20 @@ export class OrderRepository implements IOrderRepository {
       .where('created_at', '>', startDate)
       .andWhere('created_at', '<', endDate);
 
-    const getTopProductsPromise = this.db('orders')
+    const getTopProductsByAmountPromise = this.db('orders')
       .select<{ productName: string, totalOrderAmount: number }[]>(
         this.db.raw('MIN("name") as "productName"'),
         this.db.raw('SUM("amount") as "totalOrderAmount"'),
+      )
+      .innerJoin('products', 'orders.product_id', 'products.id')
+      .where('orders.created_at', '>', startDate)
+      .andWhere('orders.created_at', '<', endDate)
+      .groupBy('orders.product_id');
+
+    const getTopProductsByQuantityPromise = this.db('orders')
+      .select<{ productName: string, totalSold: number }[]>(
+        this.db.raw('MIN("name") as "productName"'),
+        this.db.raw('SUM(1) as "totalSold"'),
       )
       .innerJoin('products', 'orders.product_id', 'products.id')
       .where('orders.created_at', '>', startDate)
@@ -150,20 +160,26 @@ export class OrderRepository implements IOrderRepository {
 
     const [
       [{ totalOrders, totalOrderAmount }],
-      topProducts,
+      topProductsByAmount,
+      topProductsByQuantity,
       topBuyers,
     ] = await Promise.all([
       getTotalPromise,
-      getTopProductsPromise,
+      getTopProductsByAmountPromise,
+      getTopProductsByQuantityPromise,
       getTopBuyersPromise,
     ]);
 
     return {
       totalOrders: Number(totalOrders),
       totalOrderAmount: Number(totalOrderAmount),
-      topProducts: topProducts.map((p) => ({
+      topProductsByAmount: topProductsByAmount.map((p) => ({
         productName: p.productName,
         totalOrderAmount: Number(p.totalOrderAmount),
+      })),
+      topProductsByQuantity: topProductsByQuantity.map((p) => ({
+        productName: p.productName,
+        totalSold: Number(p.totalSold),
       })),
       topBuyers: topBuyers.map((b) => ({
         buyerAddress: b.buyerAddress,

@@ -147,7 +147,8 @@ export type StoreMetrics = {
   __typename?: 'StoreMetrics';
   dailyOrderSnapshots: Array<DailyOrderSnapshot>;
   topBuyers: Array<TopBuyer>;
-  topProducts: Array<TopProduct>;
+  topProductsByAmount: Array<TopProductByAmount>;
+  topProductsByQuantity: Array<TopProductByQuantity>;
   totalInventoryValue: Scalars['Int'];
   totalOrderAmount: Scalars['Float'];
   totalOrders: Scalars['Int'];
@@ -165,10 +166,16 @@ export type TopBuyer = {
   totalOrderAmount: Scalars['Int'];
 };
 
-export type TopProduct = {
-  __typename?: 'TopProduct';
+export type TopProductByAmount = {
+  __typename?: 'TopProductByAmount';
   productName: Scalars['String'];
   totalOrderAmount: Scalars['Int'];
+};
+
+export type TopProductByQuantity = {
+  __typename?: 'TopProductByQuantity';
+  productName: Scalars['String'];
+  totalSold: Scalars['Int'];
 };
 
 
@@ -256,7 +263,8 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']>;
   TokenStandard: TokenStandard;
   TopBuyer: ResolverTypeWrapper<TopBuyer>;
-  TopProduct: ResolverTypeWrapper<TopProduct>;
+  TopProductByAmount: ResolverTypeWrapper<TopProductByAmount>;
+  TopProductByQuantity: ResolverTypeWrapper<TopProductByQuantity>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -275,7 +283,8 @@ export type ResolversParentTypes = {
   StoreMetrics: StoreMetrics;
   String: Scalars['String'];
   TopBuyer: TopBuyer;
-  TopProduct: TopProduct;
+  TopProductByAmount: TopProductByAmount;
+  TopProductByQuantity: TopProductByQuantity;
 };
 
 export type DailyOrderSnapshotResolvers<ContextType = any, ParentType extends ResolversParentTypes['DailyOrderSnapshot'] = ResolversParentTypes['DailyOrderSnapshot']> = {
@@ -332,7 +341,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 export type StoreMetricsResolvers<ContextType = any, ParentType extends ResolversParentTypes['StoreMetrics'] = ResolversParentTypes['StoreMetrics']> = {
   dailyOrderSnapshots?: Resolver<Array<ResolversTypes['DailyOrderSnapshot']>, ParentType, ContextType>;
   topBuyers?: Resolver<Array<ResolversTypes['TopBuyer']>, ParentType, ContextType>;
-  topProducts?: Resolver<Array<ResolversTypes['TopProduct']>, ParentType, ContextType>;
+  topProductsByAmount?: Resolver<Array<ResolversTypes['TopProductByAmount']>, ParentType, ContextType>;
+  topProductsByQuantity?: Resolver<Array<ResolversTypes['TopProductByQuantity']>, ParentType, ContextType>;
   totalInventoryValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   totalOrderAmount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   totalOrders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -346,9 +356,15 @@ export type TopBuyerResolvers<ContextType = any, ParentType extends ResolversPar
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type TopProductResolvers<ContextType = any, ParentType extends ResolversParentTypes['TopProduct'] = ResolversParentTypes['TopProduct']> = {
+export type TopProductByAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['TopProductByAmount'] = ResolversParentTypes['TopProductByAmount']> = {
   productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   totalOrderAmount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TopProductByQuantityResolvers<ContextType = any, ParentType extends ResolversParentTypes['TopProductByQuantity'] = ResolversParentTypes['TopProductByQuantity']> = {
+  productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalSold?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -360,6 +376,7 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   StoreMetrics?: StoreMetricsResolvers<ContextType>;
   TopBuyer?: TopBuyerResolvers<ContextType>;
-  TopProduct?: TopProductResolvers<ContextType>;
+  TopProductByAmount?: TopProductByAmountResolvers<ContextType>;
+  TopProductByQuantity?: TopProductByQuantityResolvers<ContextType>;
 };
 

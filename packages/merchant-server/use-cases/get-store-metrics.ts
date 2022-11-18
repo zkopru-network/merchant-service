@@ -1,4 +1,6 @@
-import { addDays, startOfDay, endOfDay } from 'date-fns';
+import {
+  addDays, startOfDay, endOfDay, isBefore, isSameDay, isAfter,
+} from 'date-fns';
 import {
   DailyOrderSnapshot, ILogger, IOrderRepository, IProductRepository, OrderMetrics, ProductMetrics,
 } from '../common/interfaces';
@@ -26,10 +28,14 @@ export default async function getStoreMetricsUseCase(args: Filters, context: Con
   startDate = startDate || startOfDay(addDays(new Date(), DEFAULT_DIFF_DAYS * -1));
   endDate = endDate || endOfDay(addDays(new Date(), -1));
 
+  if (isAfter(startDate, endDate)) {
+    throw new Error('startDate cannot be after endDate');
+  }
+
   const [
     { totalProducts, totalInventoryValue },
     {
-      totalOrderAmount, totalOrders, topProducts, topBuyers,
+      totalOrderAmount, totalOrders, topProductsByAmount, topProductsByQuantity, topBuyers,
     },
     dailyOrderSnapshots,
   ] = await Promise.all([
@@ -38,13 +44,27 @@ export default async function getStoreMetricsUseCase(args: Filters, context: Con
     context.orderRepository.getDailyOrderMetrics(startDate, endDate),
   ]);
 
+  const allDayOrderSnapshots = [];
+  let currentDate = startDate;
+  while (isBefore(currentDate, endDate)) {
+    // eslint-disable-next-line no-loop-func
+    const metricsForDay = dailyOrderSnapshots.find((d) => isSameDay(d.timestamp, currentDate));
+    allDayOrderSnapshots.push({
+      timestamp: currentDate,
+      totalOrders: metricsForDay ? metricsForDay.totalOrders : 0,
+      totalOrderAmount: metricsForDay ? metricsForDay.totalOrderAmount : 0,
+    });
+    currentDate = addDays(currentDate, 1);
+  }
+
   return {
     totalProducts,
     totalInventoryValue,
     totalOrders,
     totalOrderAmount,
-    topProducts,
+    topProductsByAmount,
+    topProductsByQuantity,
     topBuyers,
-    dailyOrderSnapshots,
+    dailyOrderSnapshots: allDayOrderSnapshots,
   };
 }

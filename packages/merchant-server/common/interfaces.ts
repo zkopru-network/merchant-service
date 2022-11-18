@@ -25,9 +25,13 @@ export type DailyOrderSnapshot = {
 export type OrderMetrics = {
   totalOrders: number;
   totalOrderAmount: number;
-  topProducts: {
+  topProductsByAmount: {
     productName: string,
     totalOrderAmount: number
+  }[]
+  topProductsByQuantity: {
+    productName: string,
+    totalSold: number
   }[]
   topBuyers: {
     buyerAddress: string;
