@@ -121,7 +121,7 @@ function ProductPage() {
         isOpen={showEditModal}
         onRequestClose={() => setShowEditModal(false)}
         width="800px"
-        height="820px"
+        height="710px"
       >
         <ProductForm
           isEditMode

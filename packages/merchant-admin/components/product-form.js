@@ -23,13 +23,17 @@ export default function ProductForm(props) {
   return (
     <form className="form" onSubmit={onSubmitLocal} style={{ maxWidth: '800px' }}>
 
-      <div className="form__title">
-        Add new product
-      </div>
+      {!isEditMode && (
+        <>
+          <div className="form__title">
+            Add new product
+          </div>
 
-      <div className="form__description">
-        Add asset you own for sale - it could be either a ERC20 or ERC721 token. Products you add are immediately made available for purchase.
-      </div>
+          <div className="form__description">
+            Add asset you own for sale - it could be either a ERC20 or ERC721 token. Products you add are immediately made available for purchase.
+          </div>
+        </>
+      )}
 
       <div className="form__field">
         <label htmlFor="productName" className="label">Name
