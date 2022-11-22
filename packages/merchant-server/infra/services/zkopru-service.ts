@@ -107,23 +107,28 @@ export default class ZkopruService implements IBlockchainService {
   }
 
   async ensureProductAvailability(product: Product, quantity: number) {
-    if (product.tokenStandard === TokenStandard.Erc20) {
-      const available = this.balances[product.tokenStandard][product.contractAddress] as BN;
-      const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
+    try {
+      if (product.tokenStandard === TokenStandard.Erc20) {
+        const available = this.balances[product.tokenStandard][product.contractAddress] as BN;
+        const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
 
-      if (!available || requiredQuantity.gt(available)) {
-        throw new ValidationError(
-          `Wallet don't have enough balance for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`,
-        );
+        if (!available || requiredQuantity.gt(available)) {
+          throw new ValidationError(
+            `Wallet don't have enough balance for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`,
+          );
+        }
+      } else if (product.tokenStandard === TokenStandard.Erc721) {
+        const availableTokens = this.balances[product.tokenStandard][product.contractAddress] as BN[] || [];
+        const isAvailable = (availableTokens as BN[] || []).some((el) => el.eq(new BN(product.tokenId)));
+        if (!isAvailable) {
+          throw new ValidationError(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
+        }
+      } else {
+        throw new ValidationError('Unknown Token Standard');
       }
-    } else if (product.tokenStandard === TokenStandard.Erc721) {
-      const availableTokens = this.balances[product.tokenStandard][product.contractAddress] as BN[] || [];
-      const isAvailable = (availableTokens as BN[] || []).some((el) => el.eq(new BN(product.tokenId)));
-      if (!isAvailable) {
-        throw new ValidationError(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
-      }
-    } else {
-      throw new ValidationError('Unknown Token Standard');
+    } catch (error) {
+      this.logger.info({ data: this.balances }, 'Current wallet balance');
+      throw error;
     }
   }
 
@@ -171,7 +176,11 @@ export default class ZkopruService implements IBlockchainService {
         throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
       }
 
-      return merchantTxEncoded;
+      return {
+        buyerTransactionHash: buyerZkTx.hash().toString(),
+        sellerTransaction: merchantTxEncoded,
+        sellerTransactionHash: merchantZkTx.hash().toString(),
+      };
     } catch (error) {
       await this.wallet.wallet.unlockUtxos(merchantTx.inflow);
       throw error;

@@ -22,8 +22,8 @@ const getOrderQuery = gql`
       }
       quantity
       buyerAddress
-      buyerTransaction
-      sellerTransaction
+      buyerTransactionHash
+      sellerTransactionHash
       amount
       status
     }
@@ -63,13 +63,13 @@ function OrderPage() {
               <div className="product-view__value">{order.status}</div>
 
               <div className="product-view__label">Customer Address</div>
-              <div className="product-view__value">{trimAddress(order.buyerAddress)}</div>
+              <div className="product-view__value">{order.buyerAddress}</div>
 
               <div className="product-view__label">Customer Transaction</div>
-              <div className="product-view__value">{trimAddress(order.buyerTransaction)}</div>
+              <div className="product-view__value">{order.buyerTransactionHash}</div>
 
               <div className="product-view__label">Merchant Transaction</div>
-              <div className="product-view__value">{trimAddress(order.sellerTransaction)}</div>
+              <div className="product-view__value">{order.sellerTransactionHash}</div>
             </>
           )}
         </div>

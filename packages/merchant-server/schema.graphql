@@ -57,7 +57,9 @@ type Order {
   quantity: Float
   buyerAddress: String
   buyerTransaction: String
+  buyerTransactionHash: String
   sellerTransaction: String
+  sellerTransactionHash: String
   amount: Float
   status: OrderStatus
   createdAt: String!

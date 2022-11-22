@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
 import List from '../components/list';
-import { formatEther, trimAddress } from '../common/utils';
+import { formateDateTime, formatEther, trimAddress } from '../common/utils';
 import ErrorView from '../components/error-view';
 
 const findOrdersQuery = gql`
@@ -12,6 +12,7 @@ const findOrdersQuery = gql`
       quantity
       amount
       status
+      createdAt
     }
   }
 `;
@@ -40,8 +41,9 @@ function OrdersListPage() {
             quantity: 'Quantity',
             amount: 'Total Amount',
             status: 'Status',
+            createdAt: 'Placed on',
           }}
-          formatters={{ buyerAddress: trimAddress, amount: formatEther }}
+          formatters={{ buyerAddress: trimAddress, amount: formatEther, createdAt: formateDateTime }}
           redirectTo={(order) => `/orders/${order.id}`}
         />
       )}

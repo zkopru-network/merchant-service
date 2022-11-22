@@ -43,7 +43,7 @@ export type OrderMetrics = {
 export interface IBlockchainService {
   start: () => void;
   ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
-  executeOrder: (order: Order, params: object) => Promise<string>;
+  executeOrder: (order: Order, params: object) => Promise<{ buyerTransactionHash: string, sellerTransaction: string, sellerTransactionHash: string }>;
   getConfirmationStatusForOrders: (orders: Order[]) => Promise<Record<string, OrderStatus>>; // Given a list of orders, return { orderId: "pending | complete" } based on transaction finalization
   signMessage: (message: string) => Promise<string>
   getWalletAddress: () => string

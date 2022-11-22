@@ -72,11 +72,13 @@ export type Order = {
   amount?: Maybe<Scalars['Float']>;
   buyerAddress?: Maybe<Scalars['String']>;
   buyerTransaction?: Maybe<Scalars['String']>;
+  buyerTransactionHash?: Maybe<Scalars['String']>;
   createdAt: Scalars['String'];
   id?: Maybe<Scalars['String']>;
   product?: Maybe<Product>;
   quantity?: Maybe<Scalars['Float']>;
   sellerTransaction?: Maybe<Scalars['String']>;
+  sellerTransactionHash?: Maybe<Scalars['String']>;
   status?: Maybe<OrderStatus>;
   updatedAt: Scalars['String'];
 };
@@ -305,11 +307,13 @@ export type OrderResolvers<ContextType = any, ParentType extends ResolversParent
   amount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   buyerAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   buyerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  buyerTransactionHash?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType>;
   quantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   sellerTransaction?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sellerTransactionHash?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['OrderStatus']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

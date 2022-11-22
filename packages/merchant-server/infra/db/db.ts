@@ -23,7 +23,9 @@ declare module 'knex' {
       'amount': number
       'buyer_address': string
       'buyer_transaction': string
+      'buyer_transaction_hash': string
       'seller_transaction': string
+      'seller_transaction_hash': string
       'fee': number
       'status': string
       'created_at': Date

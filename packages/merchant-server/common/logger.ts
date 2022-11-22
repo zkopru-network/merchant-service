@@ -3,7 +3,7 @@ import { ILogger } from './interfaces';
 
 export function createLogger(options: pino.LoggerOptions = {}) : ILogger {
   return pino({
-    level: process.env.LOG_LEVEL || 'debug',
+    level: process.env.LOG_LEVEL || 'info',
     ...options,
     name: 'merchant-server',
     transport: {

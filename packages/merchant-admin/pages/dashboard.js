@@ -132,6 +132,7 @@ function Dashboard() {
         data={dailyOrderSnapshots}
         xAxisKey="timestamp"
         yAxisKeys={['totalOrders', 'totalOrderAmount']}
+        yAxisLabels={['Total orders', 'Total sales (Ξ)']}
         xAxisFormatter={(a) => (isValid(new Date(a)) ? format(new Date(a), 'MMM dd') : a)}
       />
 
