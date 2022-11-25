@@ -87,13 +87,19 @@ export default function ProductForm(props) {
               required
               className="form__input"
               value={product.tokenStandard || ''}
-              onChange={(e) => { setProduct((p) => ({ ...p, tokenStandard: e.target.value })); }}
+              onChange={(e) => {
+                const std = e.target.value;
+                setProduct((p) => ({
+                  ...p,
+                  tokenStandard: e.target.value,
+                  availableQuantity: std === TokenStandard.ERC721 ? 1 : product.availableQuantity,
+                }));
+              }}
             >
               <option value="">Select</option>
               {Object.keys(TokenStandard).map((s) => (
-                <option key={s} value={TokenStandard[s]}>s</option>
+                <option key={s} value={TokenStandard[s]}>{s}</option>
               ))}
-              <option value="Erc721">ERC721</option>
             </select>
           </label>
         </div>

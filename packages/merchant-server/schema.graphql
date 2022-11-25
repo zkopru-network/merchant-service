@@ -17,7 +17,7 @@ input CreateOrderInput {
   atomicSwapSalt: Int!
 }
 
-input ProductInput {
+input AddProductInput {
   name: String!
   description: String
   imageUrl: String
@@ -108,7 +108,7 @@ type Query {
 
 type Mutation {
   signIn(message: String!, signature: String!) : String
-  addProduct(product: ProductInput!) : Product @auth
+  addProduct(product: AddProductInput!) : Product @auth
   editProduct(id: String!, productData: EditProductInput!) : Product @auth
   createOrder(order: CreateOrderInput!) : Order
 }

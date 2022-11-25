@@ -14,6 +14,17 @@ export type Scalars = {
   Float: number;
 };
 
+export type AddProductInput = {
+  availableQuantity: Scalars['Int'];
+  contractAddress: Scalars['String'];
+  description?: InputMaybe<Scalars['String']>;
+  imageUrl?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+  price: Scalars['Float'];
+  tokenId?: InputMaybe<Scalars['String']>;
+  tokenStandard: TokenStandard;
+};
+
 export type CreateOrderInput = {
   atomicSwapSalt: Scalars['Int'];
   buyerAddress: Scalars['String'];
@@ -47,7 +58,7 @@ export type Mutation = {
 
 
 export type MutationAddProductArgs = {
-  product: ProductInput;
+  product: AddProductInput;
 };
 
 
@@ -101,17 +112,6 @@ export type Product = {
   tokenId?: Maybe<Scalars['String']>;
   tokenStandard: TokenStandard;
   updatedAt: Scalars['String'];
-};
-
-export type ProductInput = {
-  availableQuantity: Scalars['Int'];
-  contractAddress: Scalars['String'];
-  description?: InputMaybe<Scalars['String']>;
-  imageUrl?: InputMaybe<Scalars['String']>;
-  name: Scalars['String'];
-  price: Scalars['Float'];
-  tokenId?: InputMaybe<Scalars['String']>;
-  tokenStandard: TokenStandard;
 };
 
 export type Query = {
@@ -249,6 +249,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AddProductInput: AddProductInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateOrderInput: CreateOrderInput;
   DailyOrderSnapshot: ResolverTypeWrapper<DailyOrderSnapshot>;
@@ -259,7 +260,6 @@ export type ResolversTypes = {
   Order: ResolverTypeWrapper<Order>;
   OrderStatus: OrderStatus;
   Product: ResolverTypeWrapper<Product>;
-  ProductInput: ProductInput;
   Query: ResolverTypeWrapper<{}>;
   StoreMetrics: ResolverTypeWrapper<StoreMetrics>;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -271,6 +271,7 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AddProductInput: AddProductInput;
   Boolean: Scalars['Boolean'];
   CreateOrderInput: CreateOrderInput;
   DailyOrderSnapshot: DailyOrderSnapshot;
@@ -280,7 +281,6 @@ export type ResolversParentTypes = {
   Mutation: {};
   Order: Order;
   Product: Product;
-  ProductInput: ProductInput;
   Query: {};
   StoreMetrics: StoreMetrics;
   String: Scalars['String'];

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, gql } from '@apollo/client';
-import { TokenStandard } from '../common/constants';
 import ProductForm from '../components/product-form';
 
 const addProductQuery = gql`
@@ -25,7 +24,9 @@ function AddProductPage() {
   async function onSubmit(product) {
     try {
       await addProductMutation({ variables: { productInput: product } });
-      navigate('/products');
+      navigate('/products', {
+        state: { productAdded: true },
+      });
     } catch (error) {
       // eslint-disable-next-line no-alert
       window.alert(`Error while creating product : ${error.message}`);

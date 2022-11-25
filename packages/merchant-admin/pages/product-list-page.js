@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
 import List from '../components/list';
 import { formatEther } from '../common/utils';
@@ -19,7 +19,18 @@ const findProductsQuery = gql`
 `;
 
 function ProductsListPage() {
-  const { loading, error, data } = useQuery(findProductsQuery);
+  const {
+    loading, error, data, refetch,
+  } = useQuery(findProductsQuery);
+
+  const location = useLocation();
+
+  React.useState(() => {
+    // This navigation state is set when product is added in /products/new page
+    if (location.state?.productAdded) {
+      refetch();
+    }
+  }, []);
 
   return (
     <div className="page product-list-page">
