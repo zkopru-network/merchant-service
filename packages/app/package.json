@@ -1,5 +1,5 @@
 {
-  "name": "@zkopru-merchant-service/app",
+  "name": "@zms/app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

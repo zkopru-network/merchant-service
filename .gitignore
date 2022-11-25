@@ -3,6 +3,9 @@
 # Sqlite
 *.db
 
+cache
+artifacts
+
 .postgres
 .parcel-cache
 .env

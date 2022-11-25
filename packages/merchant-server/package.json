@@ -1,5 +1,5 @@
 {
-  "name": "@zkopru-merchant-service/server",
+  "name": "@zms/merchant-server",
   "version": "0.1.0",
   "description": "",
   "scripts": {
