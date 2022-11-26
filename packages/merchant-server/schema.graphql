@@ -99,11 +99,11 @@ type StoreMetrics {
 }
 
 type Query {
-  getProduct(id: String): Product @auth
-  findProducts: [Product] @auth
+  getProduct(id: String): Product
+  findProducts: [Product]
   getOrder(id: String): Order @auth
   findOrders(status: OrderStatus, productId: String): [Order] @auth
-  getStoreMetrics(startDate: String, endDate: String): StoreMetrics
+  getStoreMetrics(startDate: String, endDate: String): StoreMetrics @auth
 }
 
 type Mutation {
