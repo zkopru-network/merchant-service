@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
+import { Link } from 'react-router-dom';
 import ProductCard from '../components/product-card';
 
 const findProductsQuery = gql`
@@ -27,12 +28,14 @@ function Dashboard() {
     <div className="page home-page">
 
       <div className="page-title">
-        Dashboard
+        Featured Items
       </div>
 
       <div className="product-cards">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} loading={loading} />
+          <Link key={product.id} to={`/products/${product.id}`}>
+            <ProductCard product={product} loading={loading} />
+          </Link>
         ))}
       </div>
 

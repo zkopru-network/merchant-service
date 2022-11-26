@@ -23,7 +23,7 @@ function ProductCard(props) {
           <div className="product-card__name">{product.name}</div>
           <div className="product-card__type">{product.tokenStandard?.toUpperCase()}</div>
         </div>
-        <div className="product-card__price">Ξ {product.price}</div>
+        <div className="product-card__price"><span className="product-card__unit">Ξ</span> {product.price}</div>
       </div>
 
     </div>

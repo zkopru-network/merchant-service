@@ -3,8 +3,6 @@
 @import "../../../node_modules/bulma/sass/utilities/_all.sass";
 @import "../../../node_modules/bulma/sass/grid/_all.sass";
 
-@import "./button.scss";
-@import "./icons.css";
 @import "./custom.scss";
 
 $header_height: 4.5rem;
@@ -49,7 +47,6 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow: hidden;
 }
 
 p {
@@ -63,8 +60,28 @@ p {
 
 .main {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100%;
+}
+
+.header {
+  padding: 1rem 2rem;
+  background-color: var(--gray-100);
+  border-bottom: 1px solid var(--gray-300);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 5px;
+
+  a {
+    color: var(--text-color);
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .content {
@@ -72,7 +89,6 @@ p {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  overflow-y: auto;
 }
 
 .w-100 {
@@ -124,7 +140,8 @@ p {
 }
 
 .flex-row {
-  
+  display: flex;
+  flex-direction: row;
 }
 
 .w-100 {

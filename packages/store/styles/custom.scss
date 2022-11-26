@@ -13,6 +13,7 @@
   border: 1px solid var(--border-color);
   padding: 1rem;
   margin: 1rem;
+  color: var(--text-color);
 
   &:hover {
     border: 1px solid var(--text-color);
@@ -60,8 +61,123 @@
     font-weight: 500;
   }
 
+  &__unit {
+    font-size: 1.1rem;
+    color: var(--gray-500);
+    font-weight: 600;
+    line-height: 1.25rem;
+  }
+
   &__price {
     font-size: 1.5rem;
     font-weight: 500;
+  }
+}
+
+.product-page {
+  &__container {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &__image {
+    text-align: center;
+    background-color: var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 3px;
+    height: 380px;
+    margin-right: 1rem;
+
+    img {
+      width: 350px;
+      height: 350px;
+      object-fit: contain;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+  }
+
+  &__details {
+    padding: 0.5rem 2rem;
+    border-left: 1px solid var(--border-color);
+  }
+
+  &__label {
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--gray-500);
+    opacity: 0.9;
+  }
+
+  &__value {
+    font-size: 1.15rem;
+    margin-bottom: 1.5em;
+    font-weight: 500;
+  }
+
+  &__name {
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
+
+  &__description {
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+  }
+
+  &__unit {
+    font-size: 1.25rem;
+    color: var(--gray-500);
+    font-weight: 600;
+    line-height: 1.25rem;
+  }
+
+  &__price {
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 2rem;
+  }
+
+  &__purchase-button {
+    color: white;
+    border: 0.5px solid var(--text-color);
+    background-color: var(--text-color);
+    font-weight: 500;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 1rem 2rem;
+    border-radius: 3px;
+  
+    &:hover {
+      background-color: var(--text-color);
+      color: #fff;
+    }
+  
+    &[disabled="disabled"],
+    &[disabled="disabled"]:hover {
+      cursor: not-allowed;
+      background-color: #fff;
+      color: var(--text-color);
+    }
+  }
+
+  &__quantity {
+    display: flex;
+
+    .product-page__value {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__input {
+    margin: 1rem 5rem 2rem 0;
+    font-size: 1.15rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    height: 40px;
+    width: 150px;
   }
 }

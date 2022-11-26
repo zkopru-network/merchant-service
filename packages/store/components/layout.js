@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 
 export default function Layout() {
   return (
@@ -7,7 +7,9 @@ export default function Layout() {
 
       <div className="header">
         <h1 className="logo">
-          ZMS
+          <Link to="/">
+            ZMS
+          </Link>
         </h1>
       </div>
 
