@@ -32,9 +32,19 @@ function Dashboard() {
       </div>
 
       <div className="product-cards">
-        {products.map((product) => (
+        {loading && (
+          <>
+            <ProductCard loading={loading} />
+            <ProductCard loading={loading} />
+            <ProductCard loading={loading} />
+            <ProductCard loading={loading} />
+            <ProductCard loading={loading} />
+          </>
+        )}
+
+        {!loading && products.map((product) => (
           <Link key={product.id} to={`/products/${product.id}`}>
-            <ProductCard product={product} loading={loading} />
+            <ProductCard product={product} />
           </Link>
         ))}
       </div>

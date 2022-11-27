@@ -14,6 +14,12 @@
   padding: 1rem;
   margin: 1rem;
   color: var(--text-color);
+  position: relative;
+  overflow: hidden;
+
+  &.loading {
+    height: 300px;
+  }
 
   &:hover {
     border: 1px solid var(--text-color);
@@ -90,6 +96,13 @@
     border-radius: 3px;
     height: 380px;
     margin-right: 1rem;
+    position: relative;
+    overflow: hidden;
+    width: calc(350px + 2rem);
+
+    &.loading {
+      background-color: #fff;
+    }
 
     img {
       width: 350px;
@@ -103,6 +116,9 @@
   &__details {
     padding: 0.5rem 2rem;
     border-left: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    min-width: 500px;
   }
 
   &__label {

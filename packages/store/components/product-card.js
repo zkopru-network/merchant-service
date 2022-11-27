@@ -7,7 +7,7 @@ function ProductCard(props) {
 
   if (loading) {
     return (
-      <div className="section section--loading" />
+      <div className="product-card loading" />
     );
   }
 
