@@ -16,7 +16,7 @@ const logger = createLogger();
 const app = fastify({ logger });
 
 app.register(cors, {
-  origin: 'http://localhost:4000', // Whitelist local merchant-admin for CORS
+  origin: '*',
 });
 
 // Initialize DB connection

@@ -69,6 +69,11 @@ p {
   padding: 1rem 2rem;
   background-color: var(--gray-100);
   border-bottom: 1px solid var(--gray-300);
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  height: 5rem;
 }
 
 .logo {

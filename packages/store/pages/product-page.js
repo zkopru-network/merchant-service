@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, gql } from '@apollo/client';
 import { TokenStandard } from '../common/constants';
+import useZkopruNode from '../hooks/use-zkopru-node';
 
 const getProductQuery = gql`
   query getProduct($id: String!) {
@@ -20,16 +21,16 @@ const getProductQuery = gql`
 `;
 
 function ProductPage() {
-  const { id } = useParams();
-
   const [quantity, setQuantity] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const { id } = useParams();
+  const { generateSwapTransaction } = useZkopruNode();
 
   const { loading, data = {} } = useQuery(getProductQuery, {
     variables: { id },
   });
-
   const { product = {} } = data;
-
   const isNFT = product?.tokenStandard === TokenStandard.ERC721;
 
   React.useEffect(() => {
@@ -37,6 +38,25 @@ function ProductPage() {
       setQuantity(1);
     }
   }, [product]);
+
+  async function onSubmit(e) {
+    e.preventDefault();
+
+    try {
+      setIsLoading(true);
+      const customerTx = await generateSwapTransaction({
+        product,
+        merchantAddress: '7Hr6PXRiA8b8k9sPApQyqcd6S646Vc4qHFYDYr2xqAkDUHK2g68WCM82f1iep8J9xERvyLMiqGZfXe77DZEuzXvvxuVUU',
+        quantity,
+      });
+      console.log(customerTx);
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert(`Error ocurred while creating tx: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="page product-page">
@@ -84,7 +104,7 @@ function ProductPage() {
             </div>
             <hr />
 
-            <form>
+            <form onSubmit={onSubmit}>
               <div className="product-page__quantity">
 
                 {!isNFT && (
@@ -108,9 +128,11 @@ function ProductPage() {
 
               <button
                 type="submit"
-                className="product-page__purchase-button"
+                className={`product-page__purchase-button + ${isLoading ? 'product-page__purchase-button--loading' : ''}`}
+                disabled={loading}
               >
-                Purchase
+                <span />
+                {!isLoading && 'Purchase'}
               </button>
             </form>
 

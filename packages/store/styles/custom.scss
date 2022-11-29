@@ -1,3 +1,23 @@
+.wallet-connected {
+  display: block;
+  font-size: 0.95rem;
+  text-align: right;
+
+  &::before {
+    content: '•';
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--green-300);
+    line-height: 0rem;
+    margin-right: 0.25rem;
+  }
+}
+
+.wallet-balance {
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: right;
+}
 
 .product-cards {
   display: flex;
@@ -166,6 +186,8 @@
     cursor: pointer;
     padding: 1rem 2rem;
     border-radius: 3px;
+    width: 15rem;
+    height: 4.5rem;
   
     &:hover {
       background-color: var(--text-color);
@@ -177,6 +199,17 @@
       cursor: not-allowed;
       background-color: #fff;
       color: var(--text-color);
+    }
+
+    &--loading {
+      opacity: 0.7;
+
+      span {
+        @extend .spinner;
+        width: 25px;
+        height: 25px;
+        --border-color: white;
+      }
     }
   }
 
