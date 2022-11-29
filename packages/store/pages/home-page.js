@@ -19,7 +19,7 @@ const findProductsQuery = gql`
   }
 `;
 
-function Dashboard() {
+function HomePage() {
   const { loading, data } = useQuery(findProductsQuery);
 
   const { products = [] } = data || {};
@@ -53,4 +53,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default HomePage;

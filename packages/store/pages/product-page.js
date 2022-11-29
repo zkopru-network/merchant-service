@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql, useMutation } from '@apollo/client';
 import { TokenStandard } from '../common/constants';
-import useZkopruNode from '../hooks/use-zkopru-node';
+import { ZkopruContext } from '../context/zkopru-context';
 
 const getProductQuery = gql`
   query getProduct($id: String!) {
@@ -20,12 +20,25 @@ const getProductQuery = gql`
   }
 `;
 
+const createOrderQuery = gql`
+  mutation createOrder($orderInput: CreateOrderInput!) {
+    createOrder(order: $orderInput) {
+      id
+      buyerTransactionHash
+      sellerTransactionHash
+      status
+    }
+  }
+`;
+
 function ProductPage() {
   const [quantity, setQuantity] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
 
   const { id } = useParams();
-  const { generateSwapTransaction } = useZkopruNode();
+  const { isInitialized, generateSwapTransaction } = React.useContext(ZkopruContext);
+
+  const [createOrderMutation] = useMutation(createOrderQuery);
 
   const { loading, data = {} } = useQuery(getProductQuery, {
     variables: { id },
@@ -42,14 +55,32 @@ function ProductPage() {
   async function onSubmit(e) {
     e.preventDefault();
 
+    if (!isInitialized) {
+      // eslint-disable-next-line no-alert
+      alert('Please connect to Zkopru');
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const customerTx = await generateSwapTransaction({
+      const { customerTransaction, swapSalt } = await generateSwapTransaction({
         product,
-        merchantAddress: '7Hr6PXRiA8b8k9sPApQyqcd6S646Vc4qHFYDYr2xqAkDUHK2g68WCM82f1iep8J9xERvyLMiqGZfXe77DZEuzXvvxuVUU',
         quantity,
       });
-      console.log(customerTx);
+
+      const createdOrder = await createOrderMutation({
+        variables: {
+          orderInput: {
+            productId: product.id,
+            quantity,
+            buyerAddress: process.env.MERCHANT_ADDRESS,
+            buyerTransaction: customerTransaction,
+            atomicSwapSalt: swapSalt,
+          },
+        },
+      });
+
+      console.log(createdOrder);
     } catch (error) {
       // eslint-disable-next-line no-alert
       alert(`Error ocurred while creating tx: ${error.message}`);
@@ -114,7 +145,7 @@ function ProductPage() {
                     type="number"
                     className="product-page__input"
                     placeholder="Quantity"
-                    onChange={(e) => setQuantity(e.target.value)}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
                     max={product.availableQuantity}
                   />
                 </div>

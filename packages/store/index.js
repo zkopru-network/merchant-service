@@ -9,6 +9,7 @@ import graphQLClient from './common/graphql-client';
 import HomePage from './pages/home-page';
 import ProductPage from './pages/product-page';
 import Layout from './components/layout';
+import { ZkopruContextProvider } from './context/zkopru-context';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,7 +23,9 @@ const router = createBrowserRouter(
 const container = document.getElementById('root');
 
 createRoot(container).render(
-  <ApolloProvider client={graphQLClient}>
-    <RouterProvider router={router} />
-  </ApolloProvider>,
+  <ZkopruContextProvider>
+    <ApolloProvider client={graphQLClient}>
+      <RouterProvider router={router} />
+    </ApolloProvider>
+  </ZkopruContextProvider>,
 );

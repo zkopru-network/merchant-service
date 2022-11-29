@@ -1,22 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { fromWei } from 'web3-utils';
-import useZkopruNode from '../hooks/use-zkopru-node';
+import { ZkopruContext } from '../context/zkopru-context';
 
 export default function Layout() {
-  const { getBalance, isReady } = useZkopruNode();
+  const {
+    getETHBalance, isInitialized, connect, isSyncing,
+  } = useContext(ZkopruContext);
 
   const [balance, setBalance] = React.useState();
 
   React.useEffect(() => {
-    if (isReady) {
-      getBalance().then((b) => {
-        if (b.eth) {
-          setBalance(fromWei(b?.eth.toString()));
-        }
-      });
+    if (isInitialized && !isSyncing) {
+      getETHBalance().then(setBalance);
     }
-  }, [isReady]);
+  }, [isInitialized, isSyncing]);
 
   return (
     <div className="main">
@@ -29,17 +26,20 @@ export default function Layout() {
         </h1>
 
         <div className="wallet-status">
-          {!isReady && (
+          {!isInitialized && (
+            <button type="button" className="btn-connect" onClick={connect}>Connect</button>
+          )}
+
+          {isInitialized && isSyncing && (
             <div className="spinner" style={{ height: '25px', width: '25px' }} />
           )}
 
-          {isReady && balance && (
+          {isInitialized && !isSyncing && (typeof balance === 'number') && (
             <>
               <div className="wallet-connected">Connected</div>
               <div className="wallet-balance">Balance: Ξ {balance}</div>
             </>
           )}
-          {/* <button type="button" onClick={connect}>Connect</button> */}
         </div>
 
       </div>
