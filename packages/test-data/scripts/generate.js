@@ -12,6 +12,8 @@ const config = require('../config.json');
 const erc20 = require('../artifacts/contracts/ERC20.sol/ERC20Factory.json');
 const erc721 = require('../artifacts/contracts/ERC721.sol/ERC721Factory.json');
 
+const sleep = (s) => new Promise((r) => { setTimeout(r, s); });
+
 async function saveConfig(cnf) {
   fs.writeFileSync(path.join(__dirname, '../config.json'), JSON.stringify(cnf, null, 2));
 }
@@ -103,7 +105,7 @@ async function mintNFT(contract, tokenId) {
   }
 
   await contractWithSigner.mint(config.merchantAddress, BigNumber.from(tokenId), 'https://token');
-  await new Promise((r) => { setTimeout(r, 3000); });
+  await sleep(3000);
 
   await contractWithSigner.approve(config.zkopruAddress, BigNumber.from(tokenId));
 
@@ -125,16 +127,16 @@ async function depositToZkopru() {
 
   await node.start();
 
-  // await new Promise((r) => {
-  //   const interval = setInterval(() => {
-  //     if (node.node.synchronizer.isSynced()) {
-  //       clearInterval(interval);
-  //       r();
-  //     } else {
-  //       console.log('Waiting for Zkopru node to sync');
-  //     }
-  //   }, 10000);
-  // });
+  await new Promise((r) => {
+    const interval = setInterval(() => {
+      if (node.node.synchronizer.isSynced()) {
+        clearInterval(interval);
+        r();
+      } else {
+        console.log('Waiting for Zkopru node to sync');
+      }
+    }, 10000);
+  });
 
   // const currentBalance = await wallet.wallet.getSpendableAmount();
   // console.log('Current L2 balance: ', await wallet.wallet.getSpendableAmount());
@@ -211,22 +213,37 @@ async function main() {
   console.log(`\n\n ${JSON.stringify(config, null, 2)} \n\n`);
 
   const mealToken = await deployERC20IfNotExists('MealToken', 'MEAL', 1000);
+  await sleep(3000);
   const uniToken = await deployERC20IfNotExists('Uniswap', 'UNI', 500);
+  await sleep(3000);
   await transferERC20ToMerchant(mealToken, '100');
+  await sleep(3000);
   await transferERC20ToMerchant(uniToken, '50');
+  await sleep(3000);
 
   const ticketNFT = await deployERC721IfNotExists('Worldcup Ticket', 'WC2022');
+  await sleep(3000);
   const anonFrensNFT = await deployERC721IfNotExists('AnonFrens', 'ANF');
+  await sleep(3000);
   await mintNFT(ticketNFT, 1001);
+  await sleep(3000);
   await mintNFT(ticketNFT, 2001);
+  await sleep(3000);
   await mintNFT(ticketNFT, 3001);
+  await sleep(3000);
   await mintNFT(ticketNFT, 4001);
+  await sleep(3000);
 
   await mintNFT(anonFrensNFT, 1557);
+  await sleep(3000);
   await mintNFT(anonFrensNFT, 4844);
+  await sleep(3000);
   await mintNFT(anonFrensNFT, 4337);
+  await sleep(3000);
 
+  await sleep(3000);
   await depositToZkopru();
+  await sleep(3000);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
