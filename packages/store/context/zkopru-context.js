@@ -89,23 +89,34 @@ export function ZkopruContextProvider(props) {
 
     const swapSalt = Math.round(Math.random() * 10000000);
 
-    // TODO: Release Utxo if the tx fails
-    const swapTx = await wallet.generateSwapTransaction(
-      process.env.MERCHANT_ADDRESS,
-      '0x0000000000000000000000000000000000000000',
-      toWei(ethRequired.toString()).toString(),
-      product.contractAddress,
-      toWei(quantity.toString()).toString(),
-      (+48000 * (10 ** 9)).toString(),
-      swapSalt,
-    );
+    let swapTx;
+    try {
+      swapTx = await wallet.generateSwapTransaction(
+        process.env.MERCHANT_ADDRESS,
+        '0x0000000000000000000000000000000000000000',
+        toWei(ethRequired.toString()).toString(),
+        product.contractAddress,
+        toWei(quantity.toString()).toString(),
+        (+48000 * (10 ** 9)).toString(),
+        swapSalt,
+      );
 
-    const shieldedTx = await wallet.wallet.shieldTx({ tx: swapTx });
+      const shieldedTx = await wallet.wallet.shieldTx({ tx: swapTx });
 
-    return {
-      customerTransaction: shieldedTx.encode().toString('hex'),
-      swapSalt,
-    };
+      return {
+        customerTransaction: shieldedTx.encode().toString('hex'),
+        swapSalt,
+      };
+    } catch (error) {
+      if (swapTx) {
+        // TODO: Release Utxo if the tx fails
+        await wallet.wallet.unlockUtxos(swapTx.inflow);
+      }
+
+      // eslint-disable-next-line no-console
+      console.error(error);
+      throw error;
+    }
   }
 
   async function getETHBalance() {

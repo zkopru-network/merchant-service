@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, gql, useMutation } from '@apollo/client';
 import { TokenStandard } from '../common/constants';
 import { ZkopruContext } from '../context/zkopru-context';
@@ -36,6 +36,7 @@ function ProductPage() {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isInitialized, generateSwapTransaction } = React.useContext(ZkopruContext);
 
   const [createOrderMutation] = useMutation(createOrderQuery);
@@ -80,7 +81,7 @@ function ProductPage() {
         },
       });
 
-      console.log(createdOrder);
+      navigate(`/orders/${createdOrder.id}`);
     } catch (error) {
       // eslint-disable-next-line no-alert
       alert(`Error ocurred while creating tx: ${error.message}`);
@@ -96,51 +97,48 @@ function ProductPage() {
         Product - {product.name}
       </div>
 
-      <div className="product-page__container">
-        <div className={`product-page__image ${loading ? 'loading' : ''}`}>
+      <div className="flex-row">
+        <div className={`product-image ${loading ? 'loading' : ''}`}>
           {product.imageUrl && (
             <img src={product.imageUrl} alt={product.name} />
           )}
         </div>
 
-        {loading ? (
-          <div className="product-page__details loading" />
-        ) : (
-          <div className={`product-page__details ${loading ? 'loading' : ''}`}>
-            <h2 className="product-page__name">
-              {product.name}
-            </h2>
-            <div className="product-page__description">
-              {product.description}
-            </div>
+        <div className={`section ${loading ? 'loading' : ''}`}>
+          <h2 className="product-page__name">
+            {product.name}
+          </h2>
+          <div className="product-page__description">
+            {product.description}
+          </div>
 
-            <div className="product-page__label">Contract</div>
-            <div className="product-page__value">{product.tokenStandard?.toUpperCase()} - {product.contractAddress}</div>
+          <div className="section__label">Contract</div>
+          <div className="section__value">{product.tokenStandard?.toUpperCase()} - {product.contractAddress}</div>
 
-            {isNFT ? (
-              <>
-                <div className="product-page__label">Token Id</div>
-                <div className="product-page__value">{product.tokenId}</div>
-              </>
-            ) : (
-              <>
-                <div className="product-page__label">Available Quantity</div>
-                <div className="product-page__value">{product.availableQuantity}</div>
-              </>
-            )}
+          {isNFT ? (
+            <>
+              <div className="section__label">Token Id</div>
+              <div className="section__value">{product.tokenId}</div>
+            </>
+          ) : (
+            <>
+              <div className="section__label">Available Quantity</div>
+              <div className="section__value">{product.availableQuantity}</div>
+            </>
+          )}
 
-            <div className="product-page__label">Price</div>
-            <div className="product-page__value">
-              <span className="product-page__unit">Ξ</span> {product.price}
-            </div>
-            <hr />
+          <div className="section__label">Price</div>
+          <div className="section__value">
+            <span className="section__unit">Ξ</span> {product.price}
+          </div>
+          <hr />
 
-            <form onSubmit={onSubmit}>
-              <div className="product-page__quantity">
+          <form onSubmit={onSubmit}>
+            <div className="product-page__quantity">
 
-                {!isNFT && (
+              {!isNFT && (
                 <div>
-                  <div className="product-page__label">Required Quantity</div>
+                  <div className="section__label">Required Quantity</div>
                   <input
                     type="number"
                     className="product-page__input"
@@ -149,26 +147,25 @@ function ProductPage() {
                     max={product.availableQuantity}
                   />
                 </div>
-                )}
+              )}
 
-                <div>
-                  <div className="product-page__label">Total</div>
-                  <div className="product-page__value mt-4">Ξ {product.price * quantity}</div>
-                </div>
+              <div>
+                <div className="section__label">Total</div>
+                <div className="section__value mt-4">Ξ {product.price * quantity}</div>
               </div>
+            </div>
 
-              <button
-                type="submit"
-                className={`product-page__purchase-button + ${isLoading ? 'product-page__purchase-button--loading' : ''}`}
-                disabled={loading}
-              >
-                <span />
-                {!isLoading && 'Purchase'}
-              </button>
-            </form>
+            <button
+              type="submit"
+              className={`submit-button + ${isLoading ? 'submit-button--loading' : ''}`}
+              disabled={loading}
+            >
+              <span />
+              {!isLoading && 'Purchase'}
+            </button>
+          </form>
 
-          </div>
-        )}
+        </div>
       </div>
 
     </div>

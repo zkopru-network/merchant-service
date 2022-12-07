@@ -10,12 +10,14 @@ import HomePage from './pages/home-page';
 import ProductPage from './pages/product-page';
 import Layout from './components/layout';
 import { ZkopruContextProvider } from './context/zkopru-context';
+import OrderPage from './pages/order-page';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/products/:id" element={<ProductPage />} />
+      <Route path="/orders/:id" element={<OrderPage />} />
     </Route>,
   ),
 );
