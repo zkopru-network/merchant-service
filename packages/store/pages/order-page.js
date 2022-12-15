@@ -21,7 +21,7 @@ const getOrderQuery = gql`
 `;
 
 function OrderPage() {
-  const { id } = useParams;
+  const { id } = useParams();
 
   const { loading, data } = useQuery(getOrderQuery, {
     variables: {

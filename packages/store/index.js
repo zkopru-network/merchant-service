@@ -25,7 +25,7 @@ const router = createBrowserRouter(
 const container = document.getElementById('root');
 
 createRoot(container).render(
-  <ZkopruContextProvider>
+  <ZkopruContextProvider provider="extension">
     <ApolloProvider client={graphQLClient}>
       <RouterProvider router={router} />
     </ApolloProvider>

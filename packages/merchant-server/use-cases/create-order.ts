@@ -24,6 +24,8 @@ const ORDER_FEE = 48000; // 0.1 ETH - Fee merchant would like to pay for the sel
 export default async function createOrderUseCase(orderInput: CreateOrderInput, context: Context) : Promise<Order> {
   const product = await context.productRepository.getById(orderInput.productId);
 
+  console.log(product, orderInput);
+
   // Create domain object
   const order = new Order({
     id: uuid(),
@@ -35,6 +37,8 @@ export default async function createOrderUseCase(orderInput: CreateOrderInput, c
     createdAt: new Date(),
     updatedAt: new Date(),
   });
+
+  console.log(order);
 
   // Ensure the token/quantity is available in the wallet
   await context.blockchainService.ensureProductAvailability(product, orderInput.quantity);

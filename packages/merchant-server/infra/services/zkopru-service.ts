@@ -137,10 +137,10 @@ export default class ZkopruService implements IBlockchainService {
     const merchantTx = await this.wallet.generateSwapTransaction(
       order.buyerAddress,
       order.product.contractAddress,
-      toWei(new BN(order.quantity)).toString(),
+      toWei(order.quantity.toString()),
       ZERO_ADDRESS,
-      toWei(new BN(order.amount)).toString(),
-      (+order.fee * (10 ** 9)).toString(), // TODO: Verify fee / weiPerByte calculation
+      toWei(order.amount.toString()),
+      (+order.fee * (10 ** 9)).toString(),
       params.atomicSwapSalt,
     );
 
@@ -158,7 +158,7 @@ export default class ZkopruService implements IBlockchainService {
       }
 
       if (!buyerZkTx.outflow.some((o) => o.note.eq(merchantZkTx.swap))) {
-        throw new ValidationError('Desired swap not found in any the transaction outflow.');
+        throw new ValidationError('Desired swap not found in any of the transaction outflow.');
       }
 
       // Send both transactions to the coordinator

@@ -97,19 +97,37 @@ function getMockedZkopruWallet({
   // Override activeCoordinatorUrl to return mock url
   wallet.wallet.coordinatorManager.activeCoordinatorUrl = async () => mockCoordinatorUrl;
 
-  // Create Utxo with given balances
-  const utxo = Utxo.from(new Note(wallet.wallet.account.zkAddress, Fp.from('123'), {
-    eth: Fp.from(ethBalance ? toWei(ethBalance.toString()) : '0'),
-    tokenAddr: Fp.from(tokenAddress ?? '0x0000000000000000000000000000000000000000'),
-    erc20Amount: Fp.from(erc20Balance ? toWei(erc20Balance.toString()) : '0'),
-    nft: Fp.from(erc721Balance ? toWei(erc721Balance.toString()) : '0'),
+  // Create Utxos with given balances
+  const utxoEth = ethBalance && Utxo.from(new Note(wallet.wallet.account.zkAddress, Fp.from('123'), {
+    eth: Fp.from(toWei(ethBalance.toString())),
+    tokenAddr: Fp.from('0x0000000000000000000000000000000000000000'),
+    erc20Amount: Fp.from('0'),
+    nft: Fp.from('0'),
   }));
-  utxo.nullifier = () => Fp.from(1);
+  if (utxoEth) utxoEth.nullifier = () => Fp.from(1);
+
+  const utxoErc20 = tokenAddress && erc20Balance && Utxo.from(new Note(wallet.wallet.account.zkAddress, Fp.from('123'), {
+    eth: Fp.from('0'),
+    tokenAddr: Fp.from(tokenAddress),
+    erc20Amount: Fp.from(toWei(erc20Balance.toString())),
+    nft: Fp.from('0'),
+  }));
+  if (utxoErc20) utxoErc20.nullifier = () => Fp.from(1);
+
+  const utxoErc721 = tokenAddress && erc721Balance && Utxo.from(new Note(wallet.wallet.account.zkAddress, Fp.from('123'), {
+    eth: Fp.from('0'),
+    tokenAddr: Fp.from(tokenAddress),
+    erc20Amount: Fp.from('0'),
+    nft: Fp.from(toWei(erc721Balance.toString())),
+  }));
+  if (utxoErc721) utxoErc721.nullifier = () => Fp.from(1);
 
   // Override wallet getSpendables method to return the created Utxo instead of querying DB
   wallet.wallet.getSpendables = async () => [
-    utxo,
-  ];
+    utxoEth,
+    utxoErc20,
+    utxoErc721,
+  ].filter(Boolean);
 
   return wallet;
 }
@@ -191,12 +209,13 @@ describe('use-case/create-order', () => {
     const buyerTx = await buyerWallet.generateSwapTransaction(
       zkopruService.wallet.wallet.account.zkAddress.toString(),
       '0x0000000000000000000000000000000000000000', // Sending eth
-      purchasePrice ? toWei(purchasePrice.toString()) : toWei(new BN(product.price).mul(new BN(purchaseQuantity))).toString(),
+      purchasePrice ? toWei(purchasePrice.toString()) : toWei((product.price * purchaseQuantity).toString()),
       product.contractAddress,
-      toWei(new BN(purchaseQuantity)).toString(),
+      toWei(purchaseQuantity.toString()),
       (+48000 * (10 ** 9)).toString(), // Coordinator fee
       atomicSwapSalt,
     );
+
     const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
     const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
 
@@ -227,7 +246,7 @@ describe('use-case/create-order', () => {
     return mockedCoordinatorAPI;
   }
 
-  test('should create an order successfully', async () => {
+  test.only('should create an order successfully', async () => {
     const mockedCoordinatorAPI = mockCoordinatorAPI();
 
     const createdProduct = await createSampleProduct();
@@ -297,7 +316,7 @@ describe('use-case/create-order', () => {
       atomicSwapSalt,
       purchaseQuantity,
       purchasePrice,
-    })).rejects.toThrow('Desired swap not found in any the transaction outflow.');
+    })).rejects.toThrow('Desired swap not found in any of the transaction outflow.');
 
     // Coordinator should not be called
     expect(mockedCoordinatorAPI).toBeCalledTimes(0);

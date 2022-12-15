@@ -22,7 +22,7 @@ const getProductQuery = gql`
 
 const createOrderQuery = gql`
   mutation createOrder($orderInput: CreateOrderInput!) {
-    createOrder(order: $orderInput) {
+    createdOrder : createOrder(order: $orderInput) {
       id
       buyerTransactionHash
       sellerTransactionHash
@@ -37,7 +37,7 @@ function ProductPage() {
 
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isInitialized, generateSwapTransaction } = React.useContext(ZkopruContext);
+  const { isInitialized, generateSwapTransaction, getAddress } = React.useContext(ZkopruContext);
 
   const [createOrderMutation] = useMutation(createOrderQuery);
 
@@ -69,19 +69,19 @@ function ProductPage() {
         quantity,
       });
 
-      const createdOrder = await createOrderMutation({
+      const response = await createOrderMutation({
         variables: {
           orderInput: {
             productId: product.id,
             quantity,
-            buyerAddress: process.env.MERCHANT_ADDRESS,
+            buyerAddress: await getAddress(),
             buyerTransaction: customerTransaction,
             atomicSwapSalt: swapSalt,
           },
         },
       });
 
-      navigate(`/orders/${createdOrder.id}`);
+      navigate(`/orders/${response.data.createdOrder.id}`);
     } catch (error) {
       // eslint-disable-next-line no-alert
       alert(`Error ocurred while creating tx: ${error.message}`);
