@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
 import { useParams } from 'react-router';
+import { fromWei } from 'web3-utils';
 
 const getOrderQuery = gql`
   query getOrder($id: String) {
@@ -57,16 +58,16 @@ function OrderPage() {
             )}
 
             <div className="section__label">Quantity</div>
-            <div className="section__value">{order.quantity}</div>
+            <div className="section__value">{fromWei(order.quantity)}</div>
 
             <div className="section__label">Unit price</div>
             <div className="section__value">
-              <span className="section__unit">Ξ</span> {product.price}
+              <span className="section__unit">Ξ</span> {fromWei(product.price)}
             </div>
 
             <div className="section__label">Total Amount</div>
             <div className="section__value">
-              <span className="section__unit">Ξ</span> {order.amount}
+              <span className="section__unit">Ξ</span> {fromWei(order.amount)}
             </div>
 
             <div className="section__label">Transaction Hash</div>

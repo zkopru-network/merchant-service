@@ -3,8 +3,9 @@
 /* eslint-disable no-alert */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Zkopru, { ZkAccount } from '@zkopru/client/browser';
+import { BN } from 'bn.js';
 import React from 'react';
-import { toWei, fromWei } from 'web3-utils';
+import { fromWei } from 'web3-utils';
 
 const NETWORKS = {
   20200406: {
@@ -90,12 +91,14 @@ export default function useZkopruNode(props) {
 
     let swapTx;
     try {
+      const ethRequired = fromWei(new BN(product.price).mul(new BN(quantity)));
+
       swapTx = await wallet.generateSwapTransaction(
         process.env.MERCHANT_ADDRESS,
         '0x0000000000000000000000000000000000000000',
-        toWei((product.price * Number(quantity)).toString()),
+        ethRequired,
         product.contractAddress,
-        toWei(quantity.toString()),
+        quantity,
         (+48000 * (10 ** 9)).toString(),
         swapSalt,
       );

@@ -1,7 +1,8 @@
 /* eslint-disable no-alert */
 
+import { BN } from 'bn.js';
 import React from 'react';
-import { toWei } from 'web3-utils';
+import { fromWei } from 'web3-utils';
 
 export default function useZkopruExtension() {
   const [isInitialized, setIsInitialized] = React.useState(window.zkopru && window.zkopru.connected);
@@ -29,15 +30,15 @@ export default function useZkopruExtension() {
   }
 
   async function generateSwapTransaction({ product, quantity }) {
-    const ethRequired = product.price * quantity;
+    const ethRequired = fromWei(new BN(product.price).mul(new BN(quantity)));
 
     const swapSalt = Math.round(Math.random() * 10000000);
 
     const { tx } = await window.zkopru.generateSwapTx(
       '0x0000000000000000000000000000000000000000',
-      toWei(ethRequired.toString()),
+      ethRequired,
       product.contractAddress,
-      toWei(quantity.toString()),
+      quantity,
       process.env.MERCHANT_ADDRESS,
       swapSalt,
       (+48000 * (10 ** 9)).toString(),

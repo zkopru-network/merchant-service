@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, gql, useMutation } from '@apollo/client';
 import { TokenStandard } from '../common/constants';
 import { ZkopruContext } from '../context/zkopru-context';
+import { fromWei, toWei } from 'web3-utils';
+import { BN } from 'bn.js';
 
 const getProductQuery = gql`
   query getProduct($id: String!) {
@@ -90,6 +92,17 @@ function ProductPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="page product-page">
+        <div className='loading' />
+      </div>
+    )
+  }
+
+  // Convert to ETH units for display
+  const totalPrice = fromWei(fromWei(new BN(product.price).mul(new BN(quantity))));
+
   return (
     <div className="page product-page">
 
@@ -123,13 +136,13 @@ function ProductPage() {
           ) : (
             <>
               <div className="section__label">Available Quantity</div>
-              <div className="section__value">{product.availableQuantity}</div>
+              <div className="section__value">{fromWei(product.availableQuantity)}</div>
             </>
           )}
 
           <div className="section__label">Price</div>
           <div className="section__value">
-            <span className="section__unit">Ξ</span> {product.price}
+            <span className="section__unit">Ξ</span> {fromWei(product.price)}
           </div>
           <hr />
 
@@ -141,9 +154,10 @@ function ProductPage() {
                   <div className="section__label">Required Quantity</div>
                   <input
                     type="number"
+                    step="0.0001"
                     className="product-page__input"
                     placeholder="Quantity"
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    onChange={(e) => setQuantity(e.target.value ? toWei(e.target.value): '')}
                     max={product.availableQuantity}
                   />
                 </div>
@@ -151,7 +165,7 @@ function ProductPage() {
 
               <div>
                 <div className="section__label">Total</div>
-                <div className="section__value mt-4">Ξ {product.price * quantity}</div>
+                <div className="section__value mt-4">Ξ {totalPrice}</div>
               </div>
             </div>
 
