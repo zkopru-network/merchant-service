@@ -11,7 +11,7 @@ enum OrderStatus {
 
 input CreateOrderInput {
   productId: String!
-  quantity: Float!
+  quantity: String!
   buyerAddress: String!
   buyerTransaction: String!
   atomicSwapSalt: Int!
@@ -24,16 +24,16 @@ input AddProductInput {
   tokenStandard: TokenStandard!
   contractAddress: String!
   tokenId: String
-  availableQuantity: Int!
-  price: Float!
+  availableQuantity: String!
+  price: String!
 }
 
 input EditProductInput {
   name: String!
   description: String
   imageUrl: String
-  availableQuantity: Int!
-  price: Float!
+  availableQuantity: String!
+  price: String!
 }
 
 
@@ -45,8 +45,8 @@ type Product {
   tokenStandard: TokenStandard!
   contractAddress: String!
   tokenId: String
-  availableQuantity: Int!
-  price: Float!
+  availableQuantity: String!
+  price: String!
   createdAt: String!
   updatedAt: String!
 }
@@ -54,13 +54,13 @@ type Product {
 type Order {
   id: String
   product: Product
-  quantity: Float
+  quantity: String
   buyerAddress: String
   buyerTransaction: String
   buyerTransactionHash: String
   sellerTransaction: String
   sellerTransactionHash: String
-  amount: Float
+  amount: String
   status: OrderStatus
   createdAt: String!
   updatedAt: String!
@@ -69,12 +69,12 @@ type Order {
 type DailyOrderSnapshot {
   timestamp: String!
   totalOrders: Int!
-  totalOrderAmount: Int!
+  totalOrderAmount: String!
 }
 
 type TopProductByAmount {
   productName: String!
-  totalOrderAmount: Int!
+  totalOrderAmount: String!
 }
 
 type TopProductByQuantity {
@@ -84,14 +84,14 @@ type TopProductByQuantity {
 
 type TopBuyer {
   buyerAddress: String!
-  totalOrderAmount: Int!
+  totalOrderAmount: String!
 }
 
 type StoreMetrics {
   totalProducts: Int!
-  totalInventoryValue: Int!
+  totalInventoryValue: String!
   totalOrders: Int!
-  totalOrderAmount: Float!
+  totalOrderAmount: String!
   dailyOrderSnapshots: [DailyOrderSnapshot!]!
   topProductsByAmount: [TopProductByAmount!]!
   topProductsByQuantity: [TopProductByQuantity!]!

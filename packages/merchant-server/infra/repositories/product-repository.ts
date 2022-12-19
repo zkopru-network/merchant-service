@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import type { Knex, Tables } from 'knex';
 import { IProductRepository, ILogger, TokenStandard } from '../../common/interfaces';
 import Product from '../../domain/product';
@@ -29,8 +30,8 @@ export class ProductRepository implements IProductRepository {
       tokenId: dbRow.token_id,
       tokenStandard,
       contractAddress: dbRow.contract_address,
-      availableQuantity: dbRow.available_quantity,
-      price: dbRow.price,
+      availableQuantity: new BN(dbRow.available_quantity.toString()),
+      price: new BN(dbRow.price.toString()),
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at,
     });
@@ -45,8 +46,8 @@ export class ProductRepository implements IProductRepository {
       token_id: product.tokenId,
       token_standard: product.tokenStandard.toString(),
       contract_address: product.contractAddress,
-      available_quantity: product.availableQuantity,
-      price: product.price,
+      available_quantity: product.availableQuantity.toString(),
+      price: product.price.toString(),
       created_at: product.createdAt,
       updated_at: product.updatedAt,
     };
@@ -90,7 +91,7 @@ export class ProductRepository implements IProductRepository {
     return exists;
   }
 
-  async getProductMetrics() : Promise<{ totalProducts: number; totalInventoryValue: number; }> {
+  async getProductMetrics() : Promise<{ totalProducts: number; totalInventoryValue: BN; }> {
     const [stats] = await this.db('products')
       .select<{ totalProducts: number, totalInventoryValue: number }[]>(
         this.db.raw('SUM(1) as "totalProducts"'),
@@ -99,7 +100,7 @@ export class ProductRepository implements IProductRepository {
 
     return {
       totalProducts: Number(stats.totalProducts),
-      totalInventoryValue: Number(stats.totalInventoryValue),
+      totalInventoryValue: new BN(stats.totalInventoryValue),
     };
   }
 }

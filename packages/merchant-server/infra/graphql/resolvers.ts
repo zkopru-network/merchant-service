@@ -17,6 +17,8 @@ import getStoreMetricsUseCase from '../../use-cases/get-store-metrics';
 function productToDTO(product: Product) {
   return {
     ...product,
+    availableQuantity: product.availableQuantity.toString(),
+    price: product.price.toString(),
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
   };
@@ -25,6 +27,8 @@ function productToDTO(product: Product) {
 function orderToDTO(order: Order) {
   return {
     ...order,
+    quantity: order.quantity.toString(),
+    amount: order.amount.toString(),
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
     product: productToDTO(order.product),
@@ -133,9 +137,20 @@ const resolvers : Resolvers<MercuriusContext> = {
 
       return {
         ...metrics,
+        totalInventoryValue: metrics.totalInventoryValue.toString(),
+        totalOrderAmount: metrics.totalOrderAmount.toString(),
         dailyOrderSnapshots: metrics.dailyOrderSnapshots.map((h) => ({
           ...h,
+          totalOrderAmount: h.totalOrderAmount.toString(),
           timestamp: h.timestamp.toISOString(),
+        })),
+        topBuyers: metrics.topBuyers.map(t => ({
+          ...t,
+          totalOrderAmount: t.totalOrderAmount.toString()
+        })),
+        topProductsByAmount: metrics.topProductsByAmount.map(t => ({
+          ...t,
+          totalOrderAmount: t.totalOrderAmount.toString()
         })),
       };
     },

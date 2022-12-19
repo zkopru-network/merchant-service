@@ -31,7 +31,7 @@ export default async function updateExistingOrderStatusUseCase(context: Context)
       // Revert product's available quantity
       // eslint-disable-next-line no-await-in-loop
       const product = await context.productRepository.getById(order.product.id);
-      product.availableQuantity += order.quantity;
+      product.availableQuantity = product.availableQuantity.add(order.quantity);
       context.productRepository.updateProduct(product);
     }
 

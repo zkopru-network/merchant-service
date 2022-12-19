@@ -1,6 +1,7 @@
 import type { Logger } from 'pino';
 import Product from '../domain/product';
 import Order, { OrderStatus } from '../domain/order';
+import BN from 'bn.js';
 
 // TODO: Can be changed to a custom type to avoid dependency on pino
 export type ILogger = Logger;
@@ -13,21 +14,21 @@ export enum TokenStandard {
 
 export type ProductMetrics = {
   totalProducts: number;
-  totalInventoryValue: number;
+  totalInventoryValue: BN;
 }
 
 export type DailyOrderSnapshot = {
   timestamp: Date;
   totalOrders: number;
-  totalOrderAmount: number;
+  totalOrderAmount: BN;
 }
 
 export type OrderMetrics = {
   totalOrders: number;
-  totalOrderAmount: number;
+  totalOrderAmount: BN;
   topProductsByAmount: {
     productName: string,
-    totalOrderAmount: number
+    totalOrderAmount: BN
   }[]
   topProductsByQuantity: {
     productName: string,
@@ -35,15 +36,15 @@ export type OrderMetrics = {
   }[]
   topBuyers: {
     buyerAddress: string;
-    totalOrderAmount: number
+    totalOrderAmount: BN
   }[]
 }
 
 // Interface for the service interacting with the Blockchain
 export interface IBlockchainService {
   start: () => void;
-  ensureProductAvailability: (product: Product, quantity?: number) => Promise<void>
-  executeOrder: (order: Order, params: object) => Promise<{ buyerTransactionHash: string, sellerTransaction: string, sellerTransactionHash: string }>;
+  ensureProductAvailability: (product: Product, quantity?: BN) => Promise<void>
+  executeOrder: (order: Order, params: object) => Promise<{ buyerTransactionHash: string, sellerTransaction: string, sellerTransactionHash: string, fee: string }>;
   getConfirmationStatusForOrders: (orders: Order[]) => Promise<Record<string, OrderStatus>>; // Given a list of orders, return { orderId: "pending | complete" } based on transaction finalization
   signMessage: (message: string) => Promise<string>
   getWalletAddress: () => string

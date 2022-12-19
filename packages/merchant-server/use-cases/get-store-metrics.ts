@@ -1,3 +1,4 @@
+import { BN } from 'bn.js';
 import {
   addDays, startOfDay, endOfDay, isBefore, isSameDay, isAfter,
 } from 'date-fns';
@@ -52,7 +53,7 @@ export default async function getStoreMetricsUseCase(args: Filters, context: Con
     allDayOrderSnapshots.push({
       timestamp: currentDate,
       totalOrders: metricsForDay ? metricsForDay.totalOrders : 0,
-      totalOrderAmount: metricsForDay ? metricsForDay.totalOrderAmount : 0,
+      totalOrderAmount: metricsForDay ? metricsForDay.totalOrderAmount : new BN('0'),
     });
     currentDate = addDays(currentDate, 1);
   }

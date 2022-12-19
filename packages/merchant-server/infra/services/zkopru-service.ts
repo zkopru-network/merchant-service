@@ -8,7 +8,7 @@ import {
 } from '@zkopru/client/dist/node';
 import { ZkTx } from '@zkopru/transaction';
 import BN from 'bn.js';
-import { fromWei, toWei } from 'web3-utils';
+import { toWei } from 'web3-utils';
 import {
   ILogger, TokenStandard, IBlockchainService,
 } from '../../common/interfaces';
@@ -41,14 +41,6 @@ export default class ZkopruService implements IBlockchainService {
 
   wallet: ZkopruWallet;
 
-  // Local state for storing token balances on L2
-  balances: Record<TokenStandard, Record<string, object | object[]>>;
-
-  // Interval to refresh L2 balance in ms
-  balanceUpdateInterval : number;
-
-  private timer: NodeJS.Timeout;
-
   constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
     this.logger = context.logger;
 
@@ -61,13 +53,6 @@ export default class ZkopruService implements IBlockchainService {
       accounts: [this.zkAccount],
       databaseName: 'zkopru.db',
     });
-
-    this.balances = {
-      [TokenStandard.Erc20]: {},
-      [TokenStandard.Erc721]: {},
-    };
-
-    this.balanceUpdateInterval = 10 * 1000;
   }
 
   async start() {
@@ -83,64 +68,51 @@ export default class ZkopruService implements IBlockchainService {
         l2Address: this.wallet.wallet.account.zkAddress.toString(),
       },
     }, 'Started Zkopru Node');
-
-    await this.updateBalance();
   }
 
-  stop() {
-    clearTimeout(this.timer);
-  }
-
-  async updateBalance() {
-    this.logger.debug('Updating wallet balances');
+  async ensureProductAvailability(product: Product, requiredQuantity: BN) {
     const spendable = await this.wallet.wallet.getSpendableAmount();
+    const walletBalances = {
+      [TokenStandard.Erc20]:  Object.fromEntries(
+        Object.entries(spendable.erc20).map(([k, v]) => [k.toLowerCase(), v])
+      ),
+      [TokenStandard.Erc721]:  Object.fromEntries(
+        Object.entries(spendable.erc721).map(([k, v]) => [k.toLowerCase(), v])
+      )
+    }
 
-    this.balances = {
-      [TokenStandard.Erc721]: spendable.erc721,
-      [TokenStandard.Erc20]: spendable.erc20,
-    };
-    this.logger.debug({ data: this.balances }, 'Wallet balance updated');
+    this.logger.info({ data: walletBalances }, 'Current wallet balance');
 
-    this.timer = setTimeout(async () => {
-      await this.updateBalance();
-    }, this.balanceUpdateInterval);
-  }
+    if (product.tokenStandard === TokenStandard.Erc20) {
+      const available = walletBalances[TokenStandard.Erc20][product.contractAddress.toLowerCase()] || 0;
 
-  async ensureProductAvailability(product: Product, quantity: number) {
-    try {
-      if (product.tokenStandard === TokenStandard.Erc20) {
-        const available = this.balances[product.tokenStandard][product.contractAddress] as BN;
-        const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
-
-        if (!available || requiredQuantity.gt(available)) {
-          throw new ValidationError(
-            `Wallet don't have enough balance for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`,
-          );
-        }
-      } else if (product.tokenStandard === TokenStandard.Erc721) {
-        const availableTokens = this.balances[product.tokenStandard][product.contractAddress] as BN[] || [];
-        const isAvailable = (availableTokens as BN[] || []).some((el) => el.eq(new BN(product.tokenId)));
-        if (!isAvailable) {
-          throw new ValidationError(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
-        }
-      } else {
-        throw new ValidationError('Unknown Token Standard');
+      if (!available || requiredQuantity.gt(new BN(available.toString()))) {
+        throw new ValidationError(
+          `Wallet don't have enough balance for token ${product.contractAddress} for required quantity ${requiredQuantity}. Only ${available} available.`,
+        );
       }
-    } catch (error) {
-      this.logger.info({ data: this.balances }, 'Current wallet balance');
-      throw error;
+    } else if (product.tokenStandard === TokenStandard.Erc721) {
+      const availableTokens = walletBalances[TokenStandard.Erc721][product.contractAddress.toLowerCase()] || [];
+      const isAvailable = availableTokens.some((el) => el.toString() === product.tokenId.toString());
+      if (!isAvailable) {
+        throw new ValidationError(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
+      }
+    } else {
+      throw new ValidationError('Unknown Token Standard');
     }
   }
 
   async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
+    const weiPerBye = (48000 * (10 ** 9)).toString();
+
     // Generate swap transaction (sell tx)
     const merchantTx = await this.wallet.generateSwapTransaction(
       order.buyerAddress,
       order.product.contractAddress,
-      toWei(order.quantity.toString()),
+      order.quantity.toString(),
       ZERO_ADDRESS,
-      toWei(order.amount.toString()),
-      (+order.fee * (10 ** 9)).toString(),
+      order.amount.toString(),
+      weiPerBye,
       params.atomicSwapSalt,
     );
 
@@ -180,6 +152,7 @@ export default class ZkopruService implements IBlockchainService {
         buyerTransactionHash: buyerZkTx.hash().toString(),
         sellerTransaction: merchantTxEncoded,
         sellerTransactionHash: merchantZkTx.hash().toString(),
+        fee: merchantTx.fee.toString(),
       };
     } catch (error) {
       await this.wallet.wallet.unlockUtxos(merchantTx.inflow);

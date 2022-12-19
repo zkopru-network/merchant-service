@@ -12,17 +12,19 @@ import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
 import editProductUseCase from '../use-cases/edit-product';
 import { ValidationError } from '../common/error';
+import { getMockedZkopru, getMockedZkopruWallet } from './utils';
 
 describe('use-case/edit-product', () => {
   let productRepo: IProductRepository;
   let logger: ILogger;
   let zkopruService: ZkopruService;
+  const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
   beforeEach(async () => {
     logger = createLogger({ level: 'error' });
 
     const db = pgMem().adapters.createKnex();
-    await seed(db);
+    await seed(db, 'bigint');
     productRepo = new ProductRepository(db, { logger });
 
     zkopruService = new ZkopruService({
@@ -32,12 +34,14 @@ describe('use-case/edit-product', () => {
     }, {
       logger,
     });
+
+    zkopruService.node = await getMockedZkopru();
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc20Balance: 10, erc20TokenAddress: tokenAddress,
+    });
   });
 
   test('should be able to edit successfully', async () => {
-    // Set a dummy contract address for the token
-    const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
-
     // Fake wallet state to have enough balance for the token.
     zkopruService.balances = {
       [TokenStandard.Erc20]: {
@@ -52,8 +56,8 @@ describe('use-case/edit-product', () => {
       imageUrl: 'https://ethereum.org/test.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 4,
-      price: 0.1,
+      availableQuantity: toWei('4'),
+      price: toWei('0.1'),
     };
 
     const createdProduct = await addProductUseCase(productInput, {
@@ -68,8 +72,8 @@ describe('use-case/edit-product', () => {
         name: 'HelloToken',
         description: 'Edited Description',
         imageUrl: 'Edited Image',
-        availableQuantity: 10,
-        price: 1,
+        availableQuantity: toWei('10'),
+        price: toWei('1'),
       },
     }, {
       productRepository: productRepo,
@@ -82,14 +86,11 @@ describe('use-case/edit-product', () => {
     expect(editedProduct.name).toBe('HelloToken');
     expect(editedProduct.description).toBe('Edited Description');
     expect(editedProduct.imageUrl).toBe('Edited Image');
-    expect(editedProduct.availableQuantity).toBe(10);
-    expect(editedProduct.price).toBe(1);
+    expect(editedProduct.availableQuantity.toString()).toBe(toWei('10').toString());
+    expect(editedProduct.price.toString()).toBe(toWei('1').toString());
   });
 
   test('should throw error when edited quantity is not available in wallet', async () => {
-    // Set a dummy contract address for the token
-    const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
-
     // Fake wallet state to have enough balance for the token.
     zkopruService.balances = {
       [TokenStandard.Erc20]: {
@@ -104,8 +105,8 @@ describe('use-case/edit-product', () => {
       imageUrl: 'https://ethereum.org/test.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 4,
-      price: 0.1,
+      availableQuantity: toWei('4'),
+      price: toWei('0.1'),
     };
 
     const createdProduct = await addProductUseCase(productInput, {
@@ -120,8 +121,8 @@ describe('use-case/edit-product', () => {
         name: 'HelloToken',
         description: 'Edited Description',
         imageUrl: 'Edited Image',
-        availableQuantity: 11,
-        price: 1,
+        availableQuantity: toWei('11'),
+        price: toWei('1'),
       },
     }, {
       productRepository: productRepo,

@@ -1,3 +1,4 @@
+import { BN } from 'bn.js';
 import type { Knex, Tables } from 'knex';
 import {
   IOrderRepository, ILogger, DailyOrderSnapshot, OrderMetrics,
@@ -25,14 +26,14 @@ export class OrderRepository implements IOrderRepository {
       product: ProductRepository.mapDBRowToProduct({
         ...dbRow, id: dbRow.product_id, created_at: dbRow.product_created_at, updated_at: dbRow.product_updated_at,
       }),
-      quantity: dbRow.quantity,
-      amount: dbRow.amount,
+      quantity: new BN(dbRow.quantity.toString()),
+      amount: new BN(dbRow.amount.toString()),
       buyerAddress: dbRow.buyer_address,
       buyerTransaction: dbRow.buyer_transaction,
       buyerTransactionHash: dbRow.buyer_transaction_hash,
       sellerTransaction: dbRow.seller_transaction,
       sellerTransactionHash: dbRow.seller_transaction_hash,
-      fee: dbRow.fee,
+      fee: new BN(dbRow.fee.toString()),
       status,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at,
@@ -43,14 +44,14 @@ export class OrderRepository implements IOrderRepository {
     return {
       id: order.id,
       product_id: order.product.id,
-      quantity: order.quantity,
-      amount: order.amount,
+      quantity: order.quantity.toString(),
+      amount: order.amount.toString(),
       buyer_address: order.buyerAddress,
       buyer_transaction: order.buyerTransaction,
       buyer_transaction_hash: order.buyerTransactionHash,
       seller_transaction: order.sellerTransaction,
       seller_transaction_hash: order.sellerTransactionHash,
-      fee: order.fee,
+      fee: order.fee.toString(),
       status: order.status.toString(),
       created_at: order.createdAt,
       updated_at: order.updatedAt,
@@ -119,7 +120,7 @@ export class OrderRepository implements IOrderRepository {
     return stats.map((s) => ({
       timestamp: s.timestamp,
       totalOrders: Number(s.totalOrders),
-      totalOrderAmount: Number(s.totalOrderAmount),
+      totalOrderAmount: new BN(s.totalOrderAmount),
     }));
   }
 
@@ -176,10 +177,10 @@ export class OrderRepository implements IOrderRepository {
 
     return {
       totalOrders: Number(totalOrders),
-      totalOrderAmount: Number(totalOrderAmount),
+      totalOrderAmount: new BN(totalOrderAmount),
       topProductsByAmount: topProductsByAmount.map((p) => ({
         productName: p.productName,
-        totalOrderAmount: Number(p.totalOrderAmount),
+        totalOrderAmount: new BN(p.totalOrderAmount),
       })),
       topProductsByQuantity: topProductsByQuantity.map((p) => ({
         productName: p.productName,
@@ -187,7 +188,7 @@ export class OrderRepository implements IOrderRepository {
       })),
       topBuyers: topBuyers.map((b) => ({
         buyerAddress: b.buyerAddress,
-        totalOrderAmount: Number(b.totalOrderAmount),
+        totalOrderAmount: new BN(b.totalOrderAmount),
       })),
     };
   }

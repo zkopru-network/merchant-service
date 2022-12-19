@@ -1,3 +1,4 @@
+import { BN } from 'bn.js';
 import { v4 as uuid } from 'uuid';
 import { ValidationError } from '../common/error';
 import {
@@ -12,8 +13,8 @@ type AddProductInput = {
   tokenStandard: TokenStandard;
   contractAddress: string;
   tokenId?: string;
-  availableQuantity: number;
-  price: number;
+  availableQuantity: string;
+  price: string;
 };
 
 type Context = {
@@ -27,6 +28,8 @@ export default async function addProductUseCase(productInput: AddProductInput, c
   const product = new Product({
     id: uuid(),
     ...productInput,
+    availableQuantity: new BN(productInput.availableQuantity),
+    price: new BN(productInput.price),
     createdAt: new Date(),
     updatedAt: new Date(),
   });

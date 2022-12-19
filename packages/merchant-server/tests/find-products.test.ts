@@ -2,7 +2,6 @@ import {
   beforeEach, describe, expect, test,
 } from '@jest/globals';
 import { newDb as pgMem } from 'pg-mem';
-import { BN } from 'bn.js';
 import { toWei } from 'web3-utils';
 import { seed } from '../infra/db/migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';
@@ -11,51 +10,47 @@ import { IProductRepository, ILogger, TokenStandard } from '../common/interfaces
 import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
 import findProductsUseCase from '../use-cases/find-products';
+import { getMockedZkopru, getMockedZkopruWallet, merchantPrivateKey } from './utils';
 
 describe('use-case/find-products', () => {
   let productRepo: IProductRepository;
   let logger: ILogger;
   let zkopruService: ZkopruService;
 
+  // Set a dummy contract address for the token
+  const erc20TokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
+  const erc721TokenAddress = '0x122Ffa318051d8aF4E5f2E2732d7049486fcE022';
+
   beforeEach(async () => {
     logger = createLogger({ level: 'error' });
 
     const db = pgMem().adapters.createKnex();
-    await seed(db);
+    await seed(db, 'bigint');
     productRepo = new ProductRepository(db, { logger });
 
     zkopruService = new ZkopruService({
       websocketUrl: 'ws://test',
       contractAddress: null,
-      accountPrivateKey: '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
+      accountPrivateKey: merchantPrivateKey,
     }, {
       logger,
+    });
+
+    zkopruService.node = await getMockedZkopru();
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc20Balance: 400, erc20TokenAddress, erc721TokenAddress, erc721TokenIds: ['200'],
     });
   });
 
   test('should be able to fetch list of products successfully', async () => {
-    // Set a dummy contract address for the token
-    const tokenAddressErc20 = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
-    const tokenAddressErc721 = '0x122Ffa318051d8aF4E5f2E2732d7049486fcE022';
-
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {
-        [tokenAddressErc20]: toWei(new BN(400)),
-      },
-      [TokenStandard.Erc721]: {
-        [tokenAddressErc721]: [new BN('200')],
-      },
-    };
-
     await addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/test.png',
       tokenStandard: TokenStandard.Erc20,
-      contractAddress: tokenAddressErc20,
-      availableQuantity: 400,
-      price: 1,
+      contractAddress: erc20TokenAddress,
+      availableQuantity: toWei('400'),
+      price: toWei('1'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -68,9 +63,9 @@ describe('use-case/find-products', () => {
       imageUrl: 'https://ethereum.org/nft.png',
       tokenStandard: TokenStandard.Erc721,
       tokenId: '200',
-      contractAddress: tokenAddressErc721,
-      availableQuantity: 1,
-      price: 2.4,
+      contractAddress: erc721TokenAddress,
+      availableQuantity: toWei('1'),
+      price: toWei('2.4'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,

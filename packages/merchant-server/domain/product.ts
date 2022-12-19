@@ -1,3 +1,5 @@
+import BN from 'bn.js';
+import { toWei } from 'web3-utils';
 import { ValidationError } from '../common/error';
 import { TokenStandard } from '../common/interfaces';
 
@@ -9,8 +11,8 @@ type IProduct = {
   tokenStandard: TokenStandard;
   contractAddress: string;
   tokenId?: string;
-  availableQuantity: number;
-  price: number;
+  availableQuantity: BN;
+  price: BN;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,9 +32,9 @@ export default class Product {
 
   tokenId: string;
 
-  price: number;
+  price: BN;
 
-  availableQuantity: number;
+  availableQuantity: BN;
 
   createdAt: Date;
 
@@ -52,7 +54,7 @@ export default class Product {
         throw new ValidationError('tokenId is required for Erc721 type token.');
       }
 
-      if (args.availableQuantity !== 1) {
+      if (!args.availableQuantity.eq(new BN(toWei('1')))) {
         throw new ValidationError('Erc721 type token cannot have more than one quantity available.');
       }
     }

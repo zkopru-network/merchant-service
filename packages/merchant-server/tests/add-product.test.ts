@@ -12,8 +12,9 @@ import { IProductRepository, ILogger, TokenStandard } from '../common/interfaces
 import { createLogger } from '../common/logger';
 import ZkopruService from '../infra/services/zkopru-service';
 import { ValidationError } from '../common/error';
+import { getMockedZkopru, getMockedZkopruWallet, merchantPrivateKey } from './utils';
 
-describe('use-case/create-product', () => {
+describe('use-case/add-product', () => {
   let productRepo: IProductRepository;
   let logger: ILogger;
   let zkopruService: ZkopruService;
@@ -22,29 +23,27 @@ describe('use-case/create-product', () => {
     logger = createLogger({ level: 'error' });
 
     const db = pgMem().adapters.createKnex();
-    await seed(db);
+    await seed(db, 'bigint');
     productRepo = new ProductRepository(db, { logger });
 
     zkopruService = new ZkopruService({
       websocketUrl: 'ws://test',
       contractAddress: null,
-      accountPrivateKey: '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
+      accountPrivateKey: merchantPrivateKey,
     }, {
       logger,
     });
+
+    zkopruService.node = await getMockedZkopru();
   });
 
   test('should set id for product and save successfully', async () => {
-    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc20Balance: 10, erc20TokenAddress: tokenAddress,
+    });
 
     const productInput = {
       name: 'FoodToken',
@@ -52,8 +51,8 @@ describe('use-case/create-product', () => {
       imageUrl: 'https://ethereum.org/test.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 4,
-      price: 0.1,
+      availableQuantity: toWei('4'),
+      price: toWei('0.1'),
     };
 
     const createdProduct = await addProductUseCase(productInput, {
@@ -73,16 +72,12 @@ describe('use-case/create-product', () => {
   });
 
   test('should throw validation error when wallet balance is low', async () => {
-    // Set a dummy contract address for the token
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc20Balance: 10, erc20TokenAddress: tokenAddress,
+    });
 
     const productInput = {
       name: 'FoodToken',
@@ -90,8 +85,8 @@ describe('use-case/create-product', () => {
       imageUrl: 'https://ethereum.org/test.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 11,
-      price: 0.1,
+      availableQuantity: toWei('11'),
+      price: toWei('0.1'),
     };
 
     await expect(() => addProductUseCase(productInput, {
@@ -106,12 +101,9 @@ describe('use-case/create-product', () => {
     const tokenAddress = '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093';
 
     // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc20Balance: 10, erc20TokenAddress: tokenAddress,
+    });
 
     // Create product
     await addProductUseCase({
@@ -120,8 +112,8 @@ describe('use-case/create-product', () => {
       imageUrl: 'https://ethereum.org/test.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 5,
-      price: 0.1,
+      availableQuantity: toWei('5'),
+      price: toWei('0.1'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -135,8 +127,8 @@ describe('use-case/create-product', () => {
       imageUrl: 'https://ethereum.org/2.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 4,
-      price: 0.3,
+      availableQuantity: toWei('4'),
+      price: toWei('0.3'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -146,15 +138,11 @@ describe('use-case/create-product', () => {
 
   test('should be able to create multiple products for same Erc721 contract with different tokenId', async () => {
     // Set a dummy contract address for the token
-    const tokenAddress = '0xd12Ffa318051d8aF4E5f2E2732d7049486fcE012';
+    const tokenAddress = '0xD12Ffa318051d8aF4E5f2E2732d7049486fCE012';
 
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {},
-      [TokenStandard.Erc721]: {
-        [tokenAddress]: [new BN('10'), new BN('5'), new BN('15')],
-      },
-    };
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc721TokenAddress: tokenAddress, erc721TokenIds: ['10', '5', '15'],
+    });
 
     // Create product
     await addProductUseCase({
@@ -164,8 +152,8 @@ describe('use-case/create-product', () => {
       tokenStandard: TokenStandard.Erc721,
       contractAddress: tokenAddress,
       tokenId: '10',
-      availableQuantity: 1,
-      price: 0.1,
+      availableQuantity: toWei('1'),
+      price: toWei('0.1'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -180,8 +168,8 @@ describe('use-case/create-product', () => {
       tokenStandard: TokenStandard.Erc721,
       contractAddress: tokenAddress,
       tokenId: '5',
-      availableQuantity: 1,
-      price: 2,
+      availableQuantity: toWei('1'),
+      price: toWei('2'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -191,15 +179,11 @@ describe('use-case/create-product', () => {
 
   test('should throw error when creating multiple products for same Erc721 contract with same tokenId', async () => {
     // Set a dummy contract address for the token
-    const tokenAddress = '0xd12Ffa318051d8aF4E5f2E2732d7049486fcE012';
+    const tokenAddress = '0xD12Ffa318051d8aF4E5f2E2732d7049486fCE012';
 
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {},
-      [TokenStandard.Erc721]: {
-        [tokenAddress]: [new BN('10'), new BN('5'), new BN('15')],
-      },
-    };
+    zkopruService.wallet = getMockedZkopruWallet({
+      node: zkopruService.node, ethBalance: 0.1, erc721TokenAddress: tokenAddress, erc721TokenIds: ['10', '5', '15'],
+    });
 
     // Create product
     await addProductUseCase({
@@ -209,8 +193,8 @@ describe('use-case/create-product', () => {
       tokenStandard: TokenStandard.Erc721,
       contractAddress: tokenAddress,
       tokenId: '15',
-      availableQuantity: 1,
-      price: 0.1,
+      availableQuantity: toWei('1'),
+      price: toWei('0.1'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -225,8 +209,8 @@ describe('use-case/create-product', () => {
       tokenStandard: TokenStandard.Erc721,
       contractAddress: tokenAddress,
       tokenId: '15',
-      availableQuantity: 1,
-      price: 2,
+      availableQuantity: toWei('1'),
+      price: toWei('2'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,

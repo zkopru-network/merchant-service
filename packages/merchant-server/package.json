@@ -34,7 +34,7 @@
     "pino-pretty": "^9.1.1",
     "siwe": "^1.1.6",
     "uuid": "^9.0.0",
-    "web3-utils": "^1.8.0"
+    "web3-utils": "^1.8.1"
   },
   "keywords": [],
   "author": "",

@@ -11,22 +11,22 @@ declare module 'knex' {
       'token_standard': string
       'contract_address': string
       'token_id'?: string
-      'available_quantity': number
-      'price': number
+      'available_quantity': string
+      'price': string
       'created_at': Date
       'updated_at': Date
     },
     orders: {
       'id': string
       'product_id': string
-      'quantity': number
-      'amount': number
+      'quantity': string
+      'amount': string
       'buyer_address': string
       'buyer_transaction': string
       'buyer_transaction_hash': string
       'seller_transaction': string
       'seller_transaction_hash': string
-      'fee': number
+      'fee': string
       'status': string
       'created_at': Date
       'updated_at': Date
