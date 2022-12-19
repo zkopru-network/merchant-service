@@ -4,7 +4,7 @@ import { useMutation, gql } from '@apollo/client';
 import ProductForm from '../components/product-form';
 
 const addProductQuery = gql`
-  mutation addProduct($productInput: ProductInput!) {
+  mutation addProduct($productInput: AddProductInput!) {
     addProduct(product: $productInput) {
       id
       name

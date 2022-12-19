@@ -4,6 +4,7 @@
   "private": false,
   "dependencies": {
     "@apollo/client": "^3.7.1",
+    "bn.js": "^5.2.1",
     "bulma": "^0.9.4",
     "date-fns": "^2.29.3",
     "ethers": "^5.7.2",
@@ -15,7 +16,8 @@
     "react-router": "^6.4.3",
     "react-router-dom": "^6.4.3",
     "recharts": "^2.1.16",
-    "siwe": "^1.1.6"
+    "siwe": "^1.1.6",
+    "web3-utils": "^1.8.1"
   },
   "scripts": {
     "start": "PORT=4001 parcel index.html",

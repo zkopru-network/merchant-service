@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { fromWei } from 'web3-utils';
 
 function ProductView(props) {
   const {
@@ -41,7 +42,7 @@ function ProductView(props) {
           <div className="product-view__value">{product.tokenStandard?.toUpperCase()} - {product.contractAddress}</div>
 
           <div className="product-view__label">Price</div>
-          <div className="product-view__value">Ξ {product.price}</div>
+          <div className="product-view__value">Ξ {fromWei(product.price)}</div>
 
           {isNFT ? (
             <>
@@ -51,7 +52,7 @@ function ProductView(props) {
           ) : (
             <>
               <div className="product-view__label">Available Quantity</div>
-              <div className="product-view__value">{product.availableQuantity}</div>
+              <div className="product-view__value">{fromWei(product.availableQuantity)}</div>
             </>
           )}
 

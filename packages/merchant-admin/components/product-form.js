@@ -1,4 +1,5 @@
 import React from 'react';
+import { fromWei, toWei } from 'web3-utils';
 import { TokenStandard } from '../common/constants';
 
 export default function ProductForm(props) {
@@ -7,7 +8,11 @@ export default function ProductForm(props) {
 
   React.useEffect(() => {
     if (defaultProduct) {
-      setProduct(defaultProduct);
+      setProduct({
+        ...defaultProduct,
+        availableQuantity: fromWei(defaultProduct.availableQuantity),
+        price: fromWei(defaultProduct.price),
+      });
     }
   }, [defaultProduct]);
 
@@ -17,7 +22,11 @@ export default function ProductForm(props) {
     e.preventDefault();
     e.stopPropagation();
 
-    onSubmit(product);
+    onSubmit({
+      ...product,
+      availableQuantity: toWei(product.availableQuantity.toString()),
+      price: toWei(product.price.toString()),
+    });
   }
 
   return (

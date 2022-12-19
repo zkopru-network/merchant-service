@@ -95,7 +95,7 @@ export class ProductRepository implements IProductRepository {
     const [stats] = await this.db('products')
       .select<{ totalProducts: number, totalInventoryValue: number }[]>(
         this.db.raw('SUM(1) as "totalProducts"'),
-        this.db.raw('SUM("price" * "available_quantity") as "totalInventoryValue"'),
+        this.db.raw('SUM("price" * "available_quantity" / 1000000000000000000) as "totalInventoryValue"'),
       );
 
     return {

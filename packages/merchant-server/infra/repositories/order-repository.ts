@@ -126,7 +126,7 @@ export class OrderRepository implements IOrderRepository {
 
   async getOrderMetrics(startDate: Date, endDate: Date) : Promise<OrderMetrics> {
     const getTotalPromise = this.db('orders')
-      .select<{ totalOrders: number, totalOrderAmount: number }[]>(
+      .select<{ totalOrders: number, totalOrderAmount: string }[]>(
         this.db.raw('SUM(1) as "totalOrders"'),
         this.db.raw('SUM(amount) as "totalOrderAmount"'),
       )
@@ -134,7 +134,7 @@ export class OrderRepository implements IOrderRepository {
       .andWhere('created_at', '<', endDate);
 
     const getTopProductsByAmountPromise = this.db('orders')
-      .select<{ productName: string, totalOrderAmount: number }[]>(
+      .select<{ productName: string, totalOrderAmount: string }[]>(
         this.db.raw('MIN("name") as "productName"'),
         this.db.raw('SUM("amount") as "totalOrderAmount"'),
       )
@@ -154,7 +154,7 @@ export class OrderRepository implements IOrderRepository {
       .groupBy('orders.product_id');
 
     const getTopBuyersPromise = this.db('orders')
-      .select<{ buyerAddress: string, totalOrderAmount: number }[]>(
+      .select<{ buyerAddress: string, totalOrderAmount: string }[]>(
         this.db.raw('buyer_address as "buyerAddress"'),
         this.db.raw('SUM("amount") as "totalOrderAmount"'),
       )
@@ -176,8 +176,8 @@ export class OrderRepository implements IOrderRepository {
     ]);
 
     return {
-      totalOrders: Number(totalOrders),
-      totalOrderAmount: new BN(totalOrderAmount),
+      totalOrders: Number(totalOrders || '0'),
+      totalOrderAmount: new BN(totalOrderAmount || '0'),
       topProductsByAmount: topProductsByAmount.map((p) => ({
         productName: p.productName,
         totalOrderAmount: new BN(p.totalOrderAmount),

@@ -4,6 +4,7 @@ import { useQuery, gql } from '@apollo/client';
 import List from '../components/list';
 import { formatEther } from '../common/utils';
 import ErrorView from '../components/error-view';
+import { fromWei } from 'web3-utils';
 
 const findProductsQuery = gql`
   query findProducts {
@@ -56,7 +57,7 @@ function ProductsListPage() {
             availableQuantity: 'Quantity',
             price: 'Price',
           }}
-          formatters={{ price: formatEther }}
+          formatters={{ price: v => formatEther(fromWei(v)), availableQuantity: v => fromWei(v) }}
           redirectTo={(product) => `/products/${product.id}`}
         />
       )}

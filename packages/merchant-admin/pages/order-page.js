@@ -4,6 +4,7 @@ import { useQuery, gql } from '@apollo/client';
 import { trimAddress } from '../common/utils';
 import ErrorView from '../components/error-view';
 import ProductView from '../components/product-view';
+import { fromWei } from 'web3-utils';
 
 const getOrderQuery = gql`
   query getOrder($id: String!) {
@@ -54,10 +55,10 @@ function OrderPage() {
           {!loading && order && (
             <>
               <div className="product-view__label">Quantity</div>
-              <div className="product-view__value">{order.quantity}</div>
+              <div className="product-view__value">{fromWei(order.quantity)}</div>
 
               <div className="product-view__label">Total Amount</div>
-              <div className="product-view__value">{order.amount}</div>
+              <div className="product-view__value">{fromWei(order.amount)}</div>
 
               <div className="product-view__label">Status</div>
               <div className="product-view__value">{order.status}</div>

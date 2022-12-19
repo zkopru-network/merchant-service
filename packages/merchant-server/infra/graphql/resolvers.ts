@@ -135,6 +135,8 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
+      console.log(metrics)
+
       return {
         ...metrics,
         totalInventoryValue: metrics.totalInventoryValue.toString(),

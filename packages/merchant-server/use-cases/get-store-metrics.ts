@@ -48,6 +48,7 @@ export default async function getStoreMetricsUseCase(args: Filters, context: Con
   const allDayOrderSnapshots = [];
   let currentDate = startDate;
   while (isBefore(currentDate, endDate)) {
+    console.log(currentDate, endDate)
     // eslint-disable-next-line no-loop-func
     const metricsForDay = dailyOrderSnapshots.find((d) => isSameDay(d.timestamp, currentDate));
     allDayOrderSnapshots.push({

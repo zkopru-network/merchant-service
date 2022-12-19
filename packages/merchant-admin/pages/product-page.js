@@ -7,6 +7,7 @@ import ErrorView from '../components/error-view';
 import ProductView from '../components/product-view';
 import ProductForm from '../components/product-form';
 import Modal from '../components/modal';
+import { fromWei } from 'web3-utils';
 
 const getProductQuery = gql`
   query getProduct($id: String!) {
@@ -53,7 +54,7 @@ function ProductPage() {
 
   const { product, matchingOrders } = data;
   const hasSold = matchingOrders?.length > 0;
-  const totalSold = hasSold ? matchingOrders.reduce((acc, o) => acc + o.amount, 0) : 0;
+  const totalSold = hasSold ? matchingOrders.reduce((acc, o) => acc + Number(fromWei(o.quantity)), 0) : 0;
 
   async function onEditProduct(updatedProduct) {
     try {
@@ -112,7 +113,7 @@ function ProductPage() {
           amount: 'Total Amount',
           status: 'Status',
         }}
-        formatters={{ buyerAddress: trimAddress, amount: formatEther }}
+        formatters={{ buyerAddress: trimAddress, amount: v => formatEther(fromWei(v)), quantity: v => fromWei(v) }}
         redirectTo={(order) => `/orders/${order.id}`}
       />
 

@@ -3,6 +3,7 @@ import { useQuery, gql } from '@apollo/client';
 import List from '../components/list';
 import { formateDateTime, formatEther, trimAddress } from '../common/utils';
 import ErrorView from '../components/error-view';
+import { fromWei } from 'web3-utils';
 
 const findOrdersQuery = gql`
   query findOrders {
@@ -43,7 +44,12 @@ function OrdersListPage() {
             status: 'Status',
             createdAt: 'Placed on',
           }}
-          formatters={{ buyerAddress: trimAddress, amount: formatEther, createdAt: formateDateTime }}
+          formatters={{
+            buyerAddress: trimAddress,
+            amount: v => formatEther(fromWei(v)),
+            createdAt: formateDateTime,
+            quantity: v => fromWei(v)
+          }}
           redirectTo={(order) => `/orders/${order.id}`}
         />
       )}

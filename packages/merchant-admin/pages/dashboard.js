@@ -6,10 +6,12 @@ import DatePicker from 'react-datepicker';
 import startOfDay from 'date-fns/startOfDay';
 import addDays from 'date-fns/addDays';
 import endOfDay from 'date-fns/endOfDay';
+import { fromWei } from 'web3-utils';
 import MetricBox from '../components/metric-box';
 import Chart from '../components/chart';
 import TopItems from '../components/top-items';
 import { formatEther, trimAddress } from '../common/utils';
+import { BN } from 'bn.js';
 
 const getStoreMetricsQuery = gql`
   query getStoreMetrics($startDate: String, $endDate: String) {
@@ -40,7 +42,7 @@ const getStoreMetricsQuery = gql`
 `;
 
 function Dashboard() {
-  const [startDate, setStartDate] = React.useState(startOfDay(addDays(new Date(), 30 * -1)));
+  const [startDate, setStartDate] = React.useState(startOfDay(addDays(new Date(), 7 * -1)));
   const [endDate, setEndDate] = React.useState(endOfDay(addDays(new Date(), -1)));
   const [dateRange, setDateRange] = React.useState([startDate, endDate]);
 
@@ -73,7 +75,9 @@ function Dashboard() {
     topProductsByQuantity = [],
   } = metrics;
 
-  const avgOrderAmount = totalOrderAmount ? (totalOrderAmount / totalOrders).toFixed(2) : '';
+  const avgOrderAmount = (totalOrders && totalOrderAmount) ? 
+    Math.round(Number(fromWei(new BN(totalOrderAmount).div(new BN(totalOrders)))))
+    : '0';
 
   return (
     <div className="page home-page">
@@ -102,7 +106,7 @@ function Dashboard() {
         <MetricBox
           label="Current Inventory Value"
           loading={loading}
-          value={totalInventoryValue}
+          value={totalInventoryValue ? fromWei(totalInventoryValue) : '-'}
           unit="Ξ"
         />
         <MetricBox
@@ -113,7 +117,7 @@ function Dashboard() {
         <MetricBox
           label="Total Sales"
           loading={loading}
-          value={totalOrderAmount}
+          value={totalOrderAmount ? fromWei(totalOrderAmount) : '-'}
           unit="Ξ"
         />
         <MetricBox
@@ -129,7 +133,7 @@ function Dashboard() {
         className="mt-4"
         height={300}
         loading={loading}
-        data={dailyOrderSnapshots}
+        data={dailyOrderSnapshots.map(a => ({ ...a, totalOrderAmount: fromWei( a.totalOrderAmount)}))}
         xAxisKey="timestamp"
         yAxisKeys={['totalOrders', 'totalOrderAmount']}
         yAxisLabels={['Total orders', 'Total sales (Ξ)']}
@@ -146,8 +150,8 @@ function Dashboard() {
             itemName="product"
             nameKey="productName"
             valueKey="totalOrderAmount"
-            valueFormatter={(v) => formatEther(v)}
             valueLabel="Amount"
+            valueFormatter={(v) => formatEther(fromWei(v.toString()))}
           />
         </div>
 
@@ -159,7 +163,6 @@ function Dashboard() {
             itemName="product"
             nameKey="productName"
             valueKey="totalSold"
-            valueFormatter={(v) => formatEther(v)}
             valueLabel="Total Sold"
           />
         </div>
@@ -173,7 +176,7 @@ function Dashboard() {
             nameKey="buyerAddress"
             valueKey="totalOrderAmount"
             nameFormatter={trimAddress}
-            valueFormatter={(v) => formatEther(v)}
+            valueFormatter={(v) => formatEther(fromWei(v.toString()))}
             valueLabel="Total Amount"
           />
         </div>
