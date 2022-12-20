@@ -45,7 +45,7 @@ function OrderPage() {
         {loading ? (
           <div className="section loading" />
         ) : (
-          <div className={`section mr-6 ${loading ? 'loading' : ''}`}>
+          <div className={`section mr-5 ${loading ? 'loading' : ''}`}>
 
             <div className="section__label">Product</div>
             <div className="section__value">{product.name}</div>

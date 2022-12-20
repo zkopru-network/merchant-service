@@ -154,7 +154,7 @@ function ProductPage() {
                   <div className="section__label">Required Quantity</div>
                   <input
                     type="number"
-                    step="0.0001"
+                    step="0.00000000001"
                     className="product-page__input"
                     placeholder="Quantity"
                     onChange={(e) => setQuantity(e.target.value ? toWei(e.target.value): '')}
