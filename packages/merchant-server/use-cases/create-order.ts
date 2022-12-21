@@ -44,7 +44,7 @@ export default async function createOrderUseCase(orderInput: CreateOrderInput, c
   // Create swap transaction and broadcast to blockchain
   const {
     buyerTransactionHash, sellerTransaction, sellerTransactionHash, fee,
-  } = await context.blockchainService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt });
+  } = await context.blockchainService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt, buyerAddress: orderInput.buyerAddress });
 
   order.sellerTransaction = sellerTransaction;
   order.buyerTransactionHash = buyerTransactionHash;

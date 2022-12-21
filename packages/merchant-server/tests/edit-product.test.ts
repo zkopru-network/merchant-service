@@ -42,14 +42,6 @@ describe('use-case/edit-product', () => {
   });
 
   test('should be able to edit successfully', async () => {
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
-
     const productInput = {
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
@@ -91,14 +83,6 @@ describe('use-case/edit-product', () => {
   });
 
   test('should throw error when edited quantity is not available in wallet', async () => {
-    // Fake wallet state to have enough balance for the token.
-    zkopruService.balances = {
-      [TokenStandard.Erc20]: {
-        [tokenAddress]: toWei(new BN(10)),
-      },
-      [TokenStandard.Erc721]: {},
-    };
-
     const productInput = {
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',

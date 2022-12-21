@@ -102,12 +102,12 @@ export default class ZkopruService implements IBlockchainService {
     }
   }
 
-  async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
+  async executeOrder(order: Order, params: { atomicSwapSalt: string, buyerTransaction: string, buyerAddress: string }) {
     const weiPerBye = (48000 * (10 ** 9)).toString();
 
     // Generate swap transaction (sell tx)
     const merchantTx = await this.wallet.generateSwapTransaction(
-      order.buyerAddress,
+      params.buyerAddress,
       order.product.contractAddress,
       order.quantity.toString(),
       ZERO_ADDRESS,
@@ -174,11 +174,7 @@ export default class ZkopruService implements IBlockchainService {
     const orderStatuses : Record<string, OrderStatus> = {};
 
     for (const order of orders) {
-      // Decode buyer transaction and calculate hash
-      const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
-      const hash = buyerZkTx.hash().toString();
-
-      if (receivedTransactionHashes[hash]) {
+      if (receivedTransactionHashes[order.buyerTransactionHash]) {
         orderStatuses[order.id] = OrderStatus.Complete;
       } else {
         orderStatuses[order.id] = OrderStatus.Pending;

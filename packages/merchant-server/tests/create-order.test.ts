@@ -76,15 +76,7 @@ describe('use-case/create-order', () => {
       node: zkopruService.node, ethBalance: 0.1, erc20Balance: 10, erc20TokenAddress: tokenAddress,
     });
 
-    zkopruService.balanceUpdateInterval = 500; // Reduce interval to have quick updates based on mock values
-
     expect(Fp).toBeTruthy();
-
-    await zkopruService.updateBalance();
-  });
-
-  afterEach(() => {
-    zkopruService.stop();
   });
 
   // Test helpers
@@ -168,7 +160,7 @@ describe('use-case/create-order', () => {
     const createdProduct = await createSampleProduct();
     const purchaseQuantity = new BN(toWei('3'));
     const atomicSwapSalt = 500; // Random salt
-    const { buyerAddress, createdOrder } = await createOrder({
+    const { createdOrder } = await createOrder({
       product: createdProduct,
       atomicSwapSalt,
       purchaseQuantity,
@@ -176,7 +168,6 @@ describe('use-case/create-order', () => {
 
     // Expect order to be created
     expect(typeof createdOrder.id).toBe('string');
-    expect(createdOrder.buyerAddress).toBe(buyerAddress);
     expect(createdOrder.quantity.toString()).toBe(purchaseQuantity.toString());
     expect(createdOrder.amount.toString()).toBe(fromWei(createdProduct.price.mul(createdOrder.quantity)).toString());
 

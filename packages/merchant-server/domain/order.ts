@@ -11,7 +11,6 @@ type IOrder = {
   id: string;
   product: Product;
   quantity: BN;
-  buyerAddress: string;
   buyerTransaction: string;
   buyerTransactionHash?: string;
   sellerTransaction?: string;
@@ -29,8 +28,6 @@ export default class Order {
   product: Product;
 
   quantity: BN;
-
-  buyerAddress: string;
 
   // Total order amount: quantity * productPrice
   amount: BN;
@@ -61,7 +58,6 @@ export default class Order {
     this.id = args.id;
     this.product = args.product;
     this.quantity = args.quantity;
-    this.buyerAddress = args.buyerAddress;
     this.buyerTransaction = args.buyerTransaction;
     this.buyerTransactionHash = args.buyerTransactionHash;
     this.sellerTransaction = args.sellerTransaction;

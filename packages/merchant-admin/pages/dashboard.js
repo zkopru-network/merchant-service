@@ -106,7 +106,7 @@ function Dashboard() {
         <MetricBox
           label="Current Inventory Value"
           loading={loading}
-          value={totalInventoryValue ? fromWei(totalInventoryValue) : '-'}
+          value={totalInventoryValue ? Math.round(Number(fromWei(totalInventoryValue)).toFixed(2)) : '-'}
           unit="Ξ"
         />
         <MetricBox
@@ -142,9 +142,9 @@ function Dashboard() {
 
       <div className="mt-4 columns">
 
-        <div className="column is-4">
+        <div className="column is-6">
           <TopItems
-            title="Top Products by Amount"
+            title="Top Products by Sales Amount"
             loading={loading}
             items={topProductsByAmount}
             itemName="product"
@@ -155,29 +155,15 @@ function Dashboard() {
           />
         </div>
 
-        <div className="column is-4">
+        <div className="column is-6">
           <TopItems
-            title="Top Products by Quantity"
+            title="Top Products by Quantity Sold"
             loading={loading}
             items={topProductsByQuantity}
             itemName="product"
             nameKey="productName"
             valueKey="totalSold"
             valueLabel="Total Sold"
-          />
-        </div>
-
-        <div className="column is-4">
-          <TopItems
-            title="Top Buyers"
-            loading={loading}
-            items={topBuyers}
-            itemName="buyer"
-            nameKey="buyerAddress"
-            valueKey="totalOrderAmount"
-            nameFormatter={trimAddress}
-            valueFormatter={(v) => formatEther(fromWei(v.toString()))}
-            valueLabel="Total Amount"
           />
         </div>
 

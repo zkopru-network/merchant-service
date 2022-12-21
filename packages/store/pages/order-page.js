@@ -10,6 +10,7 @@ const getOrderQuery = gql`
       amount
       buyerTransactionHash
       sellerTransactionHash
+      status
       product {
         id
         name
@@ -75,6 +76,9 @@ function OrderPage() {
 
             <div className="section__label">Merchant Transaction Hash</div>
             <div className="section__value">{order.sellerTransactionHash}</div>
+
+            <div className="section__label">Order Status</div>
+            <div className="section__value">{order.status}</div>
 
           </div>
         )}

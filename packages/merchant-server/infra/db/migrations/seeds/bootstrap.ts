@@ -24,7 +24,6 @@ export async function seed(knex: Knex, numberType = "decimal") {
     table[numberType]("quantity", 30, 0).notNullable();
     // @ts-ignore
     table[numberType]("amount", 30, 0).notNullable();
-    table.string("buyer_address", 255).nullable();
     table.string("buyer_transaction", 5000).nullable();
     table.string("buyer_transaction_hash", 255).nullable();
     table.string("seller_transaction", 5000).nullable();
