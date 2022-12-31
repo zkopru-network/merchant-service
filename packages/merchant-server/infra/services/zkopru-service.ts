@@ -109,7 +109,7 @@ export default class ZkopruService implements IBlockchainService {
     const merchantTx = await this.wallet.generateSwapTransaction(
       params.buyerAddress,
       order.product.contractAddress,
-      order.quantity.toString(),
+      order.product.tokenStandard === TokenStandard.Erc721 ? order.product.tokenId.toString() : order.quantity.toString(),
       ZERO_ADDRESS,
       order.amount.toString(),
       weiPerBye,

@@ -6,6 +6,7 @@ import Zkopru, { ZkAccount } from '@zkopru/client/browser';
 import { BN } from 'bn.js';
 import React from 'react';
 import { fromWei } from 'web3-utils';
+import { TokenStandard } from '../common/constants';
 
 const NETWORKS = {
   20200406: {
@@ -87,7 +88,7 @@ export default function useZkopruNode(props) {
   async function generateSwapTransaction({ product, quantity }) {
     await waitForReady();
 
-    const swapSalt = 500;
+    const swapSalt = Math.round(Math.random() * 10000000);
 
     let swapTx;
     try {
@@ -98,7 +99,7 @@ export default function useZkopruNode(props) {
         '0x0000000000000000000000000000000000000000',
         ethRequired,
         product.contractAddress,
-        quantity,
+        product.tokenStandard === TokenStandard.ERC721 ? product.tokenId.toString() : quantity,
         (+48000 * (10 ** 9)).toString(),
         swapSalt,
       );
@@ -150,7 +151,7 @@ export default function useZkopruNode(props) {
     setIsInitialized(true);
     setIsSyncing(true);
     await client.initNode();
-    wallet = new Zkopru.Wallet(client, getWalletPrivateKey());
+    wallet = await Zkopru.Wallet.new(client, getWalletPrivateKey());
     _instance.current.wallet = wallet;
 
     if (!client.node.running) {

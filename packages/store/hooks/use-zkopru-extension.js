@@ -3,6 +3,7 @@
 import { BN } from 'bn.js';
 import React from 'react';
 import { fromWei } from 'web3-utils';
+import { TokenStandard } from '../common/constants';
 
 export default function useZkopruExtension() {
   const [isInitialized, setIsInitialized] = React.useState(window.zkopru && window.zkopru.connected);
@@ -38,7 +39,7 @@ export default function useZkopruExtension() {
       '0x0000000000000000000000000000000000000000',
       ethRequired,
       product.contractAddress,
-      quantity,
+      product.tokenStandard === TokenStandard.ERC721 ? product.tokenId.toString() : quantity,
       process.env.MERCHANT_ADDRESS,
       swapSalt,
       (+48000 * (10 ** 9)).toString(),

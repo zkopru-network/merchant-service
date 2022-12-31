@@ -46,12 +46,12 @@ function ProductPage() {
   const { loading, data = {} } = useQuery(getProductQuery, {
     variables: { id },
   });
-  const { product = {} } = data;
+  const { product } = data;
   const isNFT = product?.tokenStandard === TokenStandard.ERC721;
 
   React.useEffect(() => {
     if (isNFT) {
-      setQuantity(1);
+      setQuantity(toWei('1'));
     }
   }, [product]);
 
@@ -96,6 +96,14 @@ function ProductPage() {
     return (
       <div className="page product-page">
         <div className='loading' />
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="page product-page">
+        Unexpected error ocurred
       </div>
     )
   }
@@ -172,7 +180,7 @@ function ProductPage() {
             <button
               type="submit"
               className={`submit-button + ${isLoading ? 'submit-button--loading' : ''}`}
-              disabled={loading}
+              disabled={loading || (quantity === '')}
             >
               <span />
               {!isLoading && 'Purchase'}

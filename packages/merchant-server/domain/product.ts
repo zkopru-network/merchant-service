@@ -54,8 +54,8 @@ export default class Product {
         throw new ValidationError('tokenId is required for Erc721 type token.');
       }
 
-      if (!args.availableQuantity.eq(new BN(toWei('1')))) {
-        throw new ValidationError('Erc721 type token cannot have more than one quantity available.');
+      if (!args.availableQuantity.eq(new BN(toWei('1'))) && !args.availableQuantity.eq(new BN('0'))) {
+        throw new ValidationError('Erc721 type token cannot have more than one quantity available.' + args.availableQuantity.toString());
       }
     }
 

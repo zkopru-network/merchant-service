@@ -178,11 +178,10 @@
     color: #fff;
   }
 
-  &[disabled="disabled"],
-  &[disabled="disabled"]:hover {
+  &[disabled],
+  &[disabled]:hover {
     cursor: not-allowed;
-    background-color: #fff;
-    color: var(--text-color);
+    opacity: 0.7;
   }
 
   &--loading {

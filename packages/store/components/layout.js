@@ -10,8 +10,18 @@ export default function Layout() {
   const [balance, setBalance] = React.useState();
 
   React.useEffect(() => {
+    let interval;
     if (isInitialized && !isSyncing) {
       getETHBalance().then(setBalance);
+
+      clearInterval(interval);
+      interval = setInterval(() => {
+        getETHBalance().then(setBalance);
+      }, 5000);
+    }
+
+    return () => {
+      clearInterval(interval);
     }
   }, [isInitialized, isSyncing]);
 
@@ -34,7 +44,7 @@ export default function Layout() {
             <div className="spinner" style={{ height: '25px', width: '25px' }} />
           )}
 
-          {isInitialized && !isSyncing && (typeof balance === 'number') && (
+          {isInitialized && !isSyncing && (balance !== undefined) && (
             <>
               <div className="wallet-connected">Connected</div>
               <div className="wallet-balance">Balance: Ξ {balance}</div>
