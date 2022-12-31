@@ -102,13 +102,15 @@
 
 .product-page {
   &__name {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 500;
+    margin-bottom: 2rem;
   }
 
   &__description {
     font-size: 1.1rem;
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
+    white-space: break-spaces;
   }
 
   &__quantity {
@@ -143,7 +145,7 @@
   padding: 1rem;
   border-radius: 3px;
   height: 380px;
-  margin-right: 1rem;
+  margin-right: 2rem;
   position: relative;
   overflow: hidden;
   width: calc(350px + 2rem);

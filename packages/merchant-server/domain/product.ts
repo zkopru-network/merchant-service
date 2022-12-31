@@ -59,7 +59,7 @@ export default class Product {
       }
 
       if (!args.availableQuantity.eq(new BN(toWei('1'))) && !args.availableQuantity.eq(new BN('0'))) {
-        throw new ValidationError('Erc721 type token cannot have more than one quantity available.' + args.availableQuantity.toString());
+        throw new ValidationError('Erc721 type token cannot have more than one quantity available.');
       }
     }
 

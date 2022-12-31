@@ -61,7 +61,7 @@ export default function ProductForm(props) {
       <div className="form__field">
         <label htmlFor="description" className="label">
           Description
-          <input
+          <textarea
             id="description"
             type="text"
             className="form__input"

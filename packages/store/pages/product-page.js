@@ -133,6 +133,8 @@ function ProductPage() {
             {product.description}
           </div>
 
+          <hr />
+
           <div className="section__label">Contract</div>
           <div className="section__value">{product.tokenStandard?.toUpperCase()} - {product.contractAddress}</div>
 
