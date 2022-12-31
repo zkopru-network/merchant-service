@@ -111,6 +111,8 @@ function ProductPage() {
   // Convert to ETH units for display
   const totalPrice = fromWei(fromWei(new BN(product.price).mul(new BN(quantity))));
 
+  const isQuantityValid = quantity !== '' && product?.availableQuantity && new BN(quantity).lte(new BN(product.availableQuantity));
+
   return (
     <div className="page product-page">
 
@@ -182,7 +184,7 @@ function ProductPage() {
             <button
               type="submit"
               className={`submit-button + ${isLoading ? 'submit-button--loading' : ''}`}
-              disabled={loading || (quantity === '')}
+              disabled={loading || !isQuantityValid}
             >
               <span />
               {!isLoading && 'Purchase'}
