@@ -151,26 +151,14 @@ export class OrderRepository implements IOrderRepository {
       .andWhere('orders.created_at', '<', endDate)
       .groupBy('orders.product_id');
 
-    const getTopBuyersPromise = this.db('orders')
-      .select<{ buyerAddress: string, totalOrderAmount: string }[]>(
-        this.db.raw('buyer_address as "buyerAddress"'),
-        this.db.raw('SUM("amount") as "totalOrderAmount"'),
-      )
-      .innerJoin('products', 'orders.product_id', 'products.id')
-      .where('orders.created_at', '>', startDate)
-      .andWhere('orders.created_at', '<', endDate)
-      .groupBy('orders.buyer_address');
-
     const [
       [{ totalOrders, totalOrderAmount }],
       topProductsByAmount,
       topProductsByQuantity,
-      topBuyers,
     ] = await Promise.all([
       getTotalPromise,
       getTopProductsByAmountPromise,
       getTopProductsByQuantityPromise,
-      getTopBuyersPromise,
     ]);
 
     return {
@@ -183,10 +171,6 @@ export class OrderRepository implements IOrderRepository {
       topProductsByQuantity: topProductsByQuantity.map((p) => ({
         productName: p.productName,
         totalSold: Number(p.totalSold),
-      })),
-      topBuyers: topBuyers.map((b) => ({
-        buyerAddress: b.buyerAddress,
-        totalOrderAmount: new BN(b.totalOrderAmount),
       })),
     };
   }

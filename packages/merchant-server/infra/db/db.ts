@@ -21,7 +21,6 @@ declare module 'knex' {
       'product_id': string
       'quantity': string
       'amount': string
-      'buyer_address': string
       'buyer_transaction': string
       'buyer_transaction_hash': string
       'seller_transaction': string

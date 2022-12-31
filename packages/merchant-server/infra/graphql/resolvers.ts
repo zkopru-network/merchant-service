@@ -135,8 +135,6 @@ const resolvers : Resolvers<MercuriusContext> = {
         logger: context.logger,
       });
 
-      console.log(metrics)
-
       return {
         ...metrics,
         totalInventoryValue: metrics.totalInventoryValue.toString(),
@@ -145,10 +143,6 @@ const resolvers : Resolvers<MercuriusContext> = {
           ...h,
           totalOrderAmount: h.totalOrderAmount.toString(),
           timestamp: h.timestamp.toISOString(),
-        })),
-        topBuyers: metrics.topBuyers.map(t => ({
-          ...t,
-          totalOrderAmount: t.totalOrderAmount.toString()
         })),
         topProductsByAmount: metrics.topProductsByAmount.map(t => ({
           ...t,

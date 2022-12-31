@@ -82,11 +82,6 @@ type TopProductByQuantity {
   totalSold: Int!
 }
 
-type TopBuyer {
-  buyerAddress: String!
-  totalOrderAmount: String!
-}
-
 type StoreMetrics {
   totalProducts: Int!
   totalInventoryValue: String!
@@ -95,7 +90,6 @@ type StoreMetrics {
   dailyOrderSnapshots: [DailyOrderSnapshot!]!
   topProductsByAmount: [TopProductByAmount!]!
   topProductsByQuantity: [TopProductByQuantity!]!
-  topBuyers: [TopBuyer!]!
 }
 
 type Query {

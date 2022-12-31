@@ -34,10 +34,6 @@ export type OrderMetrics = {
     productName: string,
     totalSold: number
   }[]
-  topBuyers: {
-    buyerAddress: string;
-    totalOrderAmount: BN
-  }[]
 }
 
 // Interface for the service interacting with the Blockchain

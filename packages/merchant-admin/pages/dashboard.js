@@ -25,10 +25,6 @@ const getStoreMetricsQuery = gql`
         totalOrders
         totalOrderAmount
       }
-      topBuyers {
-        buyerAddress
-        totalOrderAmount
-      }
       topProductsByAmount {
         productName
         totalOrderAmount
@@ -70,7 +66,6 @@ function Dashboard() {
     totalOrderAmount,
     totalInventoryValue,
     dailyOrderSnapshots = [],
-    topBuyers = [],
     topProductsByAmount = [],
     topProductsByQuantity = [],
   } = metrics;

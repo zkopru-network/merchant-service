@@ -100,7 +100,7 @@ export class ProductRepository implements IProductRepository {
 
     return {
       totalProducts: Number(stats.totalProducts),
-      totalInventoryValue: new BN(stats.totalInventoryValue),
+      totalInventoryValue: new BN(stats.totalInventoryValue || 0),
     };
   }
 }

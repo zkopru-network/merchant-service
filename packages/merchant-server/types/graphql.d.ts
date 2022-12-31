@@ -148,7 +148,6 @@ export type QueryGetStoreMetricsArgs = {
 export type StoreMetrics = {
   __typename?: 'StoreMetrics';
   dailyOrderSnapshots: Array<DailyOrderSnapshot>;
-  topBuyers: Array<TopBuyer>;
   topProductsByAmount: Array<TopProductByAmount>;
   topProductsByQuantity: Array<TopProductByQuantity>;
   totalInventoryValue: Scalars['String'];
@@ -161,12 +160,6 @@ export enum TokenStandard {
   Erc20 = 'Erc20',
   Erc721 = 'Erc721'
 }
-
-export type TopBuyer = {
-  __typename?: 'TopBuyer';
-  buyerAddress: Scalars['String'];
-  totalOrderAmount: Scalars['String'];
-};
 
 export type TopProductByAmount = {
   __typename?: 'TopProductByAmount';
@@ -263,7 +256,6 @@ export type ResolversTypes = {
   StoreMetrics: ResolverTypeWrapper<StoreMetrics>;
   String: ResolverTypeWrapper<Scalars['String']>;
   TokenStandard: TokenStandard;
-  TopBuyer: ResolverTypeWrapper<TopBuyer>;
   TopProductByAmount: ResolverTypeWrapper<TopProductByAmount>;
   TopProductByQuantity: ResolverTypeWrapper<TopProductByQuantity>;
 };
@@ -282,7 +274,6 @@ export type ResolversParentTypes = {
   Query: {};
   StoreMetrics: StoreMetrics;
   String: Scalars['String'];
-  TopBuyer: TopBuyer;
   TopProductByAmount: TopProductByAmount;
   TopProductByQuantity: TopProductByQuantity;
 };
@@ -342,19 +333,12 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type StoreMetricsResolvers<ContextType = any, ParentType extends ResolversParentTypes['StoreMetrics'] = ResolversParentTypes['StoreMetrics']> = {
   dailyOrderSnapshots?: Resolver<Array<ResolversTypes['DailyOrderSnapshot']>, ParentType, ContextType>;
-  topBuyers?: Resolver<Array<ResolversTypes['TopBuyer']>, ParentType, ContextType>;
   topProductsByAmount?: Resolver<Array<ResolversTypes['TopProductByAmount']>, ParentType, ContextType>;
   topProductsByQuantity?: Resolver<Array<ResolversTypes['TopProductByQuantity']>, ParentType, ContextType>;
   totalInventoryValue?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   totalOrderAmount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   totalOrders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   totalProducts?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type TopBuyerResolvers<ContextType = any, ParentType extends ResolversParentTypes['TopBuyer'] = ResolversParentTypes['TopBuyer']> = {
-  buyerAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  totalOrderAmount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -377,7 +361,6 @@ export type Resolvers<ContextType = any> = {
   Product?: ProductResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   StoreMetrics?: StoreMetricsResolvers<ContextType>;
-  TopBuyer?: TopBuyerResolvers<ContextType>;
   TopProductByAmount?: TopProductByAmountResolvers<ContextType>;
   TopProductByQuantity?: TopProductByQuantityResolvers<ContextType>;
 };
