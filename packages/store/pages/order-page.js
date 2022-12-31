@@ -11,6 +11,7 @@ const getOrderQuery = gql`
       buyerTransactionHash
       sellerTransactionHash
       status
+      createdAt
       product {
         id
         name
@@ -79,6 +80,9 @@ function OrderPage() {
 
             <div className="section__label">Order Status</div>
             <div className="section__value">{order.status}</div>
+
+            <div className="section__label">Order Date</div>
+            <div className="section__value">{new Date(order.createdAt).toLocaleString()}</div>
 
           </div>
         )}
