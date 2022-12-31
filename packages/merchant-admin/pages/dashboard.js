@@ -71,7 +71,7 @@ function Dashboard() {
   } = metrics;
 
   const avgOrderAmount = (totalOrders && totalOrderAmount) ? 
-    Math.round(Number(fromWei(new BN(totalOrderAmount).div(new BN(totalOrders)))))
+    Number(fromWei(new BN(totalOrderAmount).div(new BN(totalOrders)))).toFixed(2)
     : '0';
 
   return (
