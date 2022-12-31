@@ -42,6 +42,8 @@ function Dashboard() {
   const [endDate, setEndDate] = React.useState(endOfDay(new Date(), 0));
   const [dateRange, setDateRange] = React.useState([startDate, endDate]);
 
+  console.log(startDate, endDate)
+
   React.useEffect(() => {
     const [start, end] = dateRange;
     if (start && end) {
@@ -50,7 +52,7 @@ function Dashboard() {
     }
   }, [dateRange]);
 
-  const { loading, data } = useQuery(getStoreMetricsQuery, {
+  const { loading, data, refetch } = useQuery(getStoreMetricsQuery, {
     variables: {
       startDate: startDate?.toISOString(),
       endDate: endDate?.toISOString(),
@@ -83,7 +85,10 @@ function Dashboard() {
         <div className="date-picker">
           <DatePicker
             selectsRange
-            onChange={setDateRange}
+            onChange={g => {
+              const [start, end] = g;
+              setDateRange([start && startOfDay(start), end && endOfDay(end)])
+            }}
             startDate={dateRange[0]}
             endDate={dateRange[1]}
             dateFormat="MMM dd"
