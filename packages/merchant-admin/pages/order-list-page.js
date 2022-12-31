@@ -9,11 +9,13 @@ const findOrdersQuery = gql`
   query findOrders {
     orders: findOrders {
       id
-      buyerAddress
       quantity
       amount
       status
       createdAt
+      product {
+        name
+      }
     }
   }
 `;
@@ -38,14 +40,14 @@ function OrdersListPage() {
           loading={loading}
           items={data?.orders}
           fields={{
-            buyerAddress: 'Buyer',
+            product: 'Product',
             quantity: 'Quantity',
             amount: 'Total Amount',
             status: 'Status',
             createdAt: 'Placed on',
           }}
           formatters={{
-            buyerAddress: trimAddress,
+            product: p => p.name,
             amount: v => formatEther(fromWei(v)),
             createdAt: formateDateTime,
             quantity: v => fromWei(v)

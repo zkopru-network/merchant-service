@@ -25,7 +25,7 @@ const getProductQuery = gql`
     matchingOrders: findOrders(productId: $id) {
       id
       quantity
-      buyerAddress
+      createdAt
       amount
       status
     }
@@ -108,12 +108,16 @@ function ProductPage() {
         loading={loading}
         items={data?.matchingOrders}
         fields={{
-          buyerAddress: 'Buyer',
+          createdAt: 'Date',
           quantity: 'Quantity',
           amount: 'Total Amount',
           status: 'Status',
         }}
-        formatters={{ buyerAddress: trimAddress, amount: v => formatEther(fromWei(v)), quantity: v => fromWei(v) }}
+        formatters={{
+          createdAt: (d) => new Date(d).toLocaleDateString(),
+          amount: v => formatEther(fromWei(v)),
+          quantity: v => fromWei(v)
+        }}
         redirectTo={(order) => `/orders/${order.id}`}
       />
 

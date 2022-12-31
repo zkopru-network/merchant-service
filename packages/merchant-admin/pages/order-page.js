@@ -22,7 +22,7 @@ const getOrderQuery = gql`
         imageUrl
       }
       quantity
-      buyerAddress
+      createdAt
       buyerTransactionHash
       sellerTransactionHash
       amount
@@ -63,8 +63,8 @@ function OrderPage() {
               <div className="product-view__label">Status</div>
               <div className="product-view__value">{order.status}</div>
 
-              <div className="product-view__label">Customer Address</div>
-              <div className="product-view__value">{order.buyerAddress}</div>
+              <div className="product-view__label">Date/Time</div>
+              <div className="product-view__value">{new Date(order.createdAt).toLocaleString()}</div>
 
               <div className="product-view__label">Customer Transaction</div>
               <div className="product-view__value">{order.buyerTransactionHash}</div>
