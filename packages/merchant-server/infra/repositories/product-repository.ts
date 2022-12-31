@@ -93,14 +93,16 @@ export class ProductRepository implements IProductRepository {
 
   async getProductMetrics() : Promise<{ totalProducts: number; totalInventoryValue: BN; }> {
     const [stats] = await this.db('products')
-      .select<{ totalProducts: number, totalInventoryValue: number }[]>(
+      .select<{ totalProducts: number, totalInventoryValue: string }[]>(
         this.db.raw('SUM(1) as "totalProducts"'),
         this.db.raw('SUM("price" * "available_quantity" / 1000000000000000000) as "totalInventoryValue"'),
       );
 
+    const inventoryValue = stats.totalInventoryValue?.split('.')[0] || 0;
+
     return {
       totalProducts: Number(stats.totalProducts),
-      totalInventoryValue: new BN(stats.totalInventoryValue || 0),
+      totalInventoryValue: new BN(inventoryValue),
     };
   }
 }
