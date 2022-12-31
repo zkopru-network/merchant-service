@@ -95,7 +95,7 @@ const resolvers : Resolvers<MercuriusContext> = {
     async findProducts(_, args, context) {
       const productRepo = new ProductRepository(context.db, { logger: context.logger });
 
-      const products = await findProductsUseCase({
+      const products = await findProductsUseCase(args, {
         productRepository: productRepo,
         logger: context.logger,
       });

@@ -40,6 +40,10 @@ export default class Product {
 
   updatedAt: Date;
 
+  get isActive() {
+    return this.availableQuantity.gt(new BN(toWei('0')))
+  }
+
   constructor(args: IProduct) {
     this.id = args.id;
     this.name = args.name;

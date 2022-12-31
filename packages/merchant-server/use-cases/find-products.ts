@@ -6,7 +6,12 @@ type Context = {
   productRepository: IProductRepository;
 };
 
-export default async function findProductsUseCase(context: Context) : Promise<Product[]> {
+export default async function findProductsUseCase({ onlyActive = true }, context: Context) : Promise<Product[]> {
   const result = await context.productRepository.findProducts();
+
+  if (onlyActive) {
+    return result.filter(p => p.isActive)
+  }
+
   return result;
 }

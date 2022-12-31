@@ -5,7 +5,7 @@ import ProductCard from '../components/product-card';
 
 const findProductsQuery = gql`
   query findProducts {
-    products: findProducts {
+    products: findProducts(onlyActive: true) {
       id
       name
       description

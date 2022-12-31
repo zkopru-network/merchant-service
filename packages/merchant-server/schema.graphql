@@ -94,7 +94,7 @@ type StoreMetrics {
 
 type Query {
   getProduct(id: String): Product
-  findProducts: [Product]
+  findProducts(onlyActive: Boolean): [Product]
   getOrder(id: String): Order
   findOrders(status: OrderStatus, productId: String): [Order] @auth
   getStoreMetrics(startDate: String, endDate: String): StoreMetrics @auth
