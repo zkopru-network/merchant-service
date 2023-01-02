@@ -1,0 +1,84 @@
+.login-page {
+  height: 100%;
+  width: 100%;
+  background-color: var(--gray-100);
+  display: flex;
+  flex-direction: column;
+  padding-top: 10rem;
+  align-items: center;
+
+  .section {
+    max-width: 500px;
+  }
+}
+
+.siwe-button {
+  width: 250px;  
+  border: none;
+  cursor: pointer;
+  opacity: 0.9;
+  margin: 0;
+  padding: 0;
+  background-color: inherit;
+  margin-top: 1rem;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.product-view {
+  &__container {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &__image img {
+    width: 250px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-right: 1rem;
+  }
+
+  &__details {
+    padding: 0 1.5rem;
+  }
+
+  &__label {
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--gray-500);
+    opacity: 0.9;
+  }
+
+  &__value {
+    font-size: 1.2rem;
+    margin-bottom: 1.5em;
+    font-weight: 500;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__link {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.25rem;
+  }
+}
+
+.date-picker {
+  input {
+    font-size: 1.1rem;
+    background-color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 3px;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    text-align: left;
+    width: 150px;
+    cursor: pointer;
+  }
+}

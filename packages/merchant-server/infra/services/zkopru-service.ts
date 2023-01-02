@@ -8,7 +8,7 @@ import {
 } from '@zkopru/client/dist/node';
 import { ZkTx } from '@zkopru/transaction';
 import BN from 'bn.js';
-import { fromWei, toWei } from 'web3-utils';
+import { toWei } from 'web3-utils';
 import {
   ILogger, TokenStandard, IBlockchainService,
 } from '../../common/interfaces';
@@ -41,14 +41,6 @@ export default class ZkopruService implements IBlockchainService {
 
   wallet: ZkopruWallet;
 
-  // Local state for storing token balances on L2
-  balances: Record<TokenStandard, Record<string, object | object[]>>;
-
-  // Interval to refresh L2 balance in ms
-  balanceUpdateInterval : number;
-
-  private timer: NodeJS.Timeout;
-
   constructor(params: L2ServiceConstructor, context: { logger: ILogger }) {
     this.logger = context.logger;
 
@@ -61,13 +53,6 @@ export default class ZkopruService implements IBlockchainService {
       accounts: [this.zkAccount],
       databaseName: 'zkopru.db',
     });
-
-    this.balances = {
-      [TokenStandard.Erc20]: {},
-      [TokenStandard.Erc721]: {},
-    };
-
-    this.balanceUpdateInterval = 10 * 1000;
   }
 
   async start() {
@@ -78,45 +63,37 @@ export default class ZkopruService implements IBlockchainService {
     await this.node.start();
 
     this.logger.info({
-      ethAddress: this.wallet.wallet.account.ethAddress,
-      l2Address: this.wallet.wallet.account.zkAddress.toString(),
+      data: {
+        ethAddress: this.wallet.wallet.account.ethAddress,
+        l2Address: this.wallet.wallet.account.zkAddress.toString(),
+      },
     }, 'Started Zkopru Node');
-
-    await this.updateBalance();
   }
 
-  stop() {
-    clearTimeout(this.timer);
-  }
-
-  async updateBalance() {
-    this.logger.debug('Updating wallet balances');
+  async ensureProductAvailability(product: Product, requiredQuantity: BN) {
     const spendable = await this.wallet.wallet.getSpendableAmount();
+    const walletBalances = {
+      [TokenStandard.Erc20]:  Object.fromEntries(
+        Object.entries(spendable.erc20).map(([k, v]) => [k.toLowerCase(), v])
+      ),
+      [TokenStandard.Erc721]:  Object.fromEntries(
+        Object.entries(spendable.erc721).map(([k, v]) => [k.toLowerCase(), v])
+      )
+    }
 
-    this.balances = {
-      [TokenStandard.Erc721]: spendable.erc721,
-      [TokenStandard.Erc20]: spendable.erc20,
-    };
-    this.logger.debug(this.balances, 'Wallet balance');
+    this.logger.info({ data: walletBalances }, 'Current wallet balance');
 
-    this.timer = setTimeout(async () => {
-      await this.updateBalance();
-    }, this.balanceUpdateInterval);
-  }
-
-  async ensureProductAvailability(product: Product, quantity: number) {
     if (product.tokenStandard === TokenStandard.Erc20) {
-      const available = this.balances[product.tokenStandard][product.contractAddress] as BN;
-      const requiredQuantity = new BN(toWei(quantity.toString(), 'ether'));
+      const available = walletBalances[TokenStandard.Erc20][product.contractAddress.toLowerCase()] || 0;
 
-      if (!available || requiredQuantity.gt(available)) {
+      if (!available || requiredQuantity.gt(new BN(available.toString()))) {
         throw new ValidationError(
-          `No enough balance in wallet for token ${product.contractAddress} for required quantity ${quantity}. Only ${fromWei((available || 0).toString(), 'ether')} available.`,
+          `Wallet don't have enough balance for token ${product.contractAddress} for required quantity ${requiredQuantity}. Only ${available} available.`,
         );
       }
     } else if (product.tokenStandard === TokenStandard.Erc721) {
-      const availableTokens = this.balances[product.tokenStandard][product.contractAddress] as BN[] || [];
-      const isAvailable = (availableTokens as BN[] || []).some((el) => el.eq(new BN(product.tokenId)));
+      const availableTokens = walletBalances[TokenStandard.Erc721][product.contractAddress.toLowerCase()] || [];
+      const isAvailable = availableTokens.some((el) => el.toString() === product.tokenId.toString());
       if (!isAvailable) {
         throw new ValidationError(`Token ${product.tokenId} in contract ${product.contractAddress} not present in wallet.`);
       }
@@ -125,15 +102,17 @@ export default class ZkopruService implements IBlockchainService {
     }
   }
 
-  async executeOrder(order: Order, params: { atomicSwapSalt: string }) {
+  async executeOrder(order: Order, params: { atomicSwapSalt: string, buyerTransaction: string, buyerAddress: string }) {
+    const weiPerBye = (48000 * (10 ** 9)).toString();
+
     // Generate swap transaction (sell tx)
     const merchantTx = await this.wallet.generateSwapTransaction(
-      order.buyerAddress,
+      params.buyerAddress,
       order.product.contractAddress,
-      toWei(new BN(order.quantity)).toString(),
+      order.product.tokenStandard === TokenStandard.Erc721 ? order.product.tokenId.toString() : order.quantity.toString(),
       ZERO_ADDRESS,
-      toWei(new BN(order.amount)).toString(),
-      (+order.fee * (10 ** 9)).toString(), // TODO: Verify fee / weiPerByte calculation
+      order.amount.toString(),
+      weiPerBye,
       params.atomicSwapSalt,
     );
 
@@ -144,14 +123,14 @@ export default class ZkopruService implements IBlockchainService {
 
       const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
 
-      this.logger.debug({ buyerZkTx, merchantTx }, 'Swap transactions');
+      this.logger.debug({ data: { buyerZkTx, merchantTx } }, 'Swap transactions');
 
       if (!merchantZkTx.outflow.some((o) => o.note.eq(buyerZkTx.swap))) {
         throw new Error('Customer desired swap not found in generated merchant tx outflow.');
       }
 
       if (!buyerZkTx.outflow.some((o) => o.note.eq(merchantZkTx.swap))) {
-        throw new ValidationError('Desired swap not found in any the transaction outflow.');
+        throw new ValidationError('Desired swap not found in any of the transaction outflow.');
       }
 
       // Send both transactions to the coordinator
@@ -169,7 +148,12 @@ export default class ZkopruService implements IBlockchainService {
         throw Error(`Error while sending tx to coordinator ${JSON.stringify(response.data)}`);
       }
 
-      return merchantTxEncoded;
+      return {
+        buyerTransactionHash: buyerZkTx.hash().toString(),
+        sellerTransaction: merchantTxEncoded,
+        sellerTransactionHash: merchantZkTx.hash().toString(),
+        fee: merchantTx.fee.toString(),
+      };
     } catch (error) {
       await this.wallet.wallet.unlockUtxos(merchantTx.inflow);
       throw error;
@@ -190,11 +174,7 @@ export default class ZkopruService implements IBlockchainService {
     const orderStatuses : Record<string, OrderStatus> = {};
 
     for (const order of orders) {
-      // Decode buyer transaction and calculate hash
-      const buyerZkTx = ZkTx.decode(Buffer.from(order.buyerTransaction, 'hex'));
-      const hash = buyerZkTx.hash().toString();
-
-      if (receivedTransactionHashes[hash]) {
+      if (receivedTransactionHashes[order.buyerTransactionHash]) {
         orderStatuses[order.id] = OrderStatus.Complete;
       } else {
         orderStatuses[order.id] = OrderStatus.Pending;
@@ -202,5 +182,13 @@ export default class ZkopruService implements IBlockchainService {
     }
 
     return orderStatuses;
+  }
+
+  getWalletAddress() {
+    return this.wallet.wallet.account.ethAddress;
+  }
+
+  async signMessage(message: string) {
+    return this.wallet.wallet.account.ethAccount.sign(message).signature;
   }
 }

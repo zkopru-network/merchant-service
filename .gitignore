@@ -3,8 +3,11 @@
 # Sqlite
 *.db
 
-.postgres
+cache
+artifacts
 
+.postgres
+.parcel-cache
 .env
 
 # compiled output
@@ -25,6 +28,7 @@ node_modules
 *.sublime-workspace
 
 # IDE - VSCode
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

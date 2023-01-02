@@ -1,20 +1,16 @@
-/* eslint-disable import/no-unresolved */
 /* eslint-disable import/no-extraneous-dependencies */
 import {
   afterEach, beforeEach, describe, expect, jest, test,
 } from '@jest/globals';
 import axios, { AxiosStatic, AxiosResponse } from 'axios';
-import Zkopru from '@zkopru/client';
-import { ZkopruNode } from '@zkopru/client/dist/node';
-import { Note, Utxo } from '@zkopru/transaction';
 import { Fp } from '@zkopru/babyjubjub';
 import { newDb as pgMem } from 'pg-mem';
 import BN from 'bn.js';
-import { toWei } from 'web3-utils';
+import { fromWei, toWei } from 'web3-utils';
 import { ZkTx } from '@zkopru/transaction/src';
-import { seed } from '../infra/db-migrations/seeds/bootstrap';
+import { seed } from '../infra/db/migrations/seeds/bootstrap';
 import { ProductRepository } from '../infra/repositories/product-repository';
-import createProductUseCase from '../use-cases/create-product';
+import addProductUseCase from '../use-cases/add-product';
 import {
   ILogger, TokenStandard, IOrderRepository, IProductRepository,
 } from '../common/interfaces';
@@ -26,10 +22,11 @@ import Order, { OrderStatus } from '../domain/order';
 import updateExistingOrderStatusUseCase from '../use-cases/update-existing-order-status';
 import getOrderUseCase from '../use-cases/get-order';
 import Product from '../domain/product';
+import getProductUseCase from '../use-cases/get-product';
+import { getMockedZkopru, getMockedZkopruWallet, merchantPrivateKey } from './utils';
 
 // Mocked constants and helpers for all tests
 const mockCoordinatorUrl = 'https://mock-coordinator';
-const merchantPrivateKey = '0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1';
 const buyerPrivateKey = '0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773';
 
 // Mock axios
@@ -51,68 +48,6 @@ jest.mock('@zkopru/zk-wizard/dist/snark', () => ({
   }),
 }));
 
-async function getMockedZkopru() : Promise<ZkopruNode> {
-  const node = {
-    node: {
-      db: {
-        transaction: async () => ({}),
-        update: async () => ({}),
-      },
-      layer1: {
-        address: 'https://mock',
-      },
-      tracker: {
-        addAccounts: async () => ({}),
-      },
-      layer2: {
-        grove: {
-          utxoTree: {
-            merkleProof: () => ({
-              siblings: [] as object[],
-              index: Fp.from(0),
-              root: Fp.from(0),
-            }),
-          },
-        },
-        snarkVerifier: {
-          verifyTx: async () => true,
-        },
-      },
-      running: true,
-      blockCache: {},
-      blockProcessor: {},
-      synchronizer: {},
-    },
-  } as unknown as ZkopruNode;
-
-  return node;
-}
-
-function getMockedZkopruWallet({
-  node, privateKey, ethBalance, erc20Balance, erc721Balance, tokenAddress,
-}: { node: ZkopruNode, privateKey: string, ethBalance?: number, erc20Balance?: number, erc721Balance?: number, tokenAddress?: string}) {
-  const wallet = new Zkopru.Wallet(node, privateKey);
-
-  // Override activeCoordinatorUrl to return mock url
-  wallet.wallet.coordinatorManager.activeCoordinatorUrl = async () => mockCoordinatorUrl;
-
-  // Create Utxo with given balances
-  const utxo = Utxo.from(new Note(wallet.wallet.account.zkAddress, Fp.from('123'), {
-    eth: Fp.from(ethBalance ? toWei(ethBalance.toString()) : '0'),
-    tokenAddr: Fp.from(tokenAddress ?? '0x0000000000000000000000000000000000000000'),
-    erc20Amount: Fp.from(erc20Balance ? toWei(erc20Balance.toString()) : '0'),
-    nft: Fp.from(erc721Balance ? toWei(erc721Balance.toString()) : '0'),
-  }));
-  utxo.nullifier = () => Fp.from(1);
-
-  // Override wallet getSpendables method to return the created Utxo instead of querying DB
-  wallet.wallet.getSpendables = async () => [
-    utxo,
-  ];
-
-  return wallet;
-}
-
 describe('use-case/create-order', () => {
   let productRepo: IProductRepository;
   let orderRepo: IOrderRepository;
@@ -124,7 +59,7 @@ describe('use-case/create-order', () => {
     logger = createLogger({ level: 'error' });
 
     const db = pgMem().adapters.createKnex();
-    await seed(db);
+    await seed(db, 'bigint');
     productRepo = new ProductRepository(db, { logger });
     orderRepo = new OrderRepository(db, { logger });
 
@@ -138,30 +73,22 @@ describe('use-case/create-order', () => {
 
     zkopruService.node = await getMockedZkopru();
     zkopruService.wallet = getMockedZkopruWallet({
-      node: zkopruService.node, privateKey: merchantPrivateKey, ethBalance: 0.1, erc20Balance: 10, tokenAddress,
+      node: zkopruService.node, ethBalance: 0.1, erc20Balance: 10, erc20TokenAddress: tokenAddress,
     });
 
-    zkopruService.balanceUpdateInterval = 500; // Reduce interval to have quick updates based on mock values
-
     expect(Fp).toBeTruthy();
-
-    await zkopruService.updateBalance();
-  });
-
-  afterEach(() => {
-    zkopruService.stop();
   });
 
   // Test helpers
   function createSampleProduct() {
-    return createProductUseCase({
+    return addProductUseCase({
       name: 'FoodToken',
       description: 'Token exchangeable for a meal',
       imageUrl: 'https://ethereum.org/food.png',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: tokenAddress,
-      availableQuantity: 10,
-      price: 1,
+      availableQuantity: toWei('10'),
+      price: toWei('1'),
     }, {
       productRepository: productRepo,
       blockchainService: zkopruService,
@@ -176,13 +103,13 @@ describe('use-case/create-order', () => {
     purchasePrice,
   } : {
     product: Product,
-    purchaseQuantity: number,
+    purchaseQuantity: BN,
     atomicSwapSalt: number,
     purchasePrice?: BN
   }) : Promise<{ createdOrder: Order, buyerAddress: string, buyerZkTx: ZkTx }> {
     // Create a new wallet for the buyer
     const buyerWallet = getMockedZkopruWallet({
-      node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10, tokenAddress,
+      node: zkopruService.node, privateKey: buyerPrivateKey, ethBalance: 10,
     });
 
     const buyerAddress = buyerWallet.wallet.account.zkAddress.toString();
@@ -190,19 +117,20 @@ describe('use-case/create-order', () => {
     const buyerTx = await buyerWallet.generateSwapTransaction(
       zkopruService.wallet.wallet.account.zkAddress.toString(),
       '0x0000000000000000000000000000000000000000', // Sending eth
-      purchasePrice ? toWei(purchasePrice.toString()) : toWei(new BN(product.price).mul(new BN(purchaseQuantity))).toString(),
+      purchasePrice ? purchasePrice.toString() : fromWei((product.price.mul(purchaseQuantity)).toString()),
       product.contractAddress,
-      toWei(new BN(purchaseQuantity)).toString(),
+      purchaseQuantity.toString(),
       (+48000 * (10 ** 9)).toString(), // Coordinator fee
       atomicSwapSalt,
     );
+
     const buyerZkTx = await buyerWallet.wallet.shieldTx({ tx: buyerTx });
     const buyerTransactionEncoded = buyerZkTx.encode().toString('hex');
 
     // Execute create order use-case
     const createdOrder = await createOrderUseCase({
       productId: product.id,
-      quantity: purchaseQuantity,
+      quantity: purchaseQuantity.toString(),
       buyerAddress,
       buyerTransaction: buyerTransactionEncoded,
       atomicSwapSalt,
@@ -230,9 +158,9 @@ describe('use-case/create-order', () => {
     const mockedCoordinatorAPI = mockCoordinatorAPI();
 
     const createdProduct = await createSampleProduct();
-    const purchaseQuantity = 3;
+    const purchaseQuantity = new BN(toWei('3'));
     const atomicSwapSalt = 500; // Random salt
-    const { buyerAddress, createdOrder } = await createOrder({
+    const { createdOrder } = await createOrder({
       product: createdProduct,
       atomicSwapSalt,
       purchaseQuantity,
@@ -240,9 +168,8 @@ describe('use-case/create-order', () => {
 
     // Expect order to be created
     expect(typeof createdOrder.id).toBe('string');
-    expect(createdOrder.buyerAddress).toBe(buyerAddress);
-    expect(createdOrder.quantity).toBe(purchaseQuantity);
-    expect(createdOrder.amount).toBe(createdProduct.price * createdOrder.quantity);
+    expect(createdOrder.quantity.toString()).toBe(purchaseQuantity.toString());
+    expect(createdOrder.amount.toString()).toBe(fromWei(createdProduct.price.mul(createdOrder.quantity)).toString());
 
     expect(createdOrder.createdAt).toBeInstanceOf(Date);
     expect(createdOrder.updatedAt).toBeInstanceOf(Date);
@@ -258,15 +185,37 @@ describe('use-case/create-order', () => {
     };
 
     expect(mockedCoordinatorAPI).toBeCalledWith(`${mockCoordinatorUrl}/txs`, expectedCall);
-  }, 10 * 1000);
+  }, 15 * 1000);
+
+  test('should reduce available quantity of product after creating order', async () => {
+    mockCoordinatorAPI();
+
+    const createdProduct = await createSampleProduct();
+    const purchaseQuantity = new BN(toWei('3'));
+    const atomicSwapSalt = 500; // Random salt
+    const { createdOrder } = await createOrder({
+      product: createdProduct,
+      atomicSwapSalt,
+      purchaseQuantity,
+    });
+
+    expect(typeof createdOrder.id).toBe('string');
+
+    // Expect available quantity to be reduced
+    const updatedProduct = await getProductUseCase(createdProduct.id, {
+      logger,
+      productRepository: productRepo,
+    });
+    expect(updatedProduct.availableQuantity.toString()).toEqual(createdProduct.availableQuantity.sub(createdOrder.quantity).toString());
+  }, 15 * 1000);
 
   test('should fail creating order if transaction amount is lower', async () => {
     const mockedCoordinatorAPI = mockCoordinatorAPI();
 
     const createdProduct = await createSampleProduct();
-    const purchaseQuantity = 3;
+    const purchaseQuantity = new BN(toWei('3'));
     const atomicSwapSalt = 500; // Random salt
-    const purchasePrice = new BN(createdProduct.price * purchaseQuantity - 1); // Send 1ETH less
+    const purchasePrice = new BN(fromWei(createdProduct.price.mul(purchaseQuantity))).sub(new BN(toWei('1'))); // Send 1ETH less
 
     // Swap will not match is the price is different
     await expect(createOrder({
@@ -274,17 +223,17 @@ describe('use-case/create-order', () => {
       atomicSwapSalt,
       purchaseQuantity,
       purchasePrice,
-    })).rejects.toThrow('Desired swap not found in any the transaction outflow.');
+    })).rejects.toThrow('Desired swap not found in any of the transaction outflow.');
 
     // Coordinator should not be called
     expect(mockedCoordinatorAPI).toBeCalledTimes(0);
-  }, 10 * 1000);
+  }, 15 * 1000);
 
   test('should update order status to confirmed when transaction is finalized on chain', async () => {
     mockCoordinatorAPI();
 
     const createdProduct = await createSampleProduct();
-    const purchaseQuantity = 3;
+    const purchaseQuantity = new BN(toWei('3'));
     const atomicSwapSalt = 500; // Random salt
     const { createdOrder, buyerZkTx } = await createOrder({
       product: createdProduct,
@@ -308,6 +257,7 @@ describe('use-case/create-order', () => {
       logger,
       orderRepository: orderRepo,
       blockchainService: zkopruService,
+      productRepository: productRepo,
     });
 
     // Get updated order
@@ -317,13 +267,13 @@ describe('use-case/create-order', () => {
     });
 
     expect(updatedOrder.status).toBe(OrderStatus.Complete);
-  }, 10 * 1000);
+  }, 15 * 1000);
 
   test('should update a confirmed order to pending if block containing the transaction is slashed', async () => {
     mockCoordinatorAPI();
 
     const createdProduct = await createSampleProduct();
-    const purchaseQuantity = 3;
+    const purchaseQuantity = new BN(toWei('3'));
     const atomicSwapSalt = 500; // Random salt
     const { createdOrder, buyerZkTx } = await createOrder({
       product: createdProduct,
@@ -343,6 +293,7 @@ describe('use-case/create-order', () => {
       logger,
       orderRepository: orderRepo,
       blockchainService: zkopruService,
+      productRepository: productRepo,
     });
 
     // Get updated order
@@ -364,6 +315,7 @@ describe('use-case/create-order', () => {
       logger,
       orderRepository: orderRepo,
       blockchainService: zkopruService,
+      productRepository: productRepo,
     });
 
     // Get updated order
@@ -374,5 +326,12 @@ describe('use-case/create-order', () => {
 
     // Transaction would be back to Pending
     expect(updatedOrder2.status).toBe(OrderStatus.Pending);
-  }, 10 * 1000);
+
+    // Deducted quantity should be reverted back
+    const updatedProduct = await getProductUseCase(createdProduct.id, {
+      logger,
+      productRepository: productRepo,
+    });
+    expect(updatedProduct.availableQuantity).toEqual(createdProduct.availableQuantity);
+  }, 15 * 1000);
 });

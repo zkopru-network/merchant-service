@@ -1,0 +1,41 @@
+{
+  "name": "@zms/store",
+  "version": "0.1.0",
+  "private": false,
+  "dependencies": {
+    "@apollo/client": "^3.7.1",
+    "bn.js": "^5.2.1",
+    "bulma": "^0.9.4",
+    "date-fns": "^2.29.3",
+    "ethers": "^5.7.2",
+    "graphql": "^16.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.4.3",
+    "react-router-dom": "^6.4.3",
+    "web3-utils": "^1.8.1"
+  },
+  "scripts": {
+    "start": "PORT=4000 parcel index.html",
+    "build": "parcel build",
+    "postinstall": "yarn link-modules",
+    "link-modules": "yarn link @zkopru/client"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "assert": "^2.0.0",
+    "parcel": "^2.8.0",
+    "stream-browserify": "^3.0.0"
+  }
+}

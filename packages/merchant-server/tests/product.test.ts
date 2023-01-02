@@ -1,5 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
+import { BN } from 'bn.js';
 import { v4 } from 'uuid';
+import { toWei } from 'web3-utils';
 import { ValidationError } from '../common/error';
 import { TokenStandard } from '../common/interfaces';
 import Product from '../domain/product';
@@ -13,8 +15,8 @@ describe('domain/product', () => {
       imageUrl: 'https://ipfs.io/1234',
       tokenStandard: TokenStandard.Erc20,
       contractAddress: '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093',
-      availableQuantity: 20,
-      price: 0.5,
+      availableQuantity: new BN(toWei('20')),
+      price: new BN(toWei('0.5')),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -31,8 +33,8 @@ describe('domain/product', () => {
       tokenStandard: TokenStandard.Erc721,
       contractAddress: '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093',
       tokenId: '123',
-      availableQuantity: 1,
-      price: 2,
+      availableQuantity: new BN(toWei('1')),
+      price: new BN(toWei('2')),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -51,8 +53,8 @@ describe('domain/product', () => {
         tokenStandard: TokenStandard.Erc721,
         contractAddress: '0xc22Ffa318051d8aF4E5f2E2732d7049486fcE093',
         tokenId: '4473',
-        availableQuantity: 2,
-        price: 2,
+        availableQuantity: new BN(toWei('2')),
+        price: new BN(toWei('2')),
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -69,8 +71,8 @@ describe('domain/product', () => {
         imageUrl: 'https://ipfs.io/1234',
         tokenStandard: TokenStandard.Erc721,
         contractAddress: '0xc11Ffa318051d8aF4E5f2E2732d7049486fcE094',
-        availableQuantity: 2,
-        price: 0.1,
+        availableQuantity: new BN(toWei('2')),
+        price: new BN(toWei('0.1')),
         createdAt: new Date(),
         updatedAt: new Date(),
       });

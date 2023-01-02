@@ -1,20 +1,26 @@
 import fastify from 'fastify';
-import mercurius, { IResolvers } from 'mercurius';
-import { schema } from './infra/graphql';
+import mercurius from 'mercurius';
+import cors from '@fastify/cors';
+import { buildContext, schema } from './infra/graphql/graphql';
 import { createLogger } from './common/logger';
-import resolvers from './infra/resolvers';
 import ZkopruService from './infra/services/zkopru-service';
-import { connectDB } from './infra/db';
+import { connectDB } from './infra/db/db';
 import updateExistingOrderStatusUseCase from './use-cases/update-existing-order-status';
 import { OrderRepository } from './infra/repositories/order-repository';
+import { AuthenticationError } from './common/error';
+import { ProductRepository } from './infra/repositories/product-repository';
 
 const logger = createLogger();
 
 // Create server
 const app = fastify({ logger });
 
+app.register(cors, {
+  origin: '*',
+});
+
 // Initialize DB connection
-const db = connectDB();
+const db = connectDB({ logger });
 
 // Initialize Zkopru service
 const zkopruService = new ZkopruService({
@@ -27,13 +33,16 @@ const zkopruService = new ZkopruService({
 
 // Start ZKopru client when server starts
 app.addHook('onReady', async () => {
+  logger.debug('Starting zkopru node');
   await zkopruService.start();
+  logger.debug('Started zkopru node successfully');
 
   // Execute updateExistingOrderStatusUseCase periodically
   async function updateOrderStatus() {
     await updateExistingOrderStatusUseCase({
       logger,
       orderRepository: new OrderRepository(db, { logger }),
+      productRepository: new ProductRepository(db, { logger }),
       blockchainService: zkopruService,
     });
     setTimeout(updateOrderStatus, 10 * 1000);
@@ -43,17 +52,15 @@ app.addHook('onReady', async () => {
 });
 
 // Register GraphQL endpoint
-export const buildContext = () => ({
-  db,
-  logger,
-  zkopruService,
-});
-
 app.register(mercurius, {
   schema,
-  context: buildContext,
-  resolvers: resolvers as IResolvers,
+  context: (req) => buildContext(req, logger, zkopruService, db),
   graphiql: true,
+  errorFormatter: (result) => ({ statusCode: (result.errors[0].originalError as AuthenticationError)?.statusCode ?? 200, response: result }),
+  errorHandler(error, request, reply) {
+    logger.error(error);
+    reply.send({ errors: error.errors || [{ message: 'Unexpected error ocurred' }] });
+  },
 });
 
 export default app;

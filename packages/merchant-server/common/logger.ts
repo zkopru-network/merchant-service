@@ -6,5 +6,11 @@ export function createLogger(options: pino.LoggerOptions = {}) : ILogger {
     level: process.env.LOG_LEVEL || 'info',
     ...options,
     name: 'merchant-server',
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+      },
+    },
   });
 }

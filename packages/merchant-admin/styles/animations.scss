@@ -1,0 +1,17 @@
+
+@keyframes appear {
+  to {
+    visibility: visible;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.delay {
+  visibility: hidden;
+  animation: appear 1s ease 2s forwards;
+}

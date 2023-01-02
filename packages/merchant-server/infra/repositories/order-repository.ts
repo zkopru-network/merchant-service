@@ -1,5 +1,8 @@
+import { BN } from 'bn.js';
 import type { Knex, Tables } from 'knex';
-import { IOrderRepository, ILogger } from '../../common/interfaces';
+import {
+  IOrderRepository, ILogger, DailyOrderSnapshot, OrderMetrics,
+} from '../../common/interfaces';
 import Order, { OrderStatus } from '../../domain/order';
 import { ProductRepository } from './product-repository';
 
@@ -23,12 +26,13 @@ export class OrderRepository implements IOrderRepository {
       product: ProductRepository.mapDBRowToProduct({
         ...dbRow, id: dbRow.product_id, created_at: dbRow.product_created_at, updated_at: dbRow.product_updated_at,
       }),
-      quantity: dbRow.quantity,
-      amount: dbRow.amount,
-      buyerAddress: dbRow.buyer_address,
+      quantity: new BN(dbRow.quantity.toString()),
+      amount: new BN(dbRow.amount.toString()),
       buyerTransaction: dbRow.buyer_transaction,
+      buyerTransactionHash: dbRow.buyer_transaction_hash,
       sellerTransaction: dbRow.seller_transaction,
-      fee: dbRow.fee,
+      sellerTransactionHash: dbRow.seller_transaction_hash,
+      fee: new BN(dbRow.fee.toString()),
       status,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at,
@@ -39,12 +43,13 @@ export class OrderRepository implements IOrderRepository {
     return {
       id: order.id,
       product_id: order.product.id,
-      quantity: order.quantity,
-      amount: order.amount,
-      buyer_address: order.buyerAddress,
+      quantity: order.quantity.toString(),
+      amount: order.amount.toString(),
       buyer_transaction: order.buyerTransaction,
+      buyer_transaction_hash: order.buyerTransactionHash,
       seller_transaction: order.sellerTransaction,
-      fee: order.fee,
+      seller_transaction_hash: order.sellerTransactionHash,
+      fee: order.fee.toString(),
       status: order.status.toString(),
       created_at: order.createdAt,
       updated_at: order.updatedAt,
@@ -52,21 +57,27 @@ export class OrderRepository implements IOrderRepository {
   }
 
   async getById(id: string) : Promise<Order> {
-    const rows = await this.db('orders').select('*').where({ id });
+    const orders = await this.findOrders({ id });
 
-    if (rows.length !== 1) {
+    if (orders.length !== 1) {
       throw new Error(`Cannot find order with id ${id}`);
     }
 
-    return this.mapDBRowToOrder(rows[0]);
+    return orders[0];
   }
 
-  async findOrders(filters?: { status: OrderStatus }) : Promise<Order[]> {
+  async findOrders(filters?: { id?: string, status?: OrderStatus, productId?: string }) : Promise<Order[]> {
     const rows = await this.db.from('orders')
       .innerJoin('products', 'orders.product_id', 'products.id')
       .modify((qb) => {
         if (filters?.status) {
           qb.where('orders.status', filters.status.toString());
+        }
+        if (filters?.productId) {
+          qb.where('orders.product_id', filters.productId);
+        }
+        if (filters?.id) {
+          qb.where('orders.id', filters.id);
         }
       })
       .select(
@@ -91,5 +102,76 @@ export class OrderRepository implements IOrderRepository {
     await this.db('orders').update(
       this.mapOrderToDbRow(order),
     ).where({ id: order.id });
+  }
+
+  async getDailyOrderMetrics(startDate: Date, endDate: Date) : Promise<DailyOrderSnapshot[]> {
+    const stats = await this.db('orders')
+      .select<{ timestamp: Date, totalOrders: number, totalOrderAmount: number }[]>(
+        this.db.raw('date_trunc(\'day\', "created_at") as timestamp'),
+        this.db.raw('SUM(1) as "totalOrders"'),
+        this.db.raw('SUM("amount") as "totalOrderAmount"'),
+      )
+      .where('created_at', '>', startDate)
+      .andWhere('created_at', '<', endDate)
+      .groupBy('timestamp');
+
+    return stats.map((s) => ({
+      timestamp: s.timestamp,
+      totalOrders: Number(s.totalOrders),
+      totalOrderAmount: new BN(s.totalOrderAmount),
+    }));
+  }
+
+  async getOrderMetrics(startDate: Date, endDate: Date) : Promise<OrderMetrics> {
+    const getTotalPromise = this.db('orders')
+      .select<{ totalOrders: number, totalOrderAmount: string }[]>(
+        this.db.raw('SUM(1) as "totalOrders"'),
+        this.db.raw('SUM(amount) as "totalOrderAmount"'),
+      )
+      .where('created_at', '>', startDate)
+      .andWhere('created_at', '<', endDate);
+
+    const getTopProductsByAmountPromise = this.db('orders')
+      .select<{ productName: string, totalOrderAmount: string }[]>(
+        this.db.raw('MIN("name") as "productName"'),
+        this.db.raw('SUM("amount") as "totalOrderAmount"'),
+      )
+      .innerJoin('products', 'orders.product_id', 'products.id')
+      .where('orders.created_at', '>', startDate)
+      .andWhere('orders.created_at', '<', endDate)
+      .groupBy('orders.product_id');
+
+    const getTopProductsByQuantityPromise = this.db('orders')
+      .select<{ productName: string, totalSold: number }[]>(
+        this.db.raw('MIN("name") as "productName"'),
+        this.db.raw('SUM(1) as "totalSold"'),
+      )
+      .innerJoin('products', 'orders.product_id', 'products.id')
+      .where('orders.created_at', '>', startDate)
+      .andWhere('orders.created_at', '<', endDate)
+      .groupBy('orders.product_id');
+
+    const [
+      [{ totalOrders, totalOrderAmount }],
+      topProductsByAmount,
+      topProductsByQuantity,
+    ] = await Promise.all([
+      getTotalPromise,
+      getTopProductsByAmountPromise,
+      getTopProductsByQuantityPromise,
+    ]);
+
+    return {
+      totalOrders: Number(totalOrders || '0'),
+      totalOrderAmount: new BN(totalOrderAmount || '0'),
+      topProductsByAmount: topProductsByAmount.map((p) => ({
+        productName: p.productName,
+        totalOrderAmount: new BN(p.totalOrderAmount),
+      })),
+      topProductsByQuantity: topProductsByQuantity.map((p) => ({
+        productName: p.productName,
+        totalSold: Number(p.totalSold),
+      })),
+    };
   }
 }

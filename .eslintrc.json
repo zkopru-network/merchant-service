@@ -52,5 +52,13 @@
     "class-methods-use-this": [0],
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
   },
-  "ignorePatterns": ["**/graphql.d.ts", "**/build/", "**/dist"]
+  "ignorePatterns": ["**/graphql.d.ts", "**/build/", "**/dist"],
+  "overrides": [
+    {
+      "files": ["packages/test-data/**/*.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": [0]
+      }
+    }
+  ]
 }

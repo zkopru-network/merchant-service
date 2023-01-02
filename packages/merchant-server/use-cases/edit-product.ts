@@ -1,3 +1,4 @@
+import { BN } from 'bn.js';
 import {
   IProductRepository, ILogger, IBlockchainService,
 } from '../common/interfaces';
@@ -9,8 +10,8 @@ type EditProductInput = {
     name: string;
     description?: string;
     imageUrl?: string;
-    availableQuantity: number;
-    price: number;
+    availableQuantity: string;
+    price: string;
   }
 };
 
@@ -29,8 +30,8 @@ export default async function editProductUseCase(productInput: EditProductInput,
   product.name = productData.name;
   product.description = productData.description;
   product.imageUrl = productData.imageUrl;
-  product.availableQuantity = productData.availableQuantity;
-  product.price = productData.price;
+  product.availableQuantity = new BN(productData.availableQuantity);
+  product.price = new BN(productData.price);
 
   product.updatedAt = new Date(); // TODO: Check value change before changing date
 
