@@ -8,6 +8,35 @@ enum OrderStatus {
   Complete
 }
 
+
+input CreateOrderInput {
+  productId: String!
+  quantity: String!
+  buyerAddress: String!
+  buyerTransaction: String!
+  atomicSwapSalt: Int!
+}
+
+input AddProductInput {
+  name: String!
+  description: String
+  imageUrl: String
+  tokenStandard: TokenStandard!
+  contractAddress: String!
+  tokenId: String
+  availableQuantity: String!
+  price: String!
+}
+
+input EditProductInput {
+  name: String!
+  description: String
+  imageUrl: String
+  availableQuantity: String!
+  price: String!
+}
+
+
 type Product {
   id: String!
   name: String!
@@ -16,60 +45,64 @@ type Product {
   tokenStandard: TokenStandard!
   contractAddress: String!
   tokenId: String
-  availableQuantity: Int!
-  price: Float!
-  createdAt: Int!
-  updatedAt: Int!
-}
-
-input ProductInput {
-  name: String!
-  description: String
-  imageUrl: String
-  tokenStandard: TokenStandard!
-  contractAddress: String!
-  tokenId: String
-  availableQuantity: Int!
-  price: Float!
-}
-
-input EditProductInput {
-  name: String!
-  description: String
-  imageUrl: String
-  availableQuantity: Int!
-  price: Float!
+  availableQuantity: String!
+  price: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Order {
   id: String
   product: Product
-  quantity: Float
+  quantity: String
   buyerAddress: String
   buyerTransaction: String
+  buyerTransactionHash: String
   sellerTransaction: String
-  amount: Float
+  sellerTransactionHash: String
+  amount: String
   status: OrderStatus
-  createdAt: Int!
-  updatedAt: Int!
+  createdAt: String!
+  updatedAt: String!
 }
 
-input CreateOrderInput {
-  productId: String!
-  quantity: Float!
-  buyerAddress: String!
-  buyerTransaction: String!
-  atomicSwapSalt: Int!
+type DailyOrderSnapshot {
+  timestamp: String!
+  totalOrders: Int!
+  totalOrderAmount: String!
+}
+
+type TopProductByAmount {
+  productName: String!
+  totalOrderAmount: String!
+}
+
+type TopProductByQuantity {
+  productName: String!
+  totalSold: Int!
+}
+
+type StoreMetrics {
+  totalProducts: Int!
+  totalInventoryValue: String!
+  totalOrders: Int!
+  totalOrderAmount: String!
+  dailyOrderSnapshots: [DailyOrderSnapshot!]!
+  topProductsByAmount: [TopProductByAmount!]!
+  topProductsByQuantity: [TopProductByQuantity!]!
 }
 
 type Query {
-  findProducts: [Product]
+  getProduct(id: String): Product
+  findProducts(onlyActive: Boolean): [Product]
   getOrder(id: String): Order
-  findOrders(status: OrderStatus): [Order]
+  findOrders(status: OrderStatus, productId: String): [Order] @auth
+  getStoreMetrics(startDate: String, endDate: String): StoreMetrics @auth
 }
 
 type Mutation {
-  createProduct(product: ProductInput) : Product
-  editProduct(id: String, productData: EditProductInput) : Product
-  createOrder(order: CreateOrderInput) : Order
+  signIn(message: String!, signature: String!) : String
+  addProduct(product: AddProductInput!) : Product @auth
+  editProduct(id: String!, productData: EditProductInput!) : Product @auth
+  createOrder(order: CreateOrderInput!) : Order
 }

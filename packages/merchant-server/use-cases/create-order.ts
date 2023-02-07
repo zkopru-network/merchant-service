@@ -1,4 +1,6 @@
+import { BN } from 'bn.js';
 import { v4 as uuid } from 'uuid';
+import { fromWei } from 'web3-utils';
 import {
   ILogger, IBlockchainService, IOrderRepository, IProductRepository,
 } from '../common/interfaces';
@@ -6,7 +8,7 @@ import Order, { OrderStatus } from '../domain/order';
 
 type CreateOrderInput = {
   productId: string;
-  quantity: number;
+  quantity: string;
   buyerAddress: string;
   buyerTransaction: string;
   atomicSwapSalt: number;
@@ -19,32 +21,42 @@ type Context = {
   blockchainService: IBlockchainService;
 };
 
-const ORDER_FEE = 48000; // 0.1 ETH - Fee merchant would like to pay for the sell tx.
-
 export default async function createOrderUseCase(orderInput: CreateOrderInput, context: Context) : Promise<Order> {
   const product = await context.productRepository.getById(orderInput.productId);
+
+  const quantity = new BN(orderInput.quantity);
 
   // Create domain object
   const order = new Order({
     id: uuid(),
     ...orderInput,
     product,
-    amount: orderInput.quantity * product.price,
-    fee: ORDER_FEE,
+    quantity,
+    amount: new BN(fromWei(quantity.mul(product.price))),
     status: OrderStatus.Pending,
     createdAt: new Date(),
     updatedAt: new Date(),
   });
 
   // Ensure the token/quantity is available in the wallet
-  await context.blockchainService.ensureProductAvailability(product, orderInput.quantity);
+  await context.blockchainService.ensureProductAvailability(product, quantity);
 
   // Create swap transaction and broadcast to blockchain
-  const sellerTransaction = await context.blockchainService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt });
+  const {
+    buyerTransactionHash, sellerTransaction, sellerTransactionHash, fee,
+  } = await context.blockchainService.executeOrder(order, { atomicSwapSalt: orderInput.atomicSwapSalt, buyerAddress: orderInput.buyerAddress });
+
   order.sellerTransaction = sellerTransaction;
+  order.buyerTransactionHash = buyerTransactionHash;
+  order.sellerTransactionHash = sellerTransactionHash;
+  order.fee = new BN(fee);
+
+  // Deduct quantity from product's available quantity
+  product.availableQuantity = product.availableQuantity.sub(order.quantity);
 
   // Persist in DB
   await context.orderRepository.createOrder(order);
+  await context.productRepository.updateProduct(product);
 
   return order;
 }
